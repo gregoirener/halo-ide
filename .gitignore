@@ -1,0 +1,14 @@
+# Build output — rebuild with scripts/build-app.sh and scripts/make-dmg.sh
+.build/
+build/
+
+# Local tooling
+tools/.venv/
+__pycache__/
+*.pyc
+
+# macOS and Xcode state
+.DS_Store
+.swiftpm/
+*.xcuserstate
+DerivedData/

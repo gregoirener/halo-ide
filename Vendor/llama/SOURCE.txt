@@ -1,0 +1,5 @@
+llama.cpp runtime for Smart Fill (MIT, see LICENSE-llama.cpp).
+Source: https://github.com/ggml-org/llama.cpp/releases/tag/b11559
+Built from llama-b11559-bin-macos-arm64.tar.gz + llama-b11559-bin-macos-x64.tar.gz:
+llama-server and the libraries it links, merged with lipo into universal binaries
+(libggml-metal is Apple-silicon only; the Intel build runs on the CPU).

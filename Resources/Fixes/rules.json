@@ -1,0 +1,5631 @@
+{
+ "python": {
+  "rules": [
+   {
+    "id": "python.time.sleep.wait",
+    "match": "(?<![\\w.])time\\.(?:sleepSeconds|sleep_for|sleepFor|wait_for|waitFor|sleeep|delay|pause|wait|slp)(?=\\s*\\()",
+    "with": "time.sleep",
+    "why": "Python pauses with time.sleep(seconds)",
+    "auto": true,
+    "module": "time"
+   },
+   {
+    "id": "python.time.time.now",
+    "match": "(?<![\\w.])time\\.(?:current_time|currentTime|timestamp|get_time|time_now|current|getTime|seconds|timeNow|now)(?=\\s*\\()",
+    "with": "time.time",
+    "why": "time.time() gives the current time in seconds",
+    "auto": true,
+    "module": "time"
+   },
+   {
+    "id": "python.os.path.fn",
+    "match": "(?<![\\w.])os\\.(exists|isfile|isdir|join|basename|dirname|abspath|splitext|getsize|expanduser|isabs|realpath|relpath|normpath|getmtime|islink|split)(?=\\s*\\()",
+    "with": "os.path.$1",
+    "why": "That function lives in os.path",
+    "auto": true,
+    "module": "os"
+   },
+   {
+    "id": "python.os.makedirs.mkdirs",
+    "match": "(?<![\\w.])os\\.(?:make_dirs|makeDirs|mkdir_p|mkdirp|mkdirs)(?=\\s*\\()",
+    "with": "os.makedirs",
+    "why": "os.makedirs() creates a folder and its parents",
+    "auto": true,
+    "module": "os"
+   },
+   {
+    "id": "python.os.makedirs.makedir",
+    "match": "(?<![\\w.])os\\.(?:makedir)(?=\\s*\\()",
+    "with": "os.makedirs",
+    "why": "os.makedirs() creates a folder (and its parents)",
+    "module": "os"
+   },
+   {
+    "id": "python.os.remove.delete",
+    "match": "(?<![\\w.])os\\.(?:delete_file|remove_file|deleteFile|removeFile|del_file|delete|erase|rm)(?=\\s*\\()",
+    "with": "os.remove",
+    "why": "os.remove(path) deletes a file",
+    "auto": true,
+    "module": "os"
+   },
+   {
+    "id": "python.os.getcwd.cwd",
+    "match": "(?<![\\w.])os\\.(?:getcurrentdir|current_dir|currentDir|currentdir|get_cwd|cwd|pwd)(?=\\s*\\()",
+    "with": "os.getcwd",
+    "why": "os.getcwd() is the current folder",
+    "auto": true,
+    "module": "os"
+   },
+   {
+    "id": "python.os.listdir.ls",
+    "match": "(?<![\\w.])os\\.(?:list_files|listfiles|list_dir|listDir|files|dir|ls)(?=\\s*\\()",
+    "with": "os.listdir",
+    "why": "os.listdir(path) lists a folder",
+    "auto": true,
+    "module": "os"
+   },
+   {
+    "id": "python.os.chdir.cd",
+    "match": "(?<![\\w.])os\\.(?:change_dir|changeDir|changedir|cd)(?=\\s*\\()",
+    "with": "os.chdir",
+    "why": "os.chdir(path) changes folder",
+    "auto": true,
+    "module": "os"
+   },
+   {
+    "id": "python.os.environ.env",
+    "match": "(?<![\\w.])os\\.(?:environ_vars|environment|env_vars|ENV|env)(?![\\w(])",
+    "with": "os.environ",
+    "why": "Environment variables are os.environ",
+    "auto": true,
+    "module": "os"
+   },
+   {
+    "id": "python.os.getenv.getenviron",
+    "match": "(?<![\\w.])os\\.(?:getenviron|get_env)(?=\\s*\\()",
+    "with": "os.getenv",
+    "why": "os.getenv(name) reads an environment variable",
+    "auto": true,
+    "module": "os"
+   },
+   {
+    "id": "python.os.exit",
+    "match": "(?<![\\w.])os\\.exit(?=\\s*\\()",
+    "with": "sys.exit",
+    "why": "os has no exit(); sys.exit() ends the program",
+    "module": "os"
+   },
+   {
+    "id": "python.os.sleep",
+    "match": "(?<![\\w.])os\\.sleep(?=\\s*\\()",
+    "with": "time.sleep",
+    "why": "Sleeping is time.sleep(seconds)",
+    "module": "os"
+   },
+   {
+    "id": "python.os.copy",
+    "match": "(?<![\\w.])os\\.(?:copy|copyfile|cp)(?=\\s*\\()",
+    "with": "shutil.copy",
+    "why": "Copying files is shutil.copy",
+    "module": "os"
+   },
+   {
+    "id": "python.os.move",
+    "match": "(?<![\\w.])os\\.(?:move|mv)(?=\\s*\\()",
+    "with": "shutil.move",
+    "why": "Moving files is shutil.move (or os.rename)",
+    "module": "os"
+   },
+   {
+    "id": "python.os.cls",
+    "match": "(?<![\\w.])os\\.system\\(\\s*([\\\"'])cls\\1\\s*\\)",
+    "with": "os.system($1clear$1)",
+    "why": "cls is Windows; macOS clears the terminal with clear",
+    "auto": true,
+    "module": "os"
+   },
+   {
+    "id": "python.os.path.exists.exist",
+    "match": "(?<![\\w.])os\\.path\\.(?:file_exists|fileExists|isExist|exist|exits)(?=\\s*\\()",
+    "with": "os.path.exists",
+    "why": "os.path.exists(path) checks a path",
+    "auto": true,
+    "module": "os"
+   },
+   {
+    "id": "python.os.path.join.combine",
+    "match": "(?<![\\w.])os\\.path\\.(?:join_path|joinPath|combine|concat)(?=\\s*\\()",
+    "with": "os.path.join",
+    "why": "os.path.join() builds a path",
+    "auto": true,
+    "module": "os"
+   },
+   {
+    "id": "python.os.path.getsize.size",
+    "match": "(?<![\\w.])os\\.path\\.(?:file_size|filesize|size)(?=\\s*\\()",
+    "with": "os.path.getsize",
+    "why": "os.path.getsize(path) is a file's size",
+    "auto": true,
+    "module": "os"
+   },
+   {
+    "id": "python.os.path.splitext.ext",
+    "match": "(?<![\\w.])os\\.path\\.(?:get_extension|extension|ext)(?=\\s*\\()",
+    "with": "os.path.splitext",
+    "why": "os.path.splitext(path) splits off the extension",
+    "module": "os"
+   },
+   {
+    "id": "python.os.path.basename.filename",
+    "match": "(?<![\\w.])os\\.path\\.(?:base_name|file_name|filename|name)(?=\\s*\\()",
+    "with": "os.path.basename",
+    "why": "os.path.basename(path) is the file name",
+    "module": "os"
+   },
+   {
+    "id": "python.os.path.dirname.dir",
+    "match": "(?<![\\w.])os\\.path\\.(?:directory|dir_name|folder|parent|dir)(?=\\s*\\()",
+    "with": "os.path.dirname",
+    "why": "os.path.dirname(path) is the folder",
+    "module": "os"
+   },
+   {
+    "id": "python.sys.argv.args",
+    "match": "(?<![\\w.])sys\\.(?:arguments|params|argc|args|arg)(?![\\w(])",
+    "with": "sys.argv",
+    "why": "Command-line arguments are sys.argv",
+    "auto": true,
+    "module": "sys"
+   },
+   {
+    "id": "python.sys.maxsize.maxint",
+    "match": "(?<![\\w.])sys\\.(?:maxint)(?![\\w(])",
+    "with": "sys.maxsize",
+    "why": "Python 3 renamed sys.maxint to sys.maxsize",
+    "auto": true,
+    "module": "sys"
+   },
+   {
+    "id": "python.sys.getsizeof.sizeof",
+    "match": "(?<![\\w.])sys\\.(?:getsize|size_of|sizeof|size)(?=\\s*\\()",
+    "with": "sys.getsizeof",
+    "why": "sys.getsizeof(obj) is an object's size",
+    "auto": true,
+    "module": "sys"
+   },
+   {
+    "id": "python.sys.exit.quit",
+    "match": "(?<![\\w.])sys\\.(?:terminate|close|kill|quit|stop|end)(?=\\s*\\()",
+    "with": "sys.exit",
+    "why": "sys.exit() ends the program",
+    "auto": true,
+    "module": "sys"
+   },
+   {
+    "id": "python.json.loads.parse",
+    "match": "(?<![\\w.])json\\.(?:parse_string|deserialize|from_string|load_string|parseString|unserialize|fromString|loadString|readString|from_json|to_object|fromJSON|toObject|decode|parse)(?=\\s*\\()",
+    "with": "json.loads",
+    "why": "json.loads(text) turns JSON text into Python data",
+    "auto": true,
+    "module": "json"
+   },
+   {
+    "id": "python.json.dumps.stringify",
+    "match": "(?<![\\w.])json\\.(?:write_string|dump_string|writeString|dumpString|serialize|stringify|to_string|stringfy|toString|to_json|encode|toJSON)(?=\\s*\\()",
+    "with": "json.dumps",
+    "why": "json.dumps(data) turns Python data into JSON text",
+    "auto": true,
+    "module": "json"
+   },
+   {
+    "id": "python.json.load.read",
+    "match": "(?<![\\w.])json\\.(?:parse_file|parseFile|read_file|readFile|open|read)(?=\\s*\\()",
+    "with": "json.load",
+    "why": "json.load(file) reads JSON from an open file",
+    "auto": true,
+    "module": "json"
+   },
+   {
+    "id": "python.json.dump.write",
+    "match": "(?<![\\w.])json\\.(?:write_file|save_file|writeFile|saveFile|write|save)(?=\\s*\\()",
+    "with": "json.dump",
+    "why": "json.dump(data, file) writes JSON to an open file",
+    "auto": true,
+    "module": "json"
+   },
+   {
+    "id": "python.random.randint.int",
+    "match": "(?<![\\w.])random\\.(?:random_integer|randomInteger|random_number|randomNumber|randInteger|random_int|randomInt|rand_int|integer|number|randi|int)(?=\\s*\\()",
+    "with": "random.randint",
+    "why": "random.randint(a, b) picks a whole number from a to b",
+    "auto": true,
+    "module": "random"
+   },
+   {
+    "id": "python.random.random.rand",
+    "match": "(?<![\\w.])random\\.(?:random_float|randomFloat|randFloat|decimal|double|float|rand|rnd)(?=\\s*\\()",
+    "with": "random.random",
+    "why": "random.random() is a float from 0 to 1",
+    "auto": true,
+    "module": "random"
+   },
+   {
+    "id": "python.random.choice.choose",
+    "match": "(?<![\\w.])random\\.(?:random_element|randomElement|random_choice|randomChoice|pick_one|element|pickOne|choose|one_of|select|oneOf|item|pick)(?=\\s*\\()",
+    "with": "random.choice",
+    "why": "random.choice(seq) picks one item",
+    "auto": true,
+    "module": "random"
+   },
+   {
+    "id": "python.random.randrange.range",
+    "match": "(?<![\\w.])random\\.(?:range)(?=\\s*\\()",
+    "with": "random.randrange",
+    "why": "random.randrange(start, stop) picks from a range",
+    "auto": true,
+    "module": "random"
+   },
+   {
+    "id": "python.random.uniform.between",
+    "match": "(?<![\\w.])random\\.(?:float_between|rand_between|randBetween|between)(?=\\s*\\()",
+    "with": "random.uniform",
+    "why": "random.uniform(a, b) is a float between a and b",
+    "module": "random"
+   },
+   {
+    "id": "python.random.shuffle.shuffled",
+    "match": "(?<![\\w.])random\\.(?:shuffle_list|shuffleList|scramble|shuffled|mix)(?=\\s*\\()",
+    "with": "random.shuffle",
+    "why": "random.shuffle(list) shuffles in place (and returns None)",
+    "auto": true,
+    "module": "random"
+   },
+   {
+    "id": "python.math.pow.power",
+    "match": "(?<![\\w.])math\\.(?:power|pwr)(?=\\s*\\()",
+    "with": "math.pow",
+    "why": "It's math.pow(x, y) — or x ** y",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.sqrt.square_root",
+    "match": "(?<![\\w.])math\\.(?:square_root|squareRoot|squareroot|sqroot|sqr)(?=\\s*\\()",
+    "with": "math.sqrt",
+    "why": "Square roots are math.sqrt(x)",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.sqrt.root",
+    "match": "(?<![\\w.])math\\.(?:root)(?=\\s*\\()",
+    "with": "math.sqrt",
+    "why": "Square roots are math.sqrt(x)",
+    "module": "math"
+   },
+   {
+    "id": "python.math.ceil.ceiling",
+    "match": "(?<![\\w.])math\\.(?:round_up|ceiling|roundUp|roundup)(?=\\s*\\()",
+    "with": "math.ceil",
+    "why": "Rounding up is math.ceil(x)",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.floor.roundDown",
+    "match": "(?<![\\w.])math\\.(?:round_down|roundDown|rounddown)(?=\\s*\\()",
+    "with": "math.floor",
+    "why": "Rounding down is math.floor(x)",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.builtin",
+    "match": "(?<![\\w.])math\\.(abs|round|max|min|sum)(?=\\s*\\()",
+    "with": "$1",
+    "why": "$1() is built in — no math. needed",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.pi",
+    "match": "(?<![\\w.])math\\.(?:PI|Pi)(?![\\w(])",
+    "with": "math.pi",
+    "why": "It's lowercase: math.pi",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.e",
+    "match": "(?<![\\w.])math\\.E(?![\\w(])",
+    "with": "math.e",
+    "why": "It's lowercase: math.e",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.inf",
+    "match": "(?<![\\w.])math\\.(?:Infinity|infinity|INF|Inf|INFINITY|infinite)(?![\\w(])",
+    "with": "math.inf",
+    "why": "Infinity is math.inf",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.nan",
+    "match": "(?<![\\w.])math\\.(?:NaN|NAN|Nan)(?![\\w(])",
+    "with": "math.nan",
+    "why": "It's lowercase: math.nan",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.log.ln",
+    "match": "(?<![\\w.])math\\.(?:natural_log|naturalLog|ln)(?=\\s*\\()",
+    "with": "math.log",
+    "why": "math.log(x) is the natural log",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.radians.toRadians",
+    "match": "(?<![\\w.])math\\.(?:degreesToRadians|deg_to_rad|to_radians|toRadians|deg2rad)(?=\\s*\\()",
+    "with": "math.radians",
+    "why": "math.radians(degrees) converts to radians",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.degrees.toDegrees",
+    "match": "(?<![\\w.])math\\.(?:radiansToDegrees|rad_to_deg|to_degrees|toDegrees|rad2deg)(?=\\s*\\()",
+    "with": "math.degrees",
+    "why": "math.degrees(radians) converts to degrees",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.cbrt.cubeRoot",
+    "match": "(?<![\\w.])math\\.(?:cube_root|cubeRoot|cuberoot)(?=\\s*\\()",
+    "with": "math.cbrt",
+    "why": "Cube roots are math.cbrt(x) (Python 3.11+)",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.atan.arctan",
+    "match": "(?<![\\w.])math\\.(?:arcTan|arctan)(?=\\s*\\()",
+    "with": "math.atan",
+    "why": "Python spells it math.atan",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.asin.arcsin",
+    "match": "(?<![\\w.])math\\.(?:arcSin|arcsin)(?=\\s*\\()",
+    "with": "math.asin",
+    "why": "Python spells it math.asin",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.acos.arccos",
+    "match": "(?<![\\w.])math\\.(?:arcCos|arccos)(?=\\s*\\()",
+    "with": "math.acos",
+    "why": "Python spells it math.acos",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.sin.sine",
+    "match": "(?<![\\w.])math\\.(?:sine)(?=\\s*\\()",
+    "with": "math.sin",
+    "why": "It's math.sin",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.cos.cosine",
+    "match": "(?<![\\w.])math\\.(?:cosine)(?=\\s*\\()",
+    "with": "math.cos",
+    "why": "It's math.cos",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.tan.tangent",
+    "match": "(?<![\\w.])math\\.(?:tangent)(?=\\s*\\()",
+    "with": "math.tan",
+    "why": "It's math.tan",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.isnan.is_nan",
+    "match": "(?<![\\w.])math\\.(?:is_nan|isNaN)(?=\\s*\\()",
+    "with": "math.isnan",
+    "why": "It's math.isnan(x)",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.isinf.is_inf",
+    "match": "(?<![\\w.])math\\.(?:isinfinite|is_inf|isInf)(?=\\s*\\()",
+    "with": "math.isinf",
+    "why": "It's math.isinf(x)",
+    "auto": true,
+    "module": "math"
+   },
+   {
+    "id": "python.math.random",
+    "match": "(?<![\\w.])math\\.random(?=\\s*\\()",
+    "with": "random.random",
+    "why": "Random numbers come from the random module",
+    "module": "math"
+   },
+   {
+    "id": "python.math.mean",
+    "match": "(?<![\\w.])math\\.(?:average|mean|avg)(?=\\s*\\()",
+    "with": "statistics.mean",
+    "why": "Averages are statistics.mean()",
+    "module": "math"
+   },
+   {
+    "id": "python.re.search.find",
+    "match": "(?<![\\w.])re\\.(?:search_for|searchFor|contains|includes|locate|check|exec|find|test|has)(?=\\s*\\()",
+    "with": "re.search",
+    "why": "re.search(pattern, text) finds a match anywhere",
+    "auto": true,
+    "module": "re"
+   },
+   {
+    "id": "python.re.findall.findAll",
+    "match": "(?<![\\w.])re\\.(?:match_all|find_all|matchAll|findAll|get_all|getAll)(?=\\s*\\()",
+    "with": "re.findall",
+    "why": "re.findall(pattern, text) returns every match",
+    "auto": true,
+    "module": "re"
+   },
+   {
+    "id": "python.re.sub.replace",
+    "match": "(?<![\\w.])re\\.(?:replace_all|replaceAll|substitute|replace|sub_all|subAll|gsub)(?=\\s*\\()",
+    "with": "re.sub",
+    "why": "re.sub(pattern, replacement, text) replaces",
+    "auto": true,
+    "module": "re"
+   },
+   {
+    "id": "python.re.fullmatch.matches",
+    "match": "(?<![\\w.])re\\.(?:exactMatch|full_match|fullMatch|matchFull|matches)(?=\\s*\\()",
+    "with": "re.fullmatch",
+    "why": "re.fullmatch() matches the whole text",
+    "auto": true,
+    "module": "re"
+   },
+   {
+    "id": "python.re.compile.regex",
+    "match": "(?<![\\w.])re\\.(?:pattern|RegExp|create|regex|make|new)(?=\\s*\\()",
+    "with": "re.compile",
+    "why": "re.compile(pattern) builds a reusable pattern",
+    "module": "re"
+   },
+   {
+    "id": "python.datetime.module",
+    "match": "(?<![\\w.])datetime\\.(now|today|utcnow|strptime|fromtimestamp|fromisoformat|combine|utcfromtimestamp)(?=\\s*\\()",
+    "with": "datetime.datetime.$1",
+    "why": "With import datetime, the class is datetime.datetime",
+    "auto": true,
+    "when": "(?m)^\\s*import\\s+datetime\\s*(?:#.*)?$",
+    "unless": "\\bfrom\\s+datetime\\s+import\\b"
+   },
+   {
+    "id": "python.datetime.class",
+    "match": "(?<![\\w.])datetime\\.datetime\\.(\\w+)",
+    "with": "datetime.$1",
+    "why": "You imported the datetime class itself, so it's datetime.$1",
+    "auto": true,
+    "when": "\\bfrom\\s+datetime\\s+import\\s+[^#\\n]*\\bdatetime\\b",
+    "unless": "(?m)^\\s*import\\s+datetime\\b"
+   },
+   {
+    "id": "python.date.now",
+    "match": "(?<![\\w.])(datetime\\.date|date)\\.now(?=\\s*\\()",
+    "with": "$1.today",
+    "why": "Dates use .today(); datetime has .now()",
+    "auto": true
+   },
+   {
+    "id": "python.string.py2",
+    "match": "(?<![\\w.])string\\.(uppercase|lowercase|letters)(?![\\w(])",
+    "with": "string.ascii_$1",
+    "why": "Python 3 renamed it string.ascii_$1",
+    "auto": true,
+    "module": "string"
+   },
+   {
+    "id": "python.collections.defaultdict.default_dict",
+    "match": "(?<![\\w.])collections\\.(?:defaultDictionary|default_dict)(?=\\s*\\()",
+    "with": "collections.defaultdict",
+    "why": "It's collections.defaultdict",
+    "auto": true,
+    "module": "collections"
+   },
+   {
+    "id": "python.collections.OrderedDict.OrderedDictionary",
+    "match": "(?<![\\w.])collections\\.(?:OrderedDictionary|ordered_dict)(?=\\s*\\()",
+    "with": "collections.OrderedDict",
+    "why": "It's collections.OrderedDict",
+    "auto": true,
+    "module": "collections"
+   },
+   {
+    "id": "python.collections.namedtuple.named_tuple",
+    "match": "(?<![\\w.])collections\\.(?:named_tuple)(?=\\s*\\()",
+    "with": "collections.namedtuple",
+    "why": "It's collections.namedtuple",
+    "auto": true,
+    "module": "collections"
+   },
+   {
+    "id": "python.collections.Counter.Count",
+    "match": "(?<![\\w.])collections\\.(?:count_dict|Counts|Count)(?=\\s*\\()",
+    "with": "collections.Counter",
+    "why": "It's collections.Counter",
+    "auto": true,
+    "module": "collections"
+   },
+   {
+    "id": "python.collections.deque.dequeue",
+    "match": "(?<![\\w.])collections\\.(?:double_ended_queue|Dequeue|dequeue)(?=\\s*\\()",
+    "with": "collections.deque",
+    "why": "It's collections.deque (no 'ue')",
+    "auto": true,
+    "module": "collections"
+   },
+   {
+    "id": "python.itertools.permutations.permutation",
+    "match": "(?<![\\w.])itertools\\.(?:all_permutations|permutation|permutate|permute)(?=\\s*\\()",
+    "with": "itertools.permutations",
+    "why": "It's itertools.permutations",
+    "auto": true,
+    "module": "itertools"
+   },
+   {
+    "id": "python.itertools.combinations.combination",
+    "match": "(?<![\\w.])itertools\\.(?:all_combinations|combination|combine|combos)(?=\\s*\\()",
+    "with": "itertools.combinations",
+    "why": "It's itertools.combinations",
+    "auto": true,
+    "module": "itertools"
+   },
+   {
+    "id": "python.itertools.product.cartesian",
+    "match": "(?<![\\w.])itertools\\.(?:cartesian_product|cartesianProduct|cartesian|cross)(?=\\s*\\()",
+    "with": "itertools.product",
+    "why": "The cartesian product is itertools.product",
+    "auto": true,
+    "module": "itertools"
+   },
+   {
+    "id": "python.itertools.flatten",
+    "match": "(?<![\\w.])itertools\\.(?:flatten|flat|concat)(?=\\s*\\()",
+    "with": "itertools.chain.from_iterable",
+    "why": "Flattening is itertools.chain.from_iterable",
+    "module": "itertools"
+   },
+   {
+    "id": "python.statistics.mean.average",
+    "match": "(?<![\\w.])statistics\\.(?:arithmetic_mean|mean_value|average|avg)(?=\\s*\\()",
+    "with": "statistics.mean",
+    "why": "Averages are statistics.mean()",
+    "auto": true,
+    "module": "statistics"
+   },
+   {
+    "id": "python.statistics.median.med",
+    "match": "(?<![\\w.])statistics\\.(?:middle|med)(?=\\s*\\()",
+    "with": "statistics.median",
+    "why": "It's statistics.median()",
+    "auto": true,
+    "module": "statistics"
+   },
+   {
+    "id": "python.statistics.stdev.std",
+    "match": "(?<![\\w.])statistics\\.(?:standard_deviation|std_dev|stddev|std|sd)(?=\\s*\\()",
+    "with": "statistics.stdev",
+    "why": "Standard deviation is statistics.stdev()",
+    "auto": true,
+    "module": "statistics"
+   },
+   {
+    "id": "python.statistics.variance.var",
+    "match": "(?<![\\w.])statistics\\.(?:var)(?=\\s*\\()",
+    "with": "statistics.variance",
+    "why": "It's statistics.variance()",
+    "auto": true,
+    "module": "statistics"
+   },
+   {
+    "id": "python.subprocess.run.execute",
+    "match": "(?<![\\w.])subprocess\\.(?:run_command|runCommand|command|execute|system|shell|exec|cmd)(?=\\s*\\()",
+    "with": "subprocess.run",
+    "why": "subprocess.run([...]) runs a command",
+    "auto": true,
+    "module": "subprocess"
+   },
+   {
+    "id": "python.subprocess.Popen.spawn",
+    "match": "(?<![\\w.])subprocess\\.(?:spawn)(?=\\s*\\()",
+    "with": "subprocess.Popen",
+    "why": "subprocess.Popen starts a process without waiting",
+    "module": "subprocess"
+   },
+   {
+    "id": "python.subprocess.check_output.check_out",
+    "match": "(?<![\\w.])subprocess\\.(?:checkOutput|get_output|check_out|getOutput|capture|output)(?=\\s*\\()",
+    "with": "subprocess.check_output",
+    "why": "subprocess.check_output() returns a command's output",
+    "auto": true,
+    "module": "subprocess"
+   },
+   {
+    "id": "python.shutil.copytree.copyDir",
+    "match": "(?<![\\w.])shutil\\.(?:copyDirectory|copy_folder|copyFolder|copyfolder|copy_tree|copy_dir|copyDir)(?=\\s*\\()",
+    "with": "shutil.copytree",
+    "why": "Copying a folder is shutil.copytree",
+    "auto": true,
+    "module": "shutil"
+   },
+   {
+    "id": "python.shutil.move.mv",
+    "match": "(?<![\\w.])shutil\\.(?:rename|mv)(?=\\s*\\()",
+    "with": "shutil.move",
+    "why": "It's shutil.move",
+    "auto": true,
+    "module": "shutil"
+   },
+   {
+    "id": "python.shutil.copy.cp",
+    "match": "(?<![\\w.])shutil\\.(?:copy_file|cp)(?=\\s*\\()",
+    "with": "shutil.copy",
+    "why": "It's shutil.copy",
+    "auto": true,
+    "module": "shutil"
+   },
+   {
+    "id": "python.shutil.rmtree.rmdir",
+    "match": "(?<![\\w.])shutil\\.(?:delete_tree|remove_dir|removetree|removeDir|deltree|rm_tree|delete|remove|rm_rf|rmdir|rmrf)(?=\\s*\\()",
+    "with": "shutil.rmtree",
+    "why": "Deleting a folder tree is shutil.rmtree — careful, it deletes everything inside",
+    "module": "shutil"
+   },
+   {
+    "id": "python.turtle.forward.forwards",
+    "match": "(?<![\\w.])turtle\\.(?:move_forward|moveForward|go_forward|goForward|forwards|fw)(?=\\s*\\()",
+    "with": "turtle.forward",
+    "why": "It's turtle.forward(distance)",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.forward.move",
+    "match": "(?<![\\w.])turtle\\.(?:move|step|walk|go)(?=\\s*\\()",
+    "with": "turtle.forward",
+    "why": "turtle moves with forward(distance)",
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.backward.backwards",
+    "match": "(?<![\\w.])turtle\\.(?:backwards|move_back|moveBack|go_back|goBack|bw)(?=\\s*\\()",
+    "with": "turtle.backward",
+    "why": "It's turtle.backward(distance)",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.left.turn_left",
+    "match": "(?<![\\w.])turtle\\.(?:rotate_left|rotateLeft|left_turn|turn_left|turnLeft)(?=\\s*\\()",
+    "with": "turtle.left",
+    "why": "Turning is turtle.left(angle)",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.right.turn_right",
+    "match": "(?<![\\w.])turtle\\.(?:rotate_right|rotateRight|right_turn|turn_right|turnRight)(?=\\s*\\()",
+    "with": "turtle.right",
+    "why": "Turning is turtle.right(angle)",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.color.colour",
+    "match": "(?<![\\w.])turtle\\.(?:set_color|setColor|colour)(?=\\s*\\()",
+    "with": "turtle.color",
+    "why": "It's turtle.color()",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.penup.pen_up",
+    "match": "(?<![\\w.])turtle\\.(?:lift_pen|pen_lift|liftPen|pen_up|up_pen)(?=\\s*\\()",
+    "with": "turtle.penup",
+    "why": "It's turtle.penup()",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.pendown.pen_down",
+    "match": "(?<![\\w.])turtle\\.(?:putPenDown|lower_pen|lowerPen|pen_down)(?=\\s*\\()",
+    "with": "turtle.pendown",
+    "why": "It's turtle.pendown()",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.goto.go_to",
+    "match": "(?<![\\w.])turtle\\.(?:goto_xy|move_to|gotoxy|moveTo|go_to)(?=\\s*\\()",
+    "with": "turtle.goto",
+    "why": "It's turtle.goto(x, y)",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.bgcolor.background",
+    "match": "(?<![\\w.])turtle\\.(?:background_color|backgroundColor|setBackground|background|bg_color|bg)(?=\\s*\\()",
+    "with": "turtle.bgcolor",
+    "why": "The background is turtle.bgcolor()",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.hideturtle.hide",
+    "match": "(?<![\\w.])turtle\\.(?:hide_turtle|hide)(?=\\s*\\()",
+    "with": "turtle.hideturtle",
+    "why": "It's turtle.hideturtle()",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.showturtle.show",
+    "match": "(?<![\\w.])turtle\\.(?:show_turtle|show)(?=\\s*\\()",
+    "with": "turtle.showturtle",
+    "why": "It's turtle.showturtle()",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.exitonclick.exit_on_click",
+    "match": "(?<![\\w.])turtle\\.(?:close_on_click|exit_on_click)(?=\\s*\\()",
+    "with": "turtle.exitonclick",
+    "why": "It's turtle.exitonclick()",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.fillcolor.fill_color",
+    "match": "(?<![\\w.])turtle\\.(?:fill_color|set_fill)(?=\\s*\\()",
+    "with": "turtle.fillcolor",
+    "why": "It's turtle.fillcolor()",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.pensize.pen_size",
+    "match": "(?<![\\w.])turtle\\.(?:line_width|lineWidth|thickness|pen_size)(?=\\s*\\()",
+    "with": "turtle.pensize",
+    "why": "Line thickness is turtle.pensize()",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.circle.draw_circle",
+    "match": "(?<![\\w.])turtle\\.(?:draw_circle|make_circle|drawCircle)(?=\\s*\\()",
+    "with": "turtle.circle",
+    "why": "It's turtle.circle(radius)",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.begin_fill.start_fill",
+    "match": "(?<![\\w.])turtle\\.(?:fill_begin|start_fill|beginFill)(?=\\s*\\()",
+    "with": "turtle.begin_fill",
+    "why": "It's turtle.begin_fill()",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.end_fill.stop_fill",
+    "match": "(?<![\\w.])turtle\\.(?:stop_fill|fill_end|endFill)(?=\\s*\\()",
+    "with": "turtle.end_fill",
+    "why": "It's turtle.end_fill()",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.speed.set_speed",
+    "match": "(?<![\\w.])turtle\\.(?:set_speed|velocity)(?=\\s*\\()",
+    "with": "turtle.speed",
+    "why": "It's turtle.speed()",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.setheading.set_heading",
+    "match": "(?<![\\w.])turtle\\.(?:set_heading|turn_to|turnTo|face)(?=\\s*\\()",
+    "with": "turtle.setheading",
+    "why": "It's turtle.setheading(angle)",
+    "auto": true,
+    "module": "turtle"
+   },
+   {
+    "id": "python.turtle.wait",
+    "match": "(?<![\\w.])turtle\\.(?:wait|sleep|pause)(?=\\s*\\()",
+    "with": "time.sleep",
+    "why": "turtle can't wait; time.sleep(seconds) does",
+    "module": "turtle"
+   },
+   {
+    "id": "python.threading.sleep",
+    "match": "(?<![\\w.])threading\\.(?:sleep|wait|delay|pause)(?=\\s*\\()",
+    "with": "time.sleep",
+    "why": "Sleeping is time.sleep(seconds)",
+    "module": "threading"
+   },
+   {
+    "id": "python.threading.Thread.newThread",
+    "match": "(?<![\\w.])threading\\.(?:create_thread|start_thread|newThread)(?=\\s*\\()",
+    "with": "threading.Thread",
+    "why": "It's threading.Thread(target=…)",
+    "auto": true,
+    "module": "threading"
+   },
+   {
+    "id": "python.threading.Lock.mutex",
+    "match": "(?<![\\w.])threading\\.(?:mutex)(?=\\s*\\()",
+    "with": "threading.Lock",
+    "why": "A mutex is threading.Lock()",
+    "auto": true,
+    "module": "threading"
+   },
+   {
+    "id": "python.asyncio.sleep.delay",
+    "match": "(?<![\\w.])asyncio\\.(?:sleepFor|delay|pause)(?=\\s*\\()",
+    "with": "asyncio.sleep",
+    "why": "It's await asyncio.sleep(seconds)",
+    "auto": true,
+    "module": "asyncio"
+   },
+   {
+    "id": "python.asyncio.gather.gatherAll",
+    "match": "(?<![\\w.])asyncio\\.(?:gather_all|gatherAll|wait_all|waitAll)(?=\\s*\\()",
+    "with": "asyncio.gather",
+    "why": "Running tasks together is asyncio.gather()",
+    "auto": true,
+    "module": "asyncio"
+   },
+   {
+    "id": "python.asyncio.run.start",
+    "match": "(?<![\\w.])asyncio\\.(?:run_async|runAsync|execute|start)(?=\\s*\\()",
+    "with": "asyncio.run",
+    "why": "asyncio.run(main()) starts the event loop",
+    "module": "asyncio"
+   },
+   {
+    "id": "python.logging.warning.warn",
+    "match": "(?<![\\w.])logging\\.(?:warn)(?=\\s*\\()",
+    "with": "logging.warning",
+    "why": "logging.warn is deprecated; use logging.warning",
+    "module": "logging"
+   },
+   {
+    "id": "python.logging.error.err",
+    "match": "(?<![\\w.])logging\\.(?:err)(?=\\s*\\()",
+    "with": "logging.error",
+    "why": "It's logging.error()",
+    "auto": true,
+    "module": "logging"
+   },
+   {
+    "id": "python.logging.basicConfig.basic_config",
+    "match": "(?<![\\w.])logging\\.(?:basic_config)(?=\\s*\\()",
+    "with": "logging.basicConfig",
+    "why": "It's logging.basicConfig()",
+    "auto": true,
+    "module": "logging"
+   },
+   {
+    "id": "python.urllib.request",
+    "match": "(?<![\\w.])urllib\\.(urlopen|urlretrieve|Request)(?=\\s*\\()",
+    "with": "urllib.request.$1",
+    "why": "In Python 3 it's urllib.request.$1",
+    "auto": true,
+    "module": "urllib"
+   },
+   {
+    "id": "python.urllib.parse",
+    "match": "(?<![\\w.])urllib\\.(urlencode|quote|unquote|quote_plus|urlparse|urljoin)(?=\\s*\\()",
+    "with": "urllib.parse.$1",
+    "why": "In Python 3 it's urllib.parse.$1",
+    "auto": true,
+    "module": "urllib"
+   },
+   {
+    "id": "python.urllib2",
+    "match": "(?<![\\w.])urllib2\\.urlopen(?=\\s*\\()",
+    "with": "urllib.request.urlopen",
+    "why": "urllib2 is Python 2; it's urllib.request.urlopen now"
+   },
+   {
+    "id": "python.copy.deepcopy.deep_copy",
+    "match": "(?<![\\w.])copy\\.(?:copy_deep|deepClone|deep_copy|deepCopy|clone|deep)(?=\\s*\\()",
+    "with": "copy.deepcopy",
+    "why": "It's copy.deepcopy()",
+    "auto": true,
+    "module": "copy"
+   },
+   {
+    "id": "python.copy.copy.shallow",
+    "match": "(?<![\\w.])copy\\.(?:shallow_copy|shallowCopy|shallow)(?=\\s*\\()",
+    "with": "copy.copy",
+    "why": "It's copy.copy()",
+    "auto": true,
+    "module": "copy"
+   },
+   {
+    "id": "python.uuid.uuid4.uuid",
+    "match": "(?<![\\w.])uuid\\.(?:random_uuid|randomUUID|generate|create|random|uuid_4|uuid|gen|new|v4)(?=\\s*\\()",
+    "with": "uuid.uuid4",
+    "why": "A random UUID is uuid.uuid4()",
+    "auto": true,
+    "module": "uuid"
+   },
+   {
+    "id": "python.base64.b64encode.b64_encode",
+    "match": "(?<![\\w.])base64\\.(?:base64_encode|base64encode|b64_encode|encode64|btoa)(?=\\s*\\()",
+    "with": "base64.b64encode",
+    "why": "It's base64.b64encode(bytes)",
+    "auto": true,
+    "module": "base64"
+   },
+   {
+    "id": "python.base64.b64decode.b64_decode",
+    "match": "(?<![\\w.])base64\\.(?:base64_decode|base64decode|b64_decode|decode64|atob)(?=\\s*\\()",
+    "with": "base64.b64decode",
+    "why": "It's base64.b64decode(data)",
+    "auto": true,
+    "module": "base64"
+   },
+   {
+    "id": "python.base64.b64encode.encode",
+    "match": "(?<![\\w.])base64\\.(?:encode)(?=\\s*\\()",
+    "with": "base64.b64encode",
+    "why": "base64.encode works on files; for bytes use b64encode",
+    "module": "base64"
+   },
+   {
+    "id": "python.base64.b64decode.decode",
+    "match": "(?<![\\w.])base64\\.(?:decode)(?=\\s*\\()",
+    "with": "base64.b64decode",
+    "why": "base64.decode works on files; for data use b64decode",
+    "module": "base64"
+   },
+   {
+    "id": "python.webbrowser.open.openUrl",
+    "match": "(?<![\\w.])webbrowser\\.(?:open_link|navigate|openLink|open_url|openURL|openUrl|browse|launch|visit)(?=\\s*\\()",
+    "with": "webbrowser.open",
+    "why": "It's webbrowser.open(url)",
+    "auto": true,
+    "module": "webbrowser"
+   },
+   {
+    "id": "python.getpass.getpass.getPassword",
+    "match": "(?<![\\w.])getpass\\.(?:ask_password|get_password|askPassword|getPassword|password|prompt|input)(?=\\s*\\()",
+    "with": "getpass.getpass",
+    "why": "It's getpass.getpass()",
+    "auto": true,
+    "module": "getpass"
+   },
+   {
+    "id": "python.heapq.heappush.push",
+    "match": "(?<![\\w.])heapq\\.(?:heap_push|insert|push|add)(?=\\s*\\()",
+    "with": "heapq.heappush",
+    "why": "It's heapq.heappush(heap, item)",
+    "auto": true,
+    "module": "heapq"
+   },
+   {
+    "id": "python.heapq.heappop.pop",
+    "match": "(?<![\\w.])heapq\\.(?:extract_min|heap_pop|pop_min|popmin|pop)(?=\\s*\\()",
+    "with": "heapq.heappop",
+    "why": "It's heapq.heappop(heap)",
+    "auto": true,
+    "module": "heapq"
+   },
+   {
+    "id": "python.heapq.heapify.make_heap",
+    "match": "(?<![\\w.])heapq\\.(?:build_heap|make_heap|makeHeap)(?=\\s*\\()",
+    "with": "heapq.heapify",
+    "why": "It's heapq.heapify(list)",
+    "auto": true,
+    "module": "heapq"
+   },
+   {
+    "id": "python.glob.glob.find",
+    "match": "(?<![\\w.])glob\\.(?:find_all|findall|search|files|find|list)(?=\\s*\\()",
+    "with": "glob.glob",
+    "why": "It's glob.glob(pattern)",
+    "auto": true,
+    "module": "glob"
+   },
+   {
+    "id": "python.pickle.dump.save",
+    "match": "(?<![\\w.])pickle\\.(?:serialize|store|write|save)(?=\\s*\\()",
+    "with": "pickle.dump",
+    "why": "pickle.dump(obj, file) saves to a file",
+    "auto": true,
+    "module": "pickle"
+   },
+   {
+    "id": "python.pickle.load.read",
+    "match": "(?<![\\w.])pickle\\.(?:deserialize|unserialize|restore|read)(?=\\s*\\()",
+    "with": "pickle.load",
+    "why": "pickle.load(file) reads from a file",
+    "auto": true,
+    "module": "pickle"
+   },
+   {
+    "id": "python.sqlite3.connect.open",
+    "match": "(?<![\\w.])sqlite3\\.(?:connect_db|connection|connectDB|open_db|opendb|conn|open)(?=\\s*\\()",
+    "with": "sqlite3.connect",
+    "why": "It's sqlite3.connect(path)",
+    "auto": true,
+    "module": "sqlite3"
+   },
+   {
+    "id": "python.csv.reader.read",
+    "match": "(?<![\\w.])csv\\.(?:Reader|parse|read)(?=\\s*\\()",
+    "with": "csv.reader",
+    "why": "Reading CSV is csv.reader(file)",
+    "module": "csv"
+   },
+   {
+    "id": "python.csv.writer.write",
+    "match": "(?<![\\w.])csv\\.(?:Writer|write)(?=\\s*\\()",
+    "with": "csv.writer",
+    "why": "Writing CSV is csv.writer(file)",
+    "module": "csv"
+   },
+   {
+    "id": "python.pathlib.Path.Paths",
+    "match": "(?<![\\w.])pathlib\\.(?:Paths)(?=\\s*\\()",
+    "with": "pathlib.Path",
+    "why": "It's pathlib.Path",
+    "auto": true,
+    "module": "pathlib"
+   },
+   {
+    "id": "python.platform.system.os",
+    "match": "(?<![\\w.])platform\\.(?:operating_system|os_name|osname|os)(?=\\s*\\()",
+    "with": "platform.system",
+    "why": "platform.system() names the OS",
+    "module": "platform"
+   },
+   {
+    "id": "python.calendar.isleap.is_leap",
+    "match": "(?<![\\w.])calendar\\.(?:is_leap_year|is_leap|isLeap|leap)(?=\\s*\\()",
+    "with": "calendar.isleap",
+    "why": "It's calendar.isleap(year)",
+    "auto": true,
+    "module": "calendar"
+   },
+   {
+    "id": "python.console.log",
+    "match": "(?<![\\w.])(console)\\.log(?=\\s*\\()",
+    "with": "print",
+    "why": "Python prints with print()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.System.out",
+    "match": "(?<![\\w.])(System)\\.out\\.print(?:ln)?(?=\\s*\\()",
+    "with": "print",
+    "why": "Python prints with print()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.fmt.Println",
+    "match": "(?<![\\w.])(fmt)\\.Print(?:ln|f)?(?=\\s*\\()",
+    "with": "print",
+    "why": "Python prints with print()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.print-alias",
+    "match": "(?<![\\w.])(puts|echo|println|printLn|printline|print_line|printf|writeln|NSLog|say|Print|PRINT|prnt)(?=\\s*\\()",
+    "with": "print",
+    "why": "Python prints with print()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.alert",
+    "match": "(?<![\\w.])(alert)(?=\\s*\\()",
+    "with": "print",
+    "why": "Python has no alert(); print() shows text",
+    "undefined": 1
+   },
+   {
+    "id": "python.raw_input",
+    "match": "(?<![\\w.])(raw_input)(?=\\s*\\()",
+    "with": "input",
+    "why": "Python 3 renamed raw_input() to input()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.input-alias",
+    "match": "(?<![\\w.])(scanf|readline|readLine|read_line|gets|getline|Readline|read_input|readInput)(?=\\s*\\()",
+    "with": "input",
+    "why": "Python reads a line with input()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.prompt",
+    "match": "(?<![\\w.])(prompt)(?=\\s*\\()",
+    "with": "input",
+    "why": "Python asks with input(\"question\")",
+    "undefined": 1
+   },
+   {
+    "id": "python.len-alias",
+    "match": "(?<![\\w.])(length|lenght|len_of|lengthOf|length_of|strlen|sizeof|size_of|count_of|getLength|get_length|lengh|lenth)(?=\\s*\\()",
+    "with": "len",
+    "why": "Python's length function is len()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.len-maybe",
+    "match": "(?<![\\w.])(size|count|Length|Len|LEN)(?=\\s*\\(\\s*[^)\\s])",
+    "with": "len",
+    "why": "Python's length function is len()",
+    "undefined": 1
+   },
+   {
+    "id": "python.xrange",
+    "match": "(?<![\\w.])(xrange)(?=\\s*\\()",
+    "with": "range",
+    "why": "Python 3 renamed xrange() to range()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.unicode",
+    "match": "(?<![\\w.])(unicode)(?=\\s*\\()",
+    "with": "str",
+    "why": "In Python 3 every str is unicode",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.long",
+    "match": "(?<![\\w.])(long)(?=\\s*\\()",
+    "with": "int",
+    "why": "Python 3 ints have no size limit; it's int()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.basestring",
+    "match": "(?<![\\w.])(basestring)(?![\\w(])",
+    "with": "str",
+    "why": "Python 3 has just str",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.str-alias",
+    "match": "(?<![\\w.])(string|String|toString|to_string|stringify|toStr|to_str|tostring)(?=\\s*\\()",
+    "with": "str",
+    "why": "Python converts to text with str()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.int-alias",
+    "match": "(?<![\\w.])(integer|Integer|parseInt|parse_int|toInt|to_int|atoi|Int|INT|toInteger|to_integer|parseint)(?=\\s*\\()",
+    "with": "int",
+    "why": "Python converts to a whole number with int()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.float-alias",
+    "match": "(?<![\\w.])(parseFloat|parse_float|toFloat|to_float|double|Double|atof|Float|toDouble|to_double|parsefloat)(?=\\s*\\()",
+    "with": "float",
+    "why": "Python converts to a decimal number with float()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.bool-alias",
+    "match": "(?<![\\w.])(boolean|Boolean|Bool|toBool|to_bool|parseBool)(?=\\s*\\()",
+    "with": "bool",
+    "why": "Python's is bool()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.type-alias",
+    "match": "(?<![\\w.])(typeof|typeOf|type_of|gettype|getType|get_type)(?=\\s*\\()",
+    "with": "type",
+    "why": "Python's is type()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.list-alias",
+    "match": "(?<![\\w.])(array|Array|List|toList|to_list|ArrayList)(?=\\s*\\()",
+    "with": "list",
+    "why": "Python makes a list with list()",
+    "undefined": 1
+   },
+   {
+    "id": "python.dict-alias",
+    "match": "(?<![\\w.])(Dict|Map|HashMap|dictionary|Dictionary)(?=\\s*\\()",
+    "with": "dict",
+    "why": "Python makes a dictionary with dict()",
+    "undefined": 1
+   },
+   {
+    "id": "python.set-alias",
+    "match": "(?<![\\w.])(Set|HashSet|hashset)(?=\\s*\\()",
+    "with": "set",
+    "why": "Python's is set()",
+    "undefined": 1
+   },
+   {
+    "id": "python.reversed",
+    "match": "(?<![\\w.])(reverse|Reverse)(?=\\s*\\()",
+    "with": "reversed",
+    "why": "Python's built-in is reversed()",
+    "undefined": 1
+   },
+   {
+    "id": "python.sorted",
+    "match": "(?<![\\w.])(sort|Sort)(?=\\s*\\()",
+    "with": "sorted",
+    "why": "Python's built-in is sorted()",
+    "undefined": 1
+   },
+   {
+    "id": "python.max-alias",
+    "match": "(?<![\\w.])(maximum|Max|MAX)(?=\\s*\\()",
+    "with": "max",
+    "why": "Python's is max()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.min-alias",
+    "match": "(?<![\\w.])(minimum|Min|MIN)(?=\\s*\\()",
+    "with": "min",
+    "why": "Python's is min()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.abs-alias",
+    "match": "(?<![\\w.])(absolute|Abs|ABS|fabs)(?=\\s*\\()",
+    "with": "abs",
+    "why": "Python's is abs()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.sum-alias",
+    "match": "(?<![\\w.])(Sum|SUM|summation)(?=\\s*\\()",
+    "with": "sum",
+    "why": "Python's is sum()",
+    "undefined": 1
+   },
+   {
+    "id": "python.Math.builtin",
+    "match": "(?<![\\w.])(Math)\\.(max|min|abs|round)(?=\\s*\\()",
+    "with": "$2",
+    "why": "Python's $2() is built in",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.Math.module",
+    "match": "(?<![\\w.])(Math)\\.(floor|ceil|sqrt|pow|sin|cos|tan|log|exp|atan2|hypot|trunc)(?=\\s*\\()",
+    "with": "math.$2",
+    "why": "Python's is math.$2 (import math)",
+    "undefined": 1
+   },
+   {
+    "id": "python.Math.random",
+    "match": "(?<![\\w.])(Math)\\.random\\(\\s*\\)",
+    "with": "random.random()",
+    "why": "Python's is random.random() (import random)",
+    "undefined": 1
+   },
+   {
+    "id": "python.Math.PI",
+    "match": "(?<![\\w.])(Math)\\.PI(?!\\w)",
+    "with": "math.pi",
+    "why": "Python's is math.pi (import math)",
+    "undefined": 1
+   },
+   {
+    "id": "python.JSON.parse",
+    "match": "(?<![\\w.])(JSON)\\.parse(?=\\s*\\()",
+    "with": "json.loads",
+    "why": "Python's is json.loads() (import json)",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.JSON.stringify",
+    "match": "(?<![\\w.])(JSON)\\.stringify(?=\\s*\\()",
+    "with": "json.dumps",
+    "why": "Python's is json.dumps() (import json)",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.Object.keys",
+    "match": "(?<![\\w.])(Object)\\.keys\\(\\s*([\\w.]+)\\s*\\)",
+    "with": "$2.keys()",
+    "why": "Python dicts have .keys()",
+    "undefined": 1
+   },
+   {
+    "id": "python.Object.values",
+    "match": "(?<![\\w.])(Object)\\.values\\(\\s*([\\w.]+)\\s*\\)",
+    "with": "$2.values()",
+    "why": "Python dicts have .values()",
+    "undefined": 1
+   },
+   {
+    "id": "python.Object.entries",
+    "match": "(?<![\\w.])(Object)\\.entries\\(\\s*([\\w.]+)\\s*\\)",
+    "with": "$2.items()",
+    "why": "Python dicts have .items()",
+    "undefined": 1
+   },
+   {
+    "id": "python.Array.isArray",
+    "match": "(?<![\\w.])(Array)\\.isArray\\(\\s*([\\w.]+)\\s*\\)",
+    "with": "isinstance($2, list)",
+    "why": "Python checks with isinstance(x, list)",
+    "undefined": 1
+   },
+   {
+    "id": "python.true",
+    "match": "(?<![\\w.'\\\"])(true|TRUE)(?![\\w'\\\"])",
+    "with": "True",
+    "why": "Python capitalizes True",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.false",
+    "match": "(?<![\\w.'\\\"])(false|FALSE)(?![\\w'\\\"])",
+    "with": "False",
+    "why": "Python capitalizes False",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.none",
+    "match": "(?<![\\w.'\\\"])(null|nil|NULL|undefined|none|NONE|Null|Nil|nullptr)(?![\\w'\\\"])",
+    "with": "None",
+    "why": "Python's “nothing” is None",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.NaN",
+    "match": "(?<![\\w.])(NaN)(?!\\w)",
+    "with": "float(\"nan\")",
+    "why": "Python writes NaN as float(\"nan\") or math.nan",
+    "undefined": 1
+   },
+   {
+    "id": "python.Infinity",
+    "match": "(?<![\\w.])(Infinity)(?!\\w)",
+    "with": "float(\"inf\")",
+    "why": "Python writes infinity as float(\"inf\") or math.inf",
+    "undefined": 1
+   },
+   {
+    "id": "python.and",
+    "match": "[ \\t]*&&[ \\t]*",
+    "with": " and ",
+    "why": "Python writes && as and",
+    "auto": true
+   },
+   {
+    "id": "python.or",
+    "match": "[ \\t]*\\|\\|[ \\t]*",
+    "with": " or ",
+    "why": "Python writes || as or",
+    "auto": true
+   },
+   {
+    "id": "python.not",
+    "match": "!(?!=)[ \\t]*(?=[\\w(\\[])",
+    "with": "not ",
+    "why": "Python writes ! as not",
+    "auto": true
+   },
+   {
+    "id": "python.===",
+    "match": "===",
+    "with": "==",
+    "why": "Python compares with ==",
+    "auto": true
+   },
+   {
+    "id": "python.!==",
+    "match": "!==",
+    "with": "!=",
+    "why": "Python compares with !=",
+    "auto": true
+   },
+   {
+    "id": "python.++",
+    "match": "(?m)^([ \\t]*)([A-Za-z_][\\w.]*(?:\\[[^\\]\\n]*\\])?)[ \\t]*\\+\\+[ \\t]*;?[ \\t]*$",
+    "with": "$1$2 += 1",
+    "why": "Python has no ++; it's += 1",
+    "auto": true
+   },
+   {
+    "id": "python.--",
+    "match": "(?m)^([ \\t]*)([A-Za-z_][\\w.]*(?:\\[[^\\]\\n]*\\])?)[ \\t]*--[ \\t]*;?[ \\t]*$",
+    "with": "$1$2 -= 1",
+    "why": "Python has no --; it's -= 1",
+    "auto": true
+   },
+   {
+    "id": "python.pre++",
+    "match": "(?m)^([ \\t]*)\\+\\+[ \\t]*([A-Za-z_][\\w.]*)[ \\t]*;?[ \\t]*$",
+    "with": "$1$2 += 1",
+    "why": "Python has no ++; it's += 1",
+    "auto": true
+   },
+   {
+    "id": "python.else if",
+    "match": "(?m)^([ \\t]*)else[ \\t]+if\\b",
+    "with": "$1elif",
+    "why": "Python writes else if as elif",
+    "auto": true
+   },
+   {
+    "id": "python.elsif",
+    "match": "(?m)^([ \\t]*)(?:elseif|elsif|elseIf|else_if|elsef)\\b",
+    "with": "$1elif",
+    "why": "Python writes it elif",
+    "auto": true
+   },
+   {
+    "id": "python.catch",
+    "match": "(?m)^([ \\t]*)catch\\b",
+    "with": "$1except",
+    "why": "Python catches errors with except",
+    "auto": true
+   },
+   {
+    "id": "python.throw new Error",
+    "match": "(?m)^([ \\t]*)throw[ \\t]+new[ \\t]+Error\\b",
+    "with": "$1raise Exception",
+    "why": "Python raises errors with raise",
+    "auto": true
+   },
+   {
+    "id": "python.throw new",
+    "match": "(?m)^([ \\t]*)throw[ \\t]+new[ \\t]+",
+    "with": "$1raise ",
+    "why": "Python raises errors with raise",
+    "auto": true
+   },
+   {
+    "id": "python.throw",
+    "match": "(?m)^([ \\t]*)throw\\b",
+    "with": "$1raise",
+    "why": "Python raises errors with raise",
+    "auto": true
+   },
+   {
+    "id": "python.function",
+    "match": "(?m)^([ \\t]*)(?:async[ \\t]+)?function[ \\t]+(\\w+)[ \\t]*\\(",
+    "with": "$1def $2(",
+    "why": "Python defines functions with def",
+    "auto": true
+   },
+   {
+    "id": "python.func",
+    "match": "(?m)^([ \\t]*)(?:func|fn|fun|define|sub|proc)[ \\t]+(\\w+)[ \\t]*\\(",
+    "with": "$1def $2(",
+    "why": "Python defines functions with def",
+    "auto": true
+   },
+   {
+    "id": "python.this.",
+    "match": "(?<![\\w.])(this)\\.",
+    "with": "self.",
+    "why": "Python methods use self, not this",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "python.var",
+    "match": "(?m)^([ \\t]*)(?:var|let|const|auto|my|local)[ \\t]+(?=[A-Za-z_]\\w*[ \\t]*=(?!=))",
+    "with": "$1",
+    "why": "Python needs no declaration keyword",
+    "auto": true
+   },
+   {
+    "id": "python.int x =",
+    "match": "(?m)^([ \\t]*)int[ \\t]+([A-Za-z_]\\w*)[ \\t]*=(?!=)",
+    "with": "$1$2: int =",
+    "why": "Python writes types after the name: x: int = …",
+    "auto": true
+   },
+   {
+    "id": "python.float x =",
+    "match": "(?m)^([ \\t]*)(?:float|double)[ \\t]+([A-Za-z_]\\w*)[ \\t]*=(?!=)",
+    "with": "$1$2: float =",
+    "why": "Python writes types after the name: x: float = …",
+    "auto": true
+   },
+   {
+    "id": "python.str x =",
+    "match": "(?m)^([ \\t]*)(?:String|string|char)[ \\t]+([A-Za-z_]\\w*)[ \\t]*=(?!=)",
+    "with": "$1$2: str =",
+    "why": "Python writes types after the name: x: str = …",
+    "auto": true
+   },
+   {
+    "id": "python.bool x =",
+    "match": "(?m)^([ \\t]*)(?:bool|boolean)[ \\t]+([A-Za-z_]\\w*)[ \\t]*=(?!=)",
+    "with": "$1$2: bool =",
+    "why": "Python writes types after the name: x: bool = …",
+    "auto": true
+   },
+   {
+    "id": "python.// comment",
+    "match": "(?m)^([ \\t]*)//[ \\t]?",
+    "with": "$1# ",
+    "why": "Python comments start with #",
+    "auto": true
+   },
+   {
+    "id": "python.print py2",
+    "match": "(?m)^([ \\t]*)print[ \\t]+(?![\\s(=,.\\[])(.+?)[ \\t]*$",
+    "with": "$1print($2)",
+    "why": "In Python 3, print is a function: print(…)",
+    "auto": true
+   },
+   {
+    "id": "python.except py2",
+    "match": "(?m)^([ \\t]*)except[ \\t]+([\\w.]+)[ \\t]*,[ \\t]*([A-Za-z_]\\w*)[ \\t]*:",
+    "with": "$1except $2 as $3:",
+    "why": "Python 3 writes except Error as name:",
+    "auto": true
+   },
+   {
+    "id": "python.has_key",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.(?:has_key|containsKey|hasKey)\\(\\s*([^()\\n]+?)\\s*\\)",
+    "with": "$2 in $1",
+    "why": "Python checks keys with: key in dict",
+    "auto": true
+   },
+   {
+    "id": "python.iteritems",
+    "match": "\\.(?:iteritems|iterItems)\\(\\)",
+    "with": ".items()",
+    "why": "Python 3 renamed it .items()",
+    "auto": true
+   },
+   {
+    "id": "python.itervalues",
+    "match": "\\.itervalues\\(\\)",
+    "with": ".values()",
+    "why": "Python 3 renamed it .values()",
+    "auto": true
+   },
+   {
+    "id": "python.iterkeys",
+    "match": "\\.iterkeys\\(\\)",
+    "with": ".keys()",
+    "why": "Python 3 renamed it .keys()",
+    "auto": true
+   },
+   {
+    "id": "python.if =",
+    "match": "(?m)^([ \\t]*(?:if|elif|while)[ \\t]+[^=!<>()\\n:]*?[^=!<>:+\\-*/%&|^\\s])[ \\t]*=[ \\t]*(?!=)",
+    "with": "$1 == ",
+    "why": "A comparison needs == (a single = assigns)",
+    "auto": true
+   },
+   {
+    "id": "python..push",
+    "match": "\\.push\\(",
+    "with": ".append(",
+    "why": "Python lists use .append()",
+    "auto": true,
+    "unless": "\\bdef\\s+push\\b"
+   },
+   {
+    "id": "python..push_back",
+    "match": "\\.(?:push_back|pushBack)\\(",
+    "with": ".append(",
+    "why": "Python lists use .append()",
+    "auto": true,
+    "unless": "\\bdef\\s+(?:push_back|pushBack)\\b"
+   },
+   {
+    "id": "python..toUpperCase",
+    "match": "\\.(?:toUpperCase|toUpper|upperCase|to_upper|toupper|uppercase|upcase)\\(\\)",
+    "with": ".upper()",
+    "why": "Python strings use .upper()",
+    "auto": true,
+    "unless": "\\bdef\\s+(?:toUpperCase|toUpper|upperCase|to_upper|toupper|uppercase|upcase)\\b"
+   },
+   {
+    "id": "python..toLowerCase",
+    "match": "\\.(?:toLowerCase|toLower|lowerCase|to_lower|tolower|lowercase|downcase)\\(\\)",
+    "with": ".lower()",
+    "why": "Python strings use .lower()",
+    "auto": true,
+    "unless": "\\bdef\\s+(?:toLowerCase|toLower|lowerCase|to_lower|tolower|lowercase|downcase)\\b"
+   },
+   {
+    "id": "python..trim",
+    "match": "\\.trim\\(\\)",
+    "with": ".strip()",
+    "why": "Python strings use .strip()",
+    "auto": true,
+    "unless": "\\bdef\\s+trim\\b"
+   },
+   {
+    "id": "python..trimStart",
+    "match": "\\.(?:trimStart|trimLeft|ltrim)\\(\\)",
+    "with": ".lstrip()",
+    "why": "Python strings use .lstrip()",
+    "auto": true,
+    "unless": "\\bdef\\s+(?:trimStart|trimLeft|ltrim)\\b"
+   },
+   {
+    "id": "python..trimEnd",
+    "match": "\\.(?:trimEnd|trimRight|rtrim|chomp)\\(\\)",
+    "with": ".rstrip()",
+    "why": "Python strings use .rstrip()",
+    "auto": true,
+    "unless": "\\bdef\\s+(?:trimEnd|trimRight|rtrim|chomp)\\b"
+   },
+   {
+    "id": "python..startsWith",
+    "match": "\\.(?:startsWith|starts_with|beginsWith|begins_with|startWith)\\(",
+    "with": ".startswith(",
+    "why": "Python spells it .startswith()",
+    "auto": true,
+    "unless": "\\bdef\\s+(?:startsWith|starts_with|beginsWith|begins_with|startWith)\\b"
+   },
+   {
+    "id": "python..endsWith",
+    "match": "\\.(?:endsWith|ends_with|endWith)\\(",
+    "with": ".endswith(",
+    "why": "Python spells it .endswith()",
+    "auto": true,
+    "unless": "\\bdef\\s+(?:endsWith|ends_with|endWith)\\b"
+   },
+   {
+    "id": "python..length",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*(?:\\[[^\\]\\n]*\\])?)\\.length\\b(?![\\w(=]|\\s*=[^=])",
+    "with": "len($1)",
+    "why": "Python gets a length with len(x)",
+    "auto": true,
+    "unless": "\\.length\\s*=[^=]|\\bdef\\s+length\\b|\\blength\\s*=[^=]|@property"
+   },
+   {
+    "id": "python..len",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*(?:\\[[^\\]\\n]*\\])?)\\.len\\b(?![\\w(=]|\\s*=[^=])",
+    "with": "len($1)",
+    "why": "Python gets a length with len(x)",
+    "auto": true,
+    "unless": "\\.len\\s*=[^=]|\\bdef\\s+len\\b|\\blen\\s*=[^=]|@property"
+   },
+   {
+    "id": "python..Length",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*(?:\\[[^\\]\\n]*\\])?)\\.Length\\b(?![\\w(=]|\\s*=[^=])",
+    "with": "len($1)",
+    "why": "Python gets a length with len(x)",
+    "auto": true,
+    "unless": "\\.Length\\s*=[^=]|\\bdef\\s+Length\\b|\\bLength\\s*=[^=]|@property"
+   },
+   {
+    "id": "python..size()",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*(?:\\[[^\\]\\n]*\\])?)\\.(?:size|length|len|count|getLength|get_length|getSize|Size|Count|Length)\\(\\)",
+    "with": "len($1)",
+    "why": "Python gets a length with len(x)",
+    "auto": true,
+    "unless": "\\bdef\\s+(?:size|length|len|count|getLength|get_length|getSize|Size|Count|Length)\\b"
+   },
+   {
+    "id": "python..includes",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*(?:\\[[^\\]\\n]*\\])?)\\.(?:includes|contains)\\(\\s*([^()\\n]+?)\\s*\\)",
+    "with": "$2 in $1",
+    "why": "Python checks membership with: item in collection",
+    "auto": true,
+    "unless": "\\bdef\\s+(?:includes|contains)\\b"
+   },
+   {
+    "id": "python..indexOf",
+    "match": "\\.indexOf\\(",
+    "with": ".index(",
+    "why": "Python lists and strings use .index() (strings also have .find())",
+    "unless": "\\bdef\\s+indexOf\\b"
+   },
+   {
+    "id": "python..lastIndexOf",
+    "match": "\\.lastIndexOf\\(",
+    "with": ".rindex(",
+    "why": "Python strings use .rindex() or .rfind()",
+    "unless": "\\bdef\\s+lastIndexOf\\b"
+   },
+   {
+    "id": "python..toString",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*(?:\\[[^\\]\\n]*\\])?)\\.(?:toString|to_string|toStr|ToString|tostring)\\(\\)",
+    "with": "str($1)",
+    "why": "Python converts to text with str(x)",
+    "auto": true,
+    "unless": "\\bdef\\s+(?:toString|to_string|toStr|ToString|tostring)\\b"
+   },
+   {
+    "id": "python..equals",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.equals\\(\\s*([^()\\n]+?)\\s*\\)",
+    "with": "$1 == $2",
+    "why": "Python compares with ==",
+    "auto": true,
+    "unless": "\\bdef\\s+equals\\b"
+   },
+   {
+    "id": "python..isEmpty",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.(?:isEmpty|is_empty)\\(\\)",
+    "with": "not $1",
+    "why": "Empty collections are falsy: not x",
+    "auto": true,
+    "unless": "\\bdef\\s+(?:isEmpty|is_empty)\\b"
+   },
+   {
+    "id": "python..charAt",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.charAt\\(\\s*([^()\\n]+?)\\s*\\)",
+    "with": "$1[$2]",
+    "why": "Python indexes strings with s[i]",
+    "auto": true,
+    "unless": "\\bdef\\s+charAt\\b"
+   },
+   {
+    "id": "python..substring2",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.(?:substring|substr|slice)\\(\\s*([^(),\\n]+?)\\s*,\\s*([^()\\n]+?)\\s*\\)",
+    "with": "$1[$2:$3]",
+    "why": "Python slices with s[start:end]",
+    "auto": true,
+    "unless": "\\bdef\\s+(?:substring|substr|slice)\\b"
+   },
+   {
+    "id": "python..substring1",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.(?:substring|substr)\\(\\s*([^(),\\n]+?)\\s*\\)",
+    "with": "$1[$2:]",
+    "why": "Python slices with s[start:]",
+    "auto": true,
+    "unless": "\\bdef\\s+(?:substring|substr)\\b"
+   },
+   {
+    "id": "python..replaceAll",
+    "match": "\\.replaceAll\\(",
+    "with": ".replace(",
+    "why": "Python's .replace() already replaces every occurrence",
+    "auto": true,
+    "unless": "\\bdef\\s+replaceAll\\b"
+   },
+   {
+    "id": "python..join",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.join\\(\\s*(\\\"[^\\\"\\n]*\\\"|'[^'\\n]*')\\s*\\)",
+    "with": "$2.join($1)",
+    "why": "In Python the separator comes first: \", \".join(items)",
+    "auto": true
+   },
+   {
+    "id": "python..put",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.put\\(\\s*([^,()\\n]+?)\\s*,\\s*([^()\\n]+?)\\s*\\)",
+    "with": "$1[$2] = $3",
+    "why": "Python dicts set values with d[key] = value",
+    "unless": "\\bdef\\s+put\\b|\\bqueue\\b|\\bQueue\\b"
+   },
+   {
+    "id": "python.= .sort()",
+    "match": "(?<![\\w.])([A-Za-z_]\\w*)[ \\t]*=[ \\t]*([A-Za-z_][\\w.]*)\\.sort\\(\\s*\\)",
+    "with": "$1 = sorted($2)",
+    "why": "list.sort() sorts in place and returns None; sorted() returns a new list"
+   },
+   {
+    "id": "python.= .reverse()",
+    "match": "(?<![\\w.])([A-Za-z_]\\w*)[ \\t]*=[ \\t]*([A-Za-z_][\\w.]*)\\.reverse\\(\\s*\\)",
+    "with": "$1 = list(reversed($2))",
+    "why": "list.reverse() works in place and returns None"
+   },
+   {
+    "id": "python.x = x.append",
+    "match": "(?<![\\w.])([A-Za-z_]\\w*)[ \\t]*=[ \\t]*\\1\\.append\\(",
+    "with": "$1.append(",
+    "why": "append() changes the list and returns None — don't assign it",
+    "auto": true
+   },
+   {
+    "id": "python.^ power",
+    "match": "([\\w)\\]]+)[ \\t]*\\^[ \\t]*(\\d+)\\b",
+    "with": "$1 ** $2",
+    "why": "^ is XOR in Python; powers are **"
+   }
+  ],
+  "imports": {
+   "sleep": "from time import sleep",
+   "perf_counter": "from time import perf_counter",
+   "monotonic": "from time import monotonic",
+   "randint": "from random import randint",
+   "choice": "from random import choice",
+   "shuffle": "from random import shuffle",
+   "uniform": "from random import uniform",
+   "sample": "from random import sample",
+   "randrange": "from random import randrange",
+   "choices": "from random import choices",
+   "sqrt": "from math import sqrt",
+   "floor": "from math import floor",
+   "ceil": "from math import ceil",
+   "pi": "from math import pi",
+   "sin": "from math import sin",
+   "cos": "from math import cos",
+   "tan": "from math import tan",
+   "log": "from math import log",
+   "exp": "from math import exp",
+   "radians": "from math import radians",
+   "degrees": "from math import degrees",
+   "factorial": "from math import factorial",
+   "gcd": "from math import gcd",
+   "inf": "from math import inf",
+   "hypot": "from math import hypot",
+   "atan2": "from math import atan2",
+   "isclose": "from math import isclose",
+   "comb": "from math import comb",
+   "perm": "from math import perm",
+   "Path": "from pathlib import Path",
+   "datetime": "from datetime import datetime",
+   "timedelta": "from datetime import timedelta",
+   "date": "from datetime import date",
+   "defaultdict": "from collections import defaultdict",
+   "Counter": "from collections import Counter",
+   "deque": "from collections import deque",
+   "namedtuple": "from collections import namedtuple",
+   "OrderedDict": "from collections import OrderedDict",
+   "dataclass": "from dataclasses import dataclass",
+   "field": "from dataclasses import field",
+   "Enum": "from enum import Enum",
+   "List": "from typing import List",
+   "Dict": "from typing import Dict",
+   "Optional": "from typing import Optional",
+   "Tuple": "from typing import Tuple",
+   "Union": "from typing import Union",
+   "Any": "from typing import Any",
+   "Callable": "from typing import Callable",
+   "Iterable": "from typing import Iterable",
+   "Iterator": "from typing import Iterator",
+   "Sequence": "from typing import Sequence",
+   "partial": "from functools import partial",
+   "reduce": "from functools import reduce",
+   "lru_cache": "from functools import lru_cache",
+   "wraps": "from functools import wraps",
+   "cache": "from functools import cache",
+   "cmp_to_key": "from functools import cmp_to_key",
+   "pprint": "from pprint import pprint",
+   "deepcopy": "from copy import deepcopy",
+   "uuid4": "from uuid import uuid4",
+   "permutations": "from itertools import permutations",
+   "combinations": "from itertools import combinations",
+   "product": "from itertools import product",
+   "chain": "from itertools import chain",
+   "groupby": "from itertools import groupby",
+   "accumulate": "from itertools import accumulate",
+   "zip_longest": "from itertools import zip_longest",
+   "mean": "from statistics import mean",
+   "median": "from statistics import median",
+   "stdev": "from statistics import stdev",
+   "mode": "from statistics import mode",
+   "getpass": "from getpass import getpass",
+   "argv": "from sys import argv",
+   "ABC": "from abc import ABC",
+   "abstractmethod": "from abc import abstractmethod",
+   "ThreadPoolExecutor": "from concurrent.futures import ThreadPoolExecutor",
+   "Thread": "from threading import Thread",
+   "Fraction": "from fractions import Fraction",
+   "Decimal": "from decimal import Decimal",
+   "heappush": "from heapq import heappush",
+   "heappop": "from heapq import heappop",
+   "heapify": "from heapq import heapify",
+   "bisect_left": "from bisect import bisect_left",
+   "bisect_right": "from bisect import bisect_right",
+   "insort": "from bisect import insort",
+   "dedent": "from textwrap import dedent",
+   "contextmanager": "from contextlib import contextmanager",
+   "StringIO": "from io import StringIO",
+   "BytesIO": "from io import BytesIO",
+   "ZipFile": "from zipfile import ZipFile"
+  },
+  "builtins": [
+   "cls",
+   "self"
+  ]
+ },
+ "javascript": {
+  "rules": [
+   {
+    "id": "javascript.console.log.print",
+    "match": "(?<![\\w$.])(console)\\.(?:WriteLine|writeLine|display|printLn|println|printf|print|write|echo|puts|show|out|say)(?=\\s*\\()",
+    "with": "console.log",
+    "why": "JavaScript prints with console.log()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.console.error.err",
+    "match": "(?<![\\w$.])(console)\\.(?:err)(?=\\s*\\()",
+    "with": "console.error",
+    "why": "It's console.error()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.console.warn.warning",
+    "match": "(?<![\\w$.])(console)\\.(?:warning)(?=\\s*\\()",
+    "with": "console.warn",
+    "why": "It's console.warn()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.JSON.parse.loads",
+    "match": "(?<![\\w$.])(JSON)\\.(?:deserialize|parseString|fromString|toObject|decode|loads|load|read)(?=\\s*\\()",
+    "with": "JSON.parse",
+    "why": "JSON.parse(text) reads JSON",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.JSON.stringify.dumps",
+    "match": "(?<![\\w$.])(JSON)\\.(?:serialize|stringyfy|stringfy|toString|encode|toJSON|dumps|write|dump)(?=\\s*\\()",
+    "with": "JSON.stringify",
+    "why": "JSON.stringify(value) writes JSON",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.Math.pow.power",
+    "match": "(?<![\\w$.])(Math)\\.(?:power|pwr)(?=\\s*\\()",
+    "with": "Math.pow",
+    "why": "It's Math.pow(x, y) — or x ** y",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.Math.sqrt.squareRoot",
+    "match": "(?<![\\w$.])(Math)\\.(?:square_root|squareRoot|squareroot|root|sqr)(?=\\s*\\()",
+    "with": "Math.sqrt",
+    "why": "Square roots are Math.sqrt(x)",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.Math.ceil.ceiling",
+    "match": "(?<![\\w$.])(Math)\\.(?:ceiling|roundUp)(?=\\s*\\()",
+    "with": "Math.ceil",
+    "why": "Rounding up is Math.ceil(x)",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.Math.floor.roundDown",
+    "match": "(?<![\\w$.])(Math)\\.(?:roundDown)(?=\\s*\\()",
+    "with": "Math.floor",
+    "why": "Rounding down is Math.floor(x)",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.Math.random.rand",
+    "match": "(?<![\\w$.])(Math)\\.(?:randomNumber|rand|rnd)(?=\\s*\\()",
+    "with": "Math.random",
+    "why": "Math.random() is a number from 0 to 1",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.Math.max.maximum",
+    "match": "(?<![\\w$.])(Math)\\.(?:maximum)(?=\\s*\\()",
+    "with": "Math.max",
+    "why": "It's Math.max()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.Math.min.minimum",
+    "match": "(?<![\\w$.])(Math)\\.(?:minimum)(?=\\s*\\()",
+    "with": "Math.min",
+    "why": "It's Math.min()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.Math.abs.absolute",
+    "match": "(?<![\\w$.])(Math)\\.(?:absolute)(?=\\s*\\()",
+    "with": "Math.abs",
+    "why": "It's Math.abs()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.Math.PI.pi",
+    "match": "(?<![\\w$.])(Math)\\.(?:Pi|pi)(?![\\w$(])",
+    "with": "Math.PI",
+    "why": "It's Math.PI (capitals)",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.Math.E.e",
+    "match": "(?<![\\w$.])(Math)\\.(?:e)(?![\\w$(])",
+    "with": "Math.E",
+    "why": "It's Math.E (capital)",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.Math.randint2",
+    "match": "(?<![\\w$.])(Math)\\.(?:randint|randInt|randomInt|random_int)\\(\\s*([^,()]+?)\\s*,\\s*([^,()]+?)\\s*\\)",
+    "with": "(Math.floor(Math.random() * ($3 - $2 + 1)) + $2)",
+    "why": "JavaScript has no randint; this picks a whole number from a to b",
+    "undefined": 1
+   },
+   {
+    "id": "javascript.Math.randint1",
+    "match": "(?<![\\w$.])(Math)\\.(?:randint|randInt|randomInt|random_int)\\(\\s*([^,()]+?)\\s*\\)",
+    "with": "Math.floor(Math.random() * $2)",
+    "why": "JavaScript has no randint; this picks 0 … n-1",
+    "undefined": 1
+   },
+   {
+    "id": "javascript.document.getElementById.getElementsById",
+    "match": "(?<![\\w$.])(document)\\.(?:getElementsById|getElementId|getElemById)(?=\\s*\\()",
+    "with": "document.getElementById",
+    "why": "It's document.getElementById (singular)",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.document.getElementsByClassName.getElementByClassName",
+    "match": "(?<![\\w$.])(document)\\.(?:getElementByClassName|getElementsByClass|getElementByClass)(?=\\s*\\()",
+    "with": "document.getElementsByClassName",
+    "why": "It's document.getElementsByClassName (plural)",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.document.getElementsByTagName.getElementByTagName",
+    "match": "(?<![\\w$.])(document)\\.(?:getElementByTagName|getElementsByTag)(?=\\s*\\()",
+    "with": "document.getElementsByTagName",
+    "why": "It's document.getElementsByTagName (plural)",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.document.querySelectorAll.querySelectAll",
+    "match": "(?<![\\w$.])(document)\\.(?:querySelectorALL|querySelectAll|selectAll)(?=\\s*\\()",
+    "with": "document.querySelectorAll",
+    "why": "It's document.querySelectorAll",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.document.querySelector.querySelect",
+    "match": "(?<![\\w$.])(document)\\.(?:querySelect)(?=\\s*\\()",
+    "with": "document.querySelector",
+    "why": "It's document.querySelector",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.document.createElement.createElem",
+    "match": "(?<![\\w$.])(document)\\.(?:makeElement|createElem|newElement)(?=\\s*\\()",
+    "with": "document.createElement",
+    "why": "It's document.createElement",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.getElementById #",
+    "match": "getElementById\\(\\s*([\\\"'`])#([\\w-]+)\\1",
+    "with": "getElementById($1$2$1",
+    "why": "getElementById takes the id without #",
+    "auto": true
+   },
+   {
+    "id": "javascript.getElementsByClassName .",
+    "match": "getElementsByClassName\\(\\s*([\\\"'`])\\.([\\w-]+)\\1",
+    "with": "getElementsByClassName($1$2$1",
+    "why": "getElementsByClassName takes the class without the dot",
+    "auto": true
+   },
+   {
+    "id": "javascript.addEventListener on",
+    "match": "addEventListener\\(\\s*([\\\"'`])on([a-z]+)\\1",
+    "with": "addEventListener($1$2$1",
+    "why": "Event names have no “on”: \"click\", not \"onclick\"",
+    "auto": true
+   },
+   {
+    "id": "javascript.addEventListener call",
+    "match": "addEventListener\\(\\s*([\\\"'`]\\w+[\\\"'`])\\s*,\\s*([A-Za-z_$][\\w$.]*)\\(\\)\\s*\\)",
+    "with": "addEventListener($1, $2)",
+    "why": "Pass the function itself; $2() runs it right away"
+   },
+   {
+    "id": "javascript.setTimeout call",
+    "match": "\\b(setTimeout|setInterval)\\(\\s*([A-Za-z_$][\\w$.]*)\\(\\)\\s*,",
+    "with": "$1($2,",
+    "why": "Pass the function itself; $2() runs it right away"
+   },
+   {
+    "id": "javascript..innerHtml",
+    "match": "\\.innerHtml\\b",
+    "with": ".innerHTML",
+    "why": "DOM names are camelCase: .innerHTML",
+    "auto": true,
+    "unless": "\\binnerHtml\\s*[:=(]"
+   },
+   {
+    "id": "javascript..InnerHTML",
+    "match": "\\.InnerHTML\\b",
+    "with": ".innerHTML",
+    "why": "DOM names are camelCase: .innerHTML",
+    "auto": true,
+    "unless": "\\bInnerHTML\\s*[:=(]"
+   },
+   {
+    "id": "javascript..outerHtml",
+    "match": "\\.outerHtml\\b",
+    "with": ".outerHTML",
+    "why": "DOM names are camelCase: .outerHTML",
+    "auto": true,
+    "unless": "\\bouterHtml\\s*[:=(]"
+   },
+   {
+    "id": "javascript..textcontent",
+    "match": "\\.textcontent\\b",
+    "with": ".textContent",
+    "why": "DOM names are camelCase: .textContent",
+    "auto": true,
+    "unless": "\\btextcontent\\s*[:=(]"
+   },
+   {
+    "id": "javascript..TextContent",
+    "match": "\\.TextContent\\b",
+    "with": ".textContent",
+    "why": "DOM names are camelCase: .textContent",
+    "auto": true,
+    "unless": "\\bTextContent\\s*[:=(]"
+   },
+   {
+    "id": "javascript..innertext",
+    "match": "\\.innertext\\b",
+    "with": ".innerText",
+    "why": "DOM names are camelCase: .innerText",
+    "auto": true,
+    "unless": "\\binnertext\\s*[:=(]"
+   },
+   {
+    "id": "javascript..classname",
+    "match": "\\.classname\\b",
+    "with": ".className",
+    "why": "DOM names are camelCase: .className",
+    "auto": true,
+    "unless": "\\bclassname\\s*[:=(]"
+   },
+   {
+    "id": "javascript..classlist",
+    "match": "\\.classlist\\b",
+    "with": ".classList",
+    "why": "DOM names are camelCase: .classList",
+    "auto": true,
+    "unless": "\\bclasslist\\s*[:=(]"
+   },
+   {
+    "id": "javascript..addEventlistener",
+    "match": "\\.addEventlistener\\b",
+    "with": ".addEventListener",
+    "why": "DOM names are camelCase: .addEventListener",
+    "auto": true,
+    "unless": "\\baddEventlistener\\s*[:=(]"
+   },
+   {
+    "id": "javascript..addeventlistener",
+    "match": "\\.addeventlistener\\b",
+    "with": ".addEventListener",
+    "why": "DOM names are camelCase: .addEventListener",
+    "auto": true,
+    "unless": "\\baddeventlistener\\s*[:=(]"
+   },
+   {
+    "id": "javascript..removeEventlistener",
+    "match": "\\.removeEventlistener\\b",
+    "with": ".removeEventListener",
+    "why": "DOM names are camelCase: .removeEventListener",
+    "auto": true,
+    "unless": "\\bremoveEventlistener\\s*[:=(]"
+   },
+   {
+    "id": "javascript..appendchild",
+    "match": "\\.appendchild\\b",
+    "with": ".appendChild",
+    "why": "DOM names are camelCase: .appendChild",
+    "auto": true,
+    "unless": "\\bappendchild\\s*[:=(]"
+   },
+   {
+    "id": "javascript..AppendChild",
+    "match": "\\.AppendChild\\b",
+    "with": ".appendChild",
+    "why": "DOM names are camelCase: .appendChild",
+    "auto": true,
+    "unless": "\\bAppendChild\\s*[:=(]"
+   },
+   {
+    "id": "javascript..removechild",
+    "match": "\\.removechild\\b",
+    "with": ".removeChild",
+    "why": "DOM names are camelCase: .removeChild",
+    "auto": true,
+    "unless": "\\bremovechild\\s*[:=(]"
+   },
+   {
+    "id": "javascript..parentnode",
+    "match": "\\.parentnode\\b",
+    "with": ".parentNode",
+    "why": "DOM names are camelCase: .parentNode",
+    "auto": true,
+    "unless": "\\bparentnode\\s*[:=(]"
+   },
+   {
+    "id": "javascript..preventdefault",
+    "match": "\\.preventdefault\\b",
+    "with": ".preventDefault",
+    "why": "DOM names are camelCase: .preventDefault",
+    "auto": true,
+    "unless": "\\bpreventdefault\\s*[:=(]"
+   },
+   {
+    "id": "javascript..stoppropagation",
+    "match": "\\.stoppropagation\\b",
+    "with": ".stopPropagation",
+    "why": "DOM names are camelCase: .stopPropagation",
+    "auto": true,
+    "unless": "\\bstoppropagation\\s*[:=(]"
+   },
+   {
+    "id": "javascript..queryselector",
+    "match": "\\.queryselector\\b",
+    "with": ".querySelector",
+    "why": "DOM names are camelCase: .querySelector",
+    "auto": true,
+    "unless": "\\bqueryselector\\s*[:=(]"
+   },
+   {
+    "id": "javascript..setattribute",
+    "match": "\\.setattribute\\b",
+    "with": ".setAttribute",
+    "why": "DOM names are camelCase: .setAttribute",
+    "auto": true,
+    "unless": "\\bsetattribute\\s*[:=(]"
+   },
+   {
+    "id": "javascript..getattribute",
+    "match": "\\.getattribute\\b",
+    "with": ".getAttribute",
+    "why": "DOM names are camelCase: .getAttribute",
+    "auto": true,
+    "unless": "\\bgetattribute\\s*[:=(]"
+   },
+   {
+    "id": "javascript..onClick=",
+    "match": "\\.onClick(?=\\s*=[^=])",
+    "with": ".onclick",
+    "why": "DOM event properties are lowercase: .onclick",
+    "unless": "<\\w[^>]*\\bonClick="
+   },
+   {
+    "id": "javascript..onLoad=",
+    "match": "\\.onLoad(?=\\s*=[^=])",
+    "with": ".onload",
+    "why": "DOM event properties are lowercase: .onload",
+    "unless": "<\\w[^>]*\\bonLoad="
+   },
+   {
+    "id": "javascript..onChange=",
+    "match": "\\.onChange(?=\\s*=[^=])",
+    "with": ".onchange",
+    "why": "DOM event properties are lowercase: .onchange",
+    "unless": "<\\w[^>]*\\bonChange="
+   },
+   {
+    "id": "javascript..onSubmit=",
+    "match": "\\.onSubmit(?=\\s*=[^=])",
+    "with": ".onsubmit",
+    "why": "DOM event properties are lowercase: .onsubmit",
+    "unless": "<\\w[^>]*\\bonSubmit="
+   },
+   {
+    "id": "javascript..onKeyDown=",
+    "match": "\\.onKeyDown(?=\\s*=[^=])",
+    "with": ".onkeydown",
+    "why": "DOM event properties are lowercase: .onkeydown",
+    "unless": "<\\w[^>]*\\bonKeyDown="
+   },
+   {
+    "id": "javascript..onKeyUp=",
+    "match": "\\.onKeyUp(?=\\s*=[^=])",
+    "with": ".onkeyup",
+    "why": "DOM event properties are lowercase: .onkeyup",
+    "unless": "<\\w[^>]*\\bonKeyUp="
+   },
+   {
+    "id": "javascript..onInput=",
+    "match": "\\.onInput(?=\\s*=[^=])",
+    "with": ".oninput",
+    "why": "DOM event properties are lowercase: .oninput",
+    "unless": "<\\w[^>]*\\bonInput="
+   },
+   {
+    "id": "javascript..onMouseOver=",
+    "match": "\\.onMouseOver(?=\\s*=[^=])",
+    "with": ".onmouseover",
+    "why": "DOM event properties are lowercase: .onmouseover",
+    "unless": "<\\w[^>]*\\bonMouseOver="
+   },
+   {
+    "id": "javascript..onMouseOut=",
+    "match": "\\.onMouseOut(?=\\s*=[^=])",
+    "with": ".onmouseout",
+    "why": "DOM event properties are lowercase: .onmouseout",
+    "unless": "<\\w[^>]*\\bonMouseOut="
+   },
+   {
+    "id": "javascript..onFocus=",
+    "match": "\\.onFocus(?=\\s*=[^=])",
+    "with": ".onfocus",
+    "why": "DOM event properties are lowercase: .onfocus",
+    "unless": "<\\w[^>]*\\bonFocus="
+   },
+   {
+    "id": "javascript..onBlur=",
+    "match": "\\.onBlur(?=\\s*=[^=])",
+    "with": ".onblur",
+    "why": "DOM event properties are lowercase: .onblur",
+    "unless": "<\\w[^>]*\\bonBlur="
+   },
+   {
+    "id": "javascript..onScroll=",
+    "match": "\\.onScroll(?=\\s*=[^=])",
+    "with": ".onscroll",
+    "why": "DOM event properties are lowercase: .onscroll",
+    "unless": "<\\w[^>]*\\bonScroll="
+   },
+   {
+    "id": "javascript..onResize=",
+    "match": "\\.onResize(?=\\s*=[^=])",
+    "with": ".onresize",
+    "why": "DOM event properties are lowercase: .onresize",
+    "unless": "<\\w[^>]*\\bonResize="
+   },
+   {
+    "id": "javascript..lenght",
+    "match": "\\.(?:lenght|legnth|lengh|lentgh|lenth|lengt|lengthh|lneght|leng)\\b",
+    "with": ".length",
+    "why": "It's .length",
+    "auto": true
+   },
+   {
+    "id": "javascript..length()",
+    "match": "\\.length\\(\\)",
+    "with": ".length",
+    "why": ".length is a property — no ()",
+    "auto": true
+   },
+   {
+    "id": "javascript..len",
+    "match": "\\.len\\b(?:\\(\\))?",
+    "with": ".length",
+    "why": "It's .length",
+    "auto": true,
+    "unless": "\\blen\\s*[:=(]"
+   },
+   {
+    "id": "javascript..size()",
+    "match": "\\.(?:size|count)\\(\\)",
+    "with": ".length",
+    "why": "Arrays and strings use .length (Maps and Sets use .size)",
+    "unless": "\\b(?:size|count)\\s*\\(\\s*\\)\\s*\\{"
+   },
+   {
+    "id": "javascript..push_back",
+    "match": "\\.(?:push_back|pushBack)\\(",
+    "with": ".push(",
+    "why": "JavaScript arrays use .push()",
+    "auto": true
+   },
+   {
+    "id": "javascript..append",
+    "match": "\\.append\\(",
+    "with": ".push(",
+    "why": "Arrays use .push() (DOM elements do have .append())"
+   },
+   {
+    "id": "javascript..upper",
+    "match": "\\.(?:upper|toUpper|uppercase|to_upper)\\(\\)",
+    "with": ".toUpperCase()",
+    "why": "JavaScript strings use .toUpperCase()",
+    "auto": true
+   },
+   {
+    "id": "javascript..lower",
+    "match": "\\.(?:lower|toLower|lowercase|to_lower)\\(\\)",
+    "with": ".toLowerCase()",
+    "why": "JavaScript strings use .toLowerCase()",
+    "auto": true
+   },
+   {
+    "id": "javascript..strip",
+    "match": "\\.strip\\(\\)",
+    "with": ".trim()",
+    "why": "JavaScript strings use .trim()",
+    "auto": true
+   },
+   {
+    "id": "javascript..lstrip",
+    "match": "\\.(?:lstrip|ltrim)\\(\\)",
+    "with": ".trimStart()",
+    "why": "JavaScript strings use .trimStart()",
+    "auto": true
+   },
+   {
+    "id": "javascript..rstrip",
+    "match": "\\.(?:rstrip|rtrim)\\(\\)",
+    "with": ".trimEnd()",
+    "why": "JavaScript strings use .trimEnd()",
+    "auto": true
+   },
+   {
+    "id": "javascript..startswith",
+    "match": "\\.(?:startswith|starts_with|beginsWith|startWith)\\(",
+    "with": ".startsWith(",
+    "why": "It's .startsWith()",
+    "auto": true
+   },
+   {
+    "id": "javascript..endswith",
+    "match": "\\.(?:endswith|ends_with|endWith)\\(",
+    "with": ".endsWith(",
+    "why": "It's .endsWith()",
+    "auto": true
+   },
+   {
+    "id": "javascript..contains",
+    "match": "\\.contains\\(",
+    "with": ".includes(",
+    "why": "Strings and arrays use .includes() (classList and nodes have .contains())"
+   },
+   {
+    "id": "javascript..index",
+    "match": "\\.index\\(",
+    "with": ".indexOf(",
+    "why": "Arrays and strings use .indexOf()",
+    "unless": "\\bindex\\s*[:(]\\s*"
+   },
+   {
+    "id": "javascript..forEach case",
+    "match": "\\.(?:foreach|ForEach|for_each)\\(",
+    "with": ".forEach(",
+    "why": "It's .forEach()",
+    "auto": true
+   },
+   {
+    "id": "javascript..toString case",
+    "match": "\\.(?:tostring|ToString|to_string|toStr)\\(\\)",
+    "with": ".toString()",
+    "why": "It's .toString()",
+    "auto": true
+   },
+   {
+    "id": "javascript.True",
+    "match": "(?<![\\w$.'\\\"])(True|TRUE)(?![\\w$'\\\"])",
+    "with": "true",
+    "why": "JavaScript writes true in lowercase",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.False",
+    "match": "(?<![\\w$.'\\\"])(False|FALSE)(?![\\w$'\\\"])",
+    "with": "false",
+    "why": "JavaScript writes false in lowercase",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.None",
+    "match": "(?<![\\w$.'\\\"])(None|nil|NULL|Null|nullptr)(?![\\w$'\\\"])",
+    "with": "null",
+    "why": "JavaScript's “nothing” is null",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.elif",
+    "match": "(?m)^([ \\t]*\\}?[ \\t]*)(?:elif|elsif|elseif|elseIf)\\b",
+    "with": "$1else if",
+    "why": "JavaScript writes it else if",
+    "auto": true
+   },
+   {
+    "id": "javascript.def",
+    "match": "(?m)^([ \\t]*)(?:async[ \\t]+)?def[ \\t]+(\\w+)[ \\t]*\\(",
+    "with": "$1function $2(",
+    "why": "JavaScript defines functions with function",
+    "auto": true
+   },
+   {
+    "id": "javascript.func",
+    "match": "(?m)^([ \\t]*)(?:func|fn|fun)[ \\t]+(\\w+)[ \\t]*\\(",
+    "with": "$1function $2(",
+    "why": "JavaScript defines functions with function",
+    "auto": true
+   },
+   {
+    "id": "javascript.print",
+    "match": "(?<![\\w$.])(print)\\(\\s*(?=[^)\\s])",
+    "with": "console.log(",
+    "why": "print() prints the page; console.log() prints text",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.print-alias",
+    "match": "(?<![\\w$.])(println|printf|echo|puts|printLn|writeln)(?=\\s*\\()",
+    "with": "console.log",
+    "why": "JavaScript prints with console.log()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.System.out",
+    "match": "(?<![\\w$.])(System)\\.out\\.print(?:ln)?(?=\\s*\\()",
+    "with": "console.log",
+    "why": "JavaScript prints with console.log()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.and",
+    "match": "(?<=[\\w$)\\]'\\\"`])[ \\t]+and[ \\t]+(?=[\\w$(!'\\\"`\\[])",
+    "with": " && ",
+    "why": "JavaScript writes and as &&",
+    "auto": true,
+    "unless": "\\b(?:let|const|var)\\s+and\\b"
+   },
+   {
+    "id": "javascript.or",
+    "match": "(?<=[\\w$)\\]'\\\"`])[ \\t]+or[ \\t]+(?=[\\w$(!'\\\"`\\[])",
+    "with": " || ",
+    "why": "JavaScript writes or as ||",
+    "auto": true,
+    "unless": "\\b(?:let|const|var)\\s+or\\b"
+   },
+   {
+    "id": "javascript.not",
+    "match": "(?<![\\w$.])not[ \\t]+(?=[\\w$(\\[])",
+    "with": "!",
+    "why": "JavaScript writes not as !",
+    "auto": true,
+    "unless": "\\b(?:let|const|var|function)\\s+not\\b"
+   },
+   {
+    "id": "javascript.self.",
+    "match": "(?<![\\w$.])(self)\\.",
+    "with": "this.",
+    "why": "Methods use this, not self",
+    "undefined": 1,
+    "unless": "postMessage|importScripts|onmessage"
+   },
+   {
+    "id": "javascript.module.export",
+    "match": "(?<![\\w$.])module\\.export\\b(?!s)",
+    "with": "module.exports",
+    "why": "It's module.exports (with an s)",
+    "auto": true
+   },
+   {
+    "id": "javascript.->",
+    "match": "\\)[ \\t]*->[ \\t]*(?=[{(\\w])",
+    "with": ") => ",
+    "why": "Arrow functions use =>",
+    "auto": true
+   },
+   {
+    "id": "javascript.if =",
+    "match": "\\bif[ \\t]*\\([ \\t]*([\\w$.]+)[ \\t]*=[ \\t]*(?![=>])",
+    "with": "if ($1 === ",
+    "why": "A comparison needs === (a single = assigns)"
+   },
+   {
+    "id": "javascript.len()",
+    "match": "(?<![\\w$.])(len)\\(\\s*([^()]+?)\\s*\\)",
+    "with": "$2.length",
+    "why": "JavaScript gets a length with x.length",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.str()",
+    "match": "(?<![\\w$.])(str)\\(",
+    "with": "String(",
+    "why": "JavaScript converts to text with String(x)",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.int()",
+    "match": "(?<![\\w$.])(int)\\(",
+    "with": "parseInt(",
+    "why": "JavaScript converts to a whole number with parseInt(x)",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.float()",
+    "match": "(?<![\\w$.])(float)\\(",
+    "with": "parseFloat(",
+    "why": "JavaScript converts to a number with parseFloat(x)",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "javascript.type()",
+    "match": "(?<![\\w$.])(type)\\(\\s*([^()]+?)\\s*\\)",
+    "with": "typeof $2",
+    "why": "JavaScript checks types with typeof x",
+    "undefined": 1
+   },
+   {
+    "id": "javascript.input()",
+    "match": "(?<![\\w$.])(input)\\(",
+    "with": "prompt(",
+    "why": "Browsers ask with prompt()",
+    "undefined": 1
+   },
+   {
+    "id": "javascript.for in",
+    "match": "\\bfor[ \\t]*\\([ \\t]*(const|let|var)[ \\t]+(\\w+)[ \\t]+in[ \\t]+",
+    "with": "for ($1 $2 of ",
+    "why": "for…in gives keys/indexes; for…of gives the values"
+   },
+   {
+    "id": "javascript.typeof array",
+    "match": "\\btypeof[ \\t]+([\\w$.]+)[ \\t]*===?[ \\t]*([\\\"'`])array\\2",
+    "with": "Array.isArray($1)",
+    "why": "typeof never says \"array\"; use Array.isArray(x)",
+    "auto": true
+   },
+   {
+    "id": "javascript.typeof null",
+    "match": "\\btypeof[ \\t]+([\\w$.]+)[ \\t]*===?[ \\t]*([\\\"'`])null\\2",
+    "with": "$1 === null",
+    "why": "typeof null is \"object\"; compare with === null",
+    "auto": true
+   },
+   {
+    "id": "javascript.== NaN",
+    "match": "([\\w$.]+)[ \\t]*===?[ \\t]*NaN\\b",
+    "with": "Number.isNaN($1)",
+    "why": "Nothing equals NaN, not even NaN; use Number.isNaN(x)",
+    "auto": true
+   },
+   {
+    "id": "javascript.fetch.json",
+    "match": "\\bfetch\\(([^()]*)\\)\\.json\\(\\)",
+    "with": "(await fetch($1)).json()",
+    "why": "fetch() returns a promise; await it before .json()"
+   },
+   {
+    "id": "javascript.throw str",
+    "match": "(?m)^([ \\t]*)raise[ \\t]+",
+    "with": "$1throw ",
+    "why": "JavaScript throws errors with throw",
+    "auto": true,
+    "unless": "\\braise\\s*\\("
+   },
+   {
+    "id": "javascript.^ power",
+    "match": "([\\w$)\\]]+)[ \\t]*\\^[ \\t]*(\\d+)\\b",
+    "with": "$1 ** $2",
+    "why": "^ is XOR in JavaScript; powers are **"
+   }
+  ],
+  "builtins": [
+   "$",
+   "AbortController",
+   "Audio",
+   "Blob",
+   "Buffer",
+   "Component",
+   "CustomEvent",
+   "Element",
+   "Event",
+   "File",
+   "FileReader",
+   "FormData",
+   "HTMLElement",
+   "Image",
+   "IntersectionObserver",
+   "MutationObserver",
+   "Node",
+   "React",
+   "ResizeObserver",
+   "TextDecoder",
+   "TextEncoder",
+   "URL",
+   "URLSearchParams",
+   "WebSocket",
+   "Worker",
+   "XMLHttpRequest",
+   "_",
+   "__dirname",
+   "__filename",
+   "addEventListener",
+   "afterAll",
+   "afterEach",
+   "alert",
+   "atob",
+   "beforeAll",
+   "beforeEach",
+   "btoa",
+   "cancelAnimationFrame",
+   "clearInterval",
+   "clearTimeout",
+   "confirm",
+   "console",
+   "crypto",
+   "customElements",
+   "describe",
+   "document",
+   "event",
+   "expect",
+   "exports",
+   "fetch",
+   "getComputedStyle",
+   "global",
+   "history",
+   "innerHeight",
+   "innerWidth",
+   "it",
+   "jQuery",
+   "jest",
+   "localStorage",
+   "location",
+   "matchMedia",
+   "module",
+   "navigator",
+   "performance",
+   "process",
+   "prompt",
+   "queueMicrotask",
+   "requestAnimationFrame",
+   "require",
+   "sessionStorage",
+   "setInterval",
+   "setTimeout",
+   "structuredClone",
+   "test",
+   "useCallback",
+   "useContext",
+   "useEffect",
+   "useMemo",
+   "useReducer",
+   "useRef",
+   "useState",
+   "window"
+  ],
+  "methods": [
+   "addEventListener",
+   "after",
+   "alt",
+   "altKey",
+   "append",
+   "appendChild",
+   "arc",
+   "before",
+   "beginPath",
+   "blob",
+   "blur",
+   "catch",
+   "checked",
+   "childNodes",
+   "children",
+   "classList",
+   "className",
+   "clearRect",
+   "click",
+   "clientHeight",
+   "clientWidth",
+   "clientX",
+   "clientY",
+   "cloneNode",
+   "closest",
+   "code",
+   "ctrlKey",
+   "currentTarget",
+   "currentTime",
+   "dataset",
+   "disabled",
+   "dispatchEvent",
+   "drawImage",
+   "duration",
+   "fill",
+   "fillRect",
+   "fillStyle",
+   "fillText",
+   "finally",
+   "firstChild",
+   "firstElementChild",
+   "focus",
+   "getAttribute",
+   "getBoundingClientRect",
+   "getContext",
+   "hasAttribute",
+   "headers",
+   "height",
+   "href",
+   "id",
+   "innerHTML",
+   "innerText",
+   "insertBefore",
+   "json",
+   "key",
+   "keyCode",
+   "lastChild",
+   "lastElementChild",
+   "lineTo",
+   "matches",
+   "metaKey",
+   "moveTo",
+   "nextElementSibling",
+   "nextSibling",
+   "offsetHeight",
+   "offsetLeft",
+   "offsetTop",
+   "offsetWidth",
+   "ok",
+   "outerHTML",
+   "pageX",
+   "pageY",
+   "parentElement",
+   "parentNode",
+   "pause",
+   "play",
+   "prepend",
+   "preventDefault",
+   "previousElementSibling",
+   "previousSibling",
+   "querySelector",
+   "querySelectorAll",
+   "remove",
+   "removeAttribute",
+   "removeChild",
+   "removeEventListener",
+   "replaceChild",
+   "replaceWith",
+   "scrollHeight",
+   "scrollIntoView",
+   "scrollLeft",
+   "scrollTop",
+   "scrollWidth",
+   "setAttribute",
+   "shiftKey",
+   "src",
+   "status",
+   "statusText",
+   "stopPropagation",
+   "stroke",
+   "strokeRect",
+   "strokeStyle",
+   "style",
+   "target",
+   "text",
+   "textContent",
+   "then",
+   "title",
+   "toggleAttribute",
+   "value",
+   "volume",
+   "which",
+   "width"
+  ],
+  "keywords": [
+   "async",
+   "await",
+   "break",
+   "case",
+   "catch",
+   "class",
+   "const",
+   "continue",
+   "debugger",
+   "default",
+   "delete",
+   "do",
+   "else",
+   "export",
+   "extends",
+   "false",
+   "finally",
+   "for",
+   "function",
+   "get",
+   "if",
+   "import",
+   "in",
+   "instanceof",
+   "let",
+   "new",
+   "null",
+   "of",
+   "return",
+   "set",
+   "static",
+   "super",
+   "switch",
+   "this",
+   "throw",
+   "true",
+   "try",
+   "typeof",
+   "undefined",
+   "var",
+   "void",
+   "while",
+   "with",
+   "yield"
+  ]
+ },
+ "c": {
+  "rules": [
+   {
+    "id": "c.#include no .h",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<(pthread|stdbool|assert|dirent|limits|locale|setjmp|signal|stdarg|stddef|stdint|stdlib|string|unistd|ctype|errno|fcntl|float|stdio|math|time)>",
+    "with": "$1<$2.h>",
+    "why": "C headers end in .h: <$2.h>",
+    "auto": true
+   },
+   {
+    "id": "c.#include typo",
+    "match": "(?m)^([ \\t]*)#[ \\t]*(?:incldue|inlcude|inculde|includ|incude|inclde|Include|INCLUDE|imclude|icnlude|incluce|inclue)\\b",
+    "with": "$1#include",
+    "why": "It's #include",
+    "auto": true
+   },
+   {
+    "id": "c.#define typo",
+    "match": "(?m)^([ \\t]*)#[ \\t]*(?:defien|defnie|definr|defin|Define|DEFINE|deifne)\\b",
+    "with": "$1#define",
+    "why": "It's #define",
+    "auto": true
+   },
+   {
+    "id": "c.#define =",
+    "match": "(?m)^([ \\t]*#[ \\t]*define[ \\t]+\\w+)[ \\t]*=[ \\t]*",
+    "with": "$1 ",
+    "why": "#define takes no =: #define NAME value",
+    "auto": true
+   },
+   {
+    "id": "c.#define ;",
+    "match": "(?m)^([ \\t]*#[ \\t]*define[ \\t]+\\w+[ \\t]+[^;\\n]+?);[ \\t]*$",
+    "with": "$1",
+    "why": "A ; in a #define ends up in every use"
+   },
+   {
+    "id": "c.malloc.h",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<malloc\\.h>",
+    "with": "$1<stdlib.h>",
+    "why": "macOS has malloc in <stdlib.h>",
+    "auto": true
+   },
+   {
+    "id": "c.conio.h",
+    "match": "(?m)^[ \\t]*#[ \\t]*include[ \\t]*<conio\\.h>[ \\t]*\\n?",
+    "with": "",
+    "why": "conio.h is Windows-only; macOS doesn't have it"
+   },
+   {
+    "id": "c.print",
+    "match": "(?<![\\w.])(print|println|printLn|print_line|printline|Print|PRINT|prinf|writeln|echo)(?=\\s*\\()",
+    "with": "printf",
+    "why": "C prints with printf()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "c.console.log",
+    "match": "(?<![\\w.])(console)\\.log(?=\\s*\\()",
+    "with": "printf",
+    "why": "C prints with printf()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "c.scanf &",
+    "match": "\\bscanf\\(\\s*(\\\"[^\\\"%]*%(?:d|i|u|f|lf|c|ld|lld|hd|x|o|e|g|zu)[^\\\"]*\\\")\\s*,\\s*([A-Za-z_]\\w*)\\s*\\)",
+    "with": "scanf($1, &$2)",
+    "why": "scanf needs the variable's address: &$2"
+   },
+   {
+    "id": "c.gets",
+    "match": "(?<![\\w.])gets\\(\\s*(\\w+)\\s*\\)",
+    "with": "fgets($1, sizeof $1, stdin)",
+    "why": "gets() can overflow the buffer and was removed from C; fgets() is safe"
+   },
+   {
+    "id": "c.strlen alias",
+    "match": "(?<![\\w.])(strlength|string_length|len|length|strlenght|str_len|strLen|lenght)(?=\\s*\\()",
+    "with": "strlen",
+    "why": "C measures strings with strlen()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "c.strcmp alias",
+    "match": "(?<![\\w.])(strcompare|string_compare|strequals|str_equals|strEquals|strcmpi)(?=\\s*\\()",
+    "with": "strcmp",
+    "why": "C compares strings with strcmp()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "c.strcpy alias",
+    "match": "(?<![\\w.])(strcopy|string_copy|str_copy)(?=\\s*\\()",
+    "with": "strcpy",
+    "why": "C copies strings with strcpy()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "c.strcat alias",
+    "match": "(?<![\\w.])(strconcat|strappend|str_concat|string_concat)(?=\\s*\\()",
+    "with": "strcat",
+    "why": "C joins strings with strcat()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "c.Sleep",
+    "match": "(?<![\\w.])(Sleep)\\(\\s*(\\d+)\\s*\\)",
+    "with": "usleep($2 * 1000)",
+    "why": "Sleep(ms) is Windows; usleep() takes microseconds (<unistd.h>)",
+    "undefined": 1
+   },
+   {
+    "id": "c.pause",
+    "match": "\\bsystem\\(\\s*\\\"pause\\\"\\s*\\)",
+    "with": "getchar()",
+    "why": "system(\"pause\") is Windows; getchar() waits for Enter"
+   },
+   {
+    "id": "c.cls",
+    "match": "\\bsystem\\(\\s*\\\"cls\\\"\\s*\\)",
+    "with": "system(\"clear\")",
+    "why": "cls is Windows; macOS clears with clear",
+    "auto": true
+   },
+   {
+    "id": "c.getch",
+    "match": "(?<![\\w.])(getch|getche)\\(\\s*\\)",
+    "with": "getchar()",
+    "why": "getch() is from Windows' conio.h; getchar() reads a key",
+    "undefined": 1
+   },
+   {
+    "id": "c.void main",
+    "match": "\\bvoid[ \\t]+main[ \\t]*\\(",
+    "with": "int main(",
+    "why": "main must return int",
+    "auto": true
+   },
+   {
+    "id": "c.main()",
+    "match": "(?m)^main[ \\t]*\\(",
+    "with": "int main(",
+    "why": "main must return int",
+    "auto": true
+   },
+   {
+    "id": "c.mian",
+    "match": "(?<![\\w.])mian(?=[ \\t]*\\()",
+    "with": "main",
+    "why": "Did you mean main?",
+    "auto": true,
+    "unless": "\\bmain\\s*\\("
+   },
+   {
+    "id": "c.exit()",
+    "match": "(?<![\\w.])exit\\(\\s*\\)",
+    "with": "exit(0)",
+    "why": "exit() needs a status: exit(0)",
+    "auto": true
+   },
+   {
+    "id": "c.True",
+    "match": "(?<![\\w.'\\\"])(True|TRUE)(?![\\w'\\\"])",
+    "with": "true",
+    "why": "C writes true in lowercase (<stdbool.h>)",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "c.False",
+    "match": "(?<![\\w.'\\\"])(False|FALSE)(?![\\w'\\\"])",
+    "with": "false",
+    "why": "C writes false in lowercase (<stdbool.h>)",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "c.NULL",
+    "match": "(?<![\\w.'\\\"])(null|Null|nil|None|nullptr|NUll|Nul)(?![\\w'\\\"])",
+    "with": "NULL",
+    "why": "C's null pointer is NULL",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "c.elif",
+    "match": "(?m)^([ \\t]*\\}?[ \\t]*)(?:elif|elsif|elseif|elseIf)\\b",
+    "with": "$1else if",
+    "why": "C writes it else if",
+    "auto": true
+   },
+   {
+    "id": "c.and",
+    "match": "(?<=[\\w)\\]'\\\"])[ \\t]+and[ \\t]+(?=[\\w(!'\\\"])",
+    "with": " && ",
+    "why": "C writes and as &&",
+    "auto": true,
+    "unless": "iso646"
+   },
+   {
+    "id": "c.or",
+    "match": "(?<=[\\w)\\]'\\\"])[ \\t]+or[ \\t]+(?=[\\w(!'\\\"])",
+    "with": " || ",
+    "why": "C writes or as ||",
+    "auto": true,
+    "unless": "iso646"
+   },
+   {
+    "id": "c.not",
+    "match": "(?<![\\w.])not[ \\t]+(?=[\\w(])",
+    "with": "!",
+    "why": "C writes not as !",
+    "auto": true,
+    "unless": "iso646"
+   },
+   {
+    "id": "c.string type",
+    "match": "(?<![\\w.])string[ \\t]+(\\w+)",
+    "with": "char *$1",
+    "why": "C has no string type; text is char * (or char name[size])",
+    "unless": "\\btypedef\\b[^;]*\\bstring\\s*;"
+   },
+   {
+    "id": "c.char =\"",
+    "match": "\\bchar[ \\t]+(\\w+)[ \\t]*=[ \\t]*\\\"",
+    "with": "char $1[] = \"",
+    "why": "Text needs a char array: char $1[] = \"…\"",
+    "auto": true
+   },
+   {
+    "id": "c.array []",
+    "match": "(=[ \\t]*)\\[([^\\]\\n]*)\\][ \\t]*;",
+    "with": "$1{$2};",
+    "why": "C writes array values in braces: { … }",
+    "auto": true
+   },
+   {
+    "id": "c.if =",
+    "match": "\\bif[ \\t]*\\([ \\t]*([\\w.\\[\\]>-]+)[ \\t]*=[ \\t]*(?!=)([^)=\\n]+)\\)",
+    "with": "if ($1 == $2)",
+    "why": "A comparison needs == (a single = assigns)"
+   },
+   {
+    "id": "c.loop ;",
+    "match": "(?m)^([ \\t]*(?:for|while)[ \\t]*\\(.*\\))[ \\t]*;[ \\t]*$",
+    "with": "$1",
+    "why": "This ; ends the loop right here, so its body runs only once"
+   },
+   {
+    "id": "c.^ power",
+    "match": "([\\w)\\]]+)[ \\t]*\\^[ \\t]*2\\b",
+    "with": "$1 * $1",
+    "why": "^ is XOR in C; to square, multiply (or pow(x, 2))"
+   }
+  ],
+  "imports": {
+   "printf": "#include <stdio.h>",
+   "scanf": "#include <stdio.h>",
+   "fprintf": "#include <stdio.h>",
+   "fscanf": "#include <stdio.h>",
+   "sprintf": "#include <stdio.h>",
+   "snprintf": "#include <stdio.h>",
+   "sscanf": "#include <stdio.h>",
+   "puts": "#include <stdio.h>",
+   "fputs": "#include <stdio.h>",
+   "fgets": "#include <stdio.h>",
+   "putchar": "#include <stdio.h>",
+   "getchar": "#include <stdio.h>",
+   "fopen": "#include <stdio.h>",
+   "fclose": "#include <stdio.h>",
+   "fread": "#include <stdio.h>",
+   "fwrite": "#include <stdio.h>",
+   "fseek": "#include <stdio.h>",
+   "ftell": "#include <stdio.h>",
+   "rewind": "#include <stdio.h>",
+   "perror": "#include <stdio.h>",
+   "fflush": "#include <stdio.h>",
+   "getline": "#include <stdio.h>",
+   "FILE": "#include <stdio.h>",
+   "EOF": "#include <stdio.h>",
+   "stdin": "#include <stdio.h>",
+   "stdout": "#include <stdio.h>",
+   "stderr": "#include <stdio.h>",
+   "malloc": "#include <stdlib.h>",
+   "calloc": "#include <stdlib.h>",
+   "realloc": "#include <stdlib.h>",
+   "free": "#include <stdlib.h>",
+   "exit": "#include <stdlib.h>",
+   "abort": "#include <stdlib.h>",
+   "atexit": "#include <stdlib.h>",
+   "atoi": "#include <stdlib.h>",
+   "atof": "#include <stdlib.h>",
+   "atol": "#include <stdlib.h>",
+   "strtol": "#include <stdlib.h>",
+   "strtod": "#include <stdlib.h>",
+   "strtoul": "#include <stdlib.h>",
+   "rand": "#include <stdlib.h>",
+   "srand": "#include <stdlib.h>",
+   "qsort": "#include <stdlib.h>",
+   "bsearch": "#include <stdlib.h>",
+   "system": "#include <stdlib.h>",
+   "getenv": "#include <stdlib.h>",
+   "abs": "#include <stdlib.h>",
+   "labs": "#include <stdlib.h>",
+   "EXIT_SUCCESS": "#include <stdlib.h>",
+   "EXIT_FAILURE": "#include <stdlib.h>",
+   "RAND_MAX": "#include <stdlib.h>",
+   "strlen": "#include <string.h>",
+   "strcpy": "#include <string.h>",
+   "strncpy": "#include <string.h>",
+   "strcat": "#include <string.h>",
+   "strncat": "#include <string.h>",
+   "strcmp": "#include <string.h>",
+   "strncmp": "#include <string.h>",
+   "strchr": "#include <string.h>",
+   "strrchr": "#include <string.h>",
+   "strstr": "#include <string.h>",
+   "strtok": "#include <string.h>",
+   "memcpy": "#include <string.h>",
+   "memmove": "#include <string.h>",
+   "memset": "#include <string.h>",
+   "memcmp": "#include <string.h>",
+   "strdup": "#include <string.h>",
+   "strndup": "#include <string.h>",
+   "strerror": "#include <string.h>",
+   "strspn": "#include <string.h>",
+   "strcspn": "#include <string.h>",
+   "sqrt": "#include <math.h>",
+   "pow": "#include <math.h>",
+   "sin": "#include <math.h>",
+   "cos": "#include <math.h>",
+   "tan": "#include <math.h>",
+   "asin": "#include <math.h>",
+   "acos": "#include <math.h>",
+   "atan": "#include <math.h>",
+   "atan2": "#include <math.h>",
+   "exp": "#include <math.h>",
+   "log": "#include <math.h>",
+   "log10": "#include <math.h>",
+   "log2": "#include <math.h>",
+   "fabs": "#include <math.h>",
+   "floor": "#include <math.h>",
+   "ceil": "#include <math.h>",
+   "round": "#include <math.h>",
+   "trunc": "#include <math.h>",
+   "fmod": "#include <math.h>",
+   "hypot": "#include <math.h>",
+   "cbrt": "#include <math.h>",
+   "M_PI": "#include <math.h>",
+   "INFINITY": "#include <math.h>",
+   "NAN": "#include <math.h>",
+   "isnan": "#include <math.h>",
+   "isinf": "#include <math.h>",
+   "fmin": "#include <math.h>",
+   "fmax": "#include <math.h>",
+   "isalpha": "#include <ctype.h>",
+   "isdigit": "#include <ctype.h>",
+   "isalnum": "#include <ctype.h>",
+   "isspace": "#include <ctype.h>",
+   "isupper": "#include <ctype.h>",
+   "islower": "#include <ctype.h>",
+   "toupper": "#include <ctype.h>",
+   "tolower": "#include <ctype.h>",
+   "ispunct": "#include <ctype.h>",
+   "isxdigit": "#include <ctype.h>",
+   "isprint": "#include <ctype.h>",
+   "time": "#include <time.h>",
+   "clock": "#include <time.h>",
+   "difftime": "#include <time.h>",
+   "localtime": "#include <time.h>",
+   "gmtime": "#include <time.h>",
+   "strftime": "#include <time.h>",
+   "mktime": "#include <time.h>",
+   "CLOCKS_PER_SEC": "#include <time.h>",
+   "clock_gettime": "#include <time.h>",
+   "nanosleep": "#include <time.h>",
+   "sleep": "#include <unistd.h>",
+   "usleep": "#include <unistd.h>",
+   "getpid": "#include <unistd.h>",
+   "fork": "#include <unistd.h>",
+   "execvp": "#include <unistd.h>",
+   "pipe": "#include <unistd.h>",
+   "access": "#include <unistd.h>",
+   "getcwd": "#include <unistd.h>",
+   "chdir": "#include <unistd.h>",
+   "isatty": "#include <unistd.h>",
+   "bool": "#include <stdbool.h>",
+   "true": "#include <stdbool.h>",
+   "false": "#include <stdbool.h>",
+   "int8_t": "#include <stdint.h>",
+   "int16_t": "#include <stdint.h>",
+   "int32_t": "#include <stdint.h>",
+   "int64_t": "#include <stdint.h>",
+   "uint8_t": "#include <stdint.h>",
+   "uint16_t": "#include <stdint.h>",
+   "uint32_t": "#include <stdint.h>",
+   "uint64_t": "#include <stdint.h>",
+   "intptr_t": "#include <stdint.h>",
+   "uintptr_t": "#include <stdint.h>",
+   "INT_MAX": "#include <limits.h>",
+   "INT_MIN": "#include <limits.h>",
+   "UINT_MAX": "#include <limits.h>",
+   "LONG_MAX": "#include <limits.h>",
+   "LONG_MIN": "#include <limits.h>",
+   "CHAR_MAX": "#include <limits.h>",
+   "CHAR_MIN": "#include <limits.h>",
+   "assert": "#include <assert.h>",
+   "errno": "#include <errno.h>",
+   "signal": "#include <signal.h>",
+   "raise": "#include <signal.h>",
+   "SIGINT": "#include <signal.h>"
+  },
+  "builtins": [
+   "CHAR_MAX",
+   "CHAR_MIN",
+   "CLOCKS_PER_SEC",
+   "EOF",
+   "EXIT_FAILURE",
+   "EXIT_SUCCESS",
+   "FILE",
+   "INFINITY",
+   "INT_MAX",
+   "INT_MIN",
+   "LONG_MAX",
+   "LONG_MIN",
+   "M_PI",
+   "NAN",
+   "NULL",
+   "RAND_MAX",
+   "SIGINT",
+   "UINT_MAX",
+   "abort",
+   "abs",
+   "access",
+   "acos",
+   "argc",
+   "argv",
+   "asin",
+   "assert",
+   "atan",
+   "atan2",
+   "atexit",
+   "atof",
+   "atoi",
+   "atol",
+   "bool",
+   "bsearch",
+   "calloc",
+   "cbrt",
+   "ceil",
+   "chdir",
+   "clock",
+   "clock_gettime",
+   "cos",
+   "difftime",
+   "errno",
+   "execvp",
+   "exit",
+   "exp",
+   "fabs",
+   "false",
+   "fclose",
+   "fflush",
+   "fgets",
+   "floor",
+   "fmax",
+   "fmin",
+   "fmod",
+   "fopen",
+   "fork",
+   "fprintf",
+   "fputs",
+   "fread",
+   "free",
+   "fscanf",
+   "fseek",
+   "ftell",
+   "fwrite",
+   "getchar",
+   "getcwd",
+   "getenv",
+   "getline",
+   "getpid",
+   "gmtime",
+   "hypot",
+   "int16_t",
+   "int32_t",
+   "int64_t",
+   "int8_t",
+   "intptr_t",
+   "isalnum",
+   "isalpha",
+   "isatty",
+   "isdigit",
+   "isinf",
+   "islower",
+   "isnan",
+   "isprint",
+   "ispunct",
+   "isspace",
+   "isupper",
+   "isxdigit",
+   "labs",
+   "localtime",
+   "log",
+   "log10",
+   "log2",
+   "main",
+   "malloc",
+   "memcmp",
+   "memcpy",
+   "memmove",
+   "memset",
+   "mktime",
+   "nanosleep",
+   "perror",
+   "pipe",
+   "pow",
+   "printf",
+   "putchar",
+   "puts",
+   "qsort",
+   "raise",
+   "rand",
+   "realloc",
+   "rewind",
+   "round",
+   "scanf",
+   "signal",
+   "sin",
+   "size_t",
+   "sizeof",
+   "sleep",
+   "snprintf",
+   "sprintf",
+   "sqrt",
+   "srand",
+   "sscanf",
+   "stderr",
+   "stdin",
+   "stdout",
+   "strcat",
+   "strchr",
+   "strcmp",
+   "strcpy",
+   "strcspn",
+   "strdup",
+   "strerror",
+   "strftime",
+   "strlen",
+   "strncat",
+   "strncmp",
+   "strncpy",
+   "strndup",
+   "strrchr",
+   "strspn",
+   "strstr",
+   "strtod",
+   "strtok",
+   "strtol",
+   "strtoul",
+   "system",
+   "tan",
+   "time",
+   "tolower",
+   "toupper",
+   "true",
+   "trunc",
+   "uint16_t",
+   "uint32_t",
+   "uint64_t",
+   "uint8_t",
+   "uintptr_t",
+   "usleep"
+  ],
+  "keywords": [
+   "auto",
+   "break",
+   "case",
+   "char",
+   "const",
+   "continue",
+   "default",
+   "do",
+   "double",
+   "else",
+   "enum",
+   "extern",
+   "float",
+   "for",
+   "goto",
+   "if",
+   "inline",
+   "int",
+   "long",
+   "register",
+   "restrict",
+   "return",
+   "short",
+   "signed",
+   "sizeof",
+   "static",
+   "struct",
+   "switch",
+   "typedef",
+   "union",
+   "unsigned",
+   "void",
+   "volatile",
+   "while"
+  ]
+ },
+ "cpp": {
+  "rules": [
+   {
+    "id": "cpp.#include <stdio>",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<stdio>",
+    "with": "$1<cstdio>",
+    "why": "In C++ it's <cstdio> (or <stdio.h>)",
+    "auto": true
+   },
+   {
+    "id": "cpp.#include <stdlib>",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<stdlib>",
+    "with": "$1<cstdlib>",
+    "why": "In C++ it's <cstdlib> (or <stdlib.h>)",
+    "auto": true
+   },
+   {
+    "id": "cpp.#include <math>",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<math>",
+    "with": "$1<cmath>",
+    "why": "In C++ it's <cmath> (or <math.h>)",
+    "auto": true
+   },
+   {
+    "id": "cpp.#include <time>",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<time>",
+    "with": "$1<ctime>",
+    "why": "In C++ it's <ctime> (or <time.h>)",
+    "auto": true
+   },
+   {
+    "id": "cpp.#include <ctype>",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<ctype>",
+    "with": "$1<cctype>",
+    "why": "In C++ it's <cctype> (or <ctype.h>)",
+    "auto": true
+   },
+   {
+    "id": "cpp.#include <stdint>",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<stdint>",
+    "with": "$1<cstdint>",
+    "why": "In C++ it's <cstdint> (or <stdint.h>)",
+    "auto": true
+   },
+   {
+    "id": "cpp.#include <limits>",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<limits>",
+    "with": "$1<climits>",
+    "why": "In C++ it's <climits> (or <limits.h>)",
+    "auto": true
+   },
+   {
+    "id": "cpp.#include <assert>",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<assert>",
+    "with": "$1<cassert>",
+    "why": "In C++ it's <cassert> (or <assert.h>)",
+    "auto": true
+   },
+   {
+    "id": "cpp.#include <errno>",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<errno>",
+    "with": "$1<cerrno>",
+    "why": "In C++ it's <cerrno> (or <errno.h>)",
+    "auto": true
+   },
+   {
+    "id": "cpp.#include <stddef>",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<stddef>",
+    "with": "$1<cstddef>",
+    "why": "In C++ it's <cstddef> (or <stddef.h>)",
+    "auto": true
+   },
+   {
+    "id": "cpp.#include <float>",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<float>",
+    "with": "$1<cfloat>",
+    "why": "In C++ it's <cfloat> (or <float.h>)",
+    "auto": true
+   },
+   {
+    "id": "cpp.#include <stdarg>",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<stdarg>",
+    "with": "$1<cstdarg>",
+    "why": "In C++ it's <cstdarg> (or <stdarg.h>)",
+    "auto": true
+   },
+   {
+    "id": "cpp.#include typo",
+    "match": "(?m)^([ \\t]*)#[ \\t]*(?:incldue|inlcude|inculde|includ|incude|inclde|Include|INCLUDE|imclude|icnlude|incluce|inclue)\\b",
+    "with": "$1#include",
+    "why": "It's #include",
+    "auto": true
+   },
+   {
+    "id": "cpp.iostream.h",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<iostream\\.h>",
+    "with": "$1<iostream>",
+    "why": "Modern C++ headers have no .h: <iostream>",
+    "auto": true
+   },
+   {
+    "id": "cpp.bits/stdc++",
+    "match": "(?m)^[ \\t]*#[ \\t]*include[ \\t]*<bits/stdc\\+\\+\\.h>",
+    "with": "#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\n#include <map>\n#include <set>\n#include <cmath>",
+    "why": "macOS's compiler has no <bits/stdc++.h>; these are the headers it stands for",
+    "auto": true
+   },
+   {
+    "id": "cpp.malloc.h",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<malloc\\.h>",
+    "with": "$1<cstdlib>",
+    "why": "macOS has malloc in <cstdlib>",
+    "auto": true
+   },
+   {
+    "id": "cpp.cout >>",
+    "match": "\\b((?:std::)?cout)[ \\t]*>>",
+    "with": "$1 <<",
+    "why": "Output goes into cout with <<",
+    "auto": true
+   },
+   {
+    "id": "cpp.cin <<",
+    "match": "\\b((?:std::)?cin)[ \\t]*<<",
+    "with": "$1 >>",
+    "why": "Input comes out of cin with >>",
+    "auto": true
+   },
+   {
+    "id": "cpp.std::",
+    "match": "(?<![\\w:.])(cout|cin|cerr|endl|getline)\\b",
+    "with": "std::$1",
+    "why": "$1 lives in std:: (or add using namespace std;)",
+    "unless": "using\\s+namespace\\s+std|using\\s+std::"
+   },
+   {
+    "id": "cpp.nullptr",
+    "match": "(?<![\\w.'\\\"])(null|Null|nil|None)(?![\\w'\\\"])",
+    "with": "nullptr",
+    "why": "C++'s null pointer is nullptr",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "cpp.True",
+    "match": "(?<![\\w.'\\\"])(True|TRUE)(?![\\w'\\\"])",
+    "with": "true",
+    "why": "C++ writes true in lowercase",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "cpp.False",
+    "match": "(?<![\\w.'\\\"])(False|FALSE)(?![\\w'\\\"])",
+    "with": "false",
+    "why": "C++ writes false in lowercase",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "cpp.elif",
+    "match": "(?m)^([ \\t]*\\}?[ \\t]*)(?:elif|elsif|elseif|elseIf)\\b",
+    "with": "$1else if",
+    "why": "C++ writes it else if",
+    "auto": true
+   },
+   {
+    "id": "cpp.void main",
+    "match": "\\bvoid[ \\t]+main[ \\t]*\\(",
+    "with": "int main(",
+    "why": "main must return int",
+    "auto": true
+   },
+   {
+    "id": "cpp.mian",
+    "match": "(?<![\\w.])mian(?=[ \\t]*\\()",
+    "with": "main",
+    "why": "Did you mean main?",
+    "auto": true,
+    "unless": "\\bmain\\s*\\("
+   },
+   {
+    "id": "cpp..push",
+    "match": "\\.push\\(",
+    "with": ".push_back(",
+    "why": "Vectors add with .push_back() (stacks and queues use .push())",
+    "unless": "\\b(?:stack|queue|priority_queue)\\s*<"
+   },
+   {
+    "id": "cpp..length",
+    "match": "\\.length\\b(?![\\w(])",
+    "with": ".length()",
+    "why": "In C++ length() is a function",
+    "unless": "\\blength\\s*[;=]"
+   },
+   {
+    "id": "cpp.print",
+    "match": "(?<![\\w.:])(print|println)(?=\\s*\\()",
+    "with": "printf",
+    "why": "C++ prints with std::cout << … or printf()",
+    "undefined": 1
+   },
+   {
+    "id": "cpp.array []",
+    "match": "(=[ \\t]*)\\[([^\\]\\n]*)\\][ \\t]*;",
+    "with": "$1{$2};",
+    "why": "C++ writes values in braces: { … }",
+    "auto": true
+   },
+   {
+    "id": "cpp.string.h",
+    "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<string\\.h>",
+    "with": "$1<string>",
+    "why": "std::string is in <string> (<string.h> is C's)",
+    "when": "std::string|\\bstring\\s+\\w"
+   },
+   {
+    "id": "cpp.if =",
+    "match": "\\bif[ \\t]*\\([ \\t]*([\\w.\\[\\]>-]+)[ \\t]*=[ \\t]*(?!=)([^)=\\n]+)\\)",
+    "with": "if ($1 == $2)",
+    "why": "A comparison needs == (a single = assigns)"
+   },
+   {
+    "id": "cpp.^ power",
+    "match": "([\\w)\\]]+)[ \\t]*\\^[ \\t]*2\\b",
+    "with": "$1 * $1",
+    "why": "^ is XOR in C++; to square, multiply (or pow(x, 2))"
+   }
+  ],
+  "imports": {
+   "cout": "#include <iostream>",
+   "cin": "#include <iostream>",
+   "cerr": "#include <iostream>",
+   "endl": "#include <iostream>",
+   "vector": "#include <vector>",
+   "string": "#include <string>",
+   "getline": "#include <string>",
+   "to_string": "#include <string>",
+   "stoi": "#include <string>",
+   "stod": "#include <string>",
+   "map": "#include <map>",
+   "set": "#include <set>",
+   "unordered_map": "#include <unordered_map>",
+   "sort": "#include <algorithm>",
+   "reverse": "#include <algorithm>",
+   "max_element": "#include <algorithm>",
+   "min_element": "#include <algorithm>",
+   "find": "#include <algorithm>",
+   "count": "#include <algorithm>",
+   "sqrt": "#include <cmath>",
+   "pow": "#include <cmath>",
+   "fabs": "#include <cmath>",
+   "floor": "#include <cmath>",
+   "ceil": "#include <cmath>",
+   "printf": "#include <cstdio>",
+   "scanf": "#include <cstdio>"
+  },
+  "builtins": [
+   "CHAR_MAX",
+   "CHAR_MIN",
+   "CLOCKS_PER_SEC",
+   "EOF",
+   "EXIT_FAILURE",
+   "EXIT_SUCCESS",
+   "FILE",
+   "INFINITY",
+   "INT_MAX",
+   "INT_MIN",
+   "LONG_MAX",
+   "LONG_MIN",
+   "M_PI",
+   "NAN",
+   "NULL",
+   "RAND_MAX",
+   "SIGINT",
+   "UINT_MAX",
+   "abort",
+   "abs",
+   "access",
+   "acos",
+   "argc",
+   "argv",
+   "asin",
+   "assert",
+   "atan",
+   "atan2",
+   "atexit",
+   "atof",
+   "atoi",
+   "atol",
+   "begin",
+   "bool",
+   "bsearch",
+   "calloc",
+   "cbrt",
+   "ceil",
+   "cerr",
+   "chdir",
+   "cin",
+   "clock",
+   "clock_gettime",
+   "cos",
+   "cout",
+   "difftime",
+   "emplace_back",
+   "end",
+   "endl",
+   "errno",
+   "execvp",
+   "exit",
+   "exp",
+   "fabs",
+   "false",
+   "fclose",
+   "fflush",
+   "fgets",
+   "find",
+   "floor",
+   "fmax",
+   "fmin",
+   "fmod",
+   "fopen",
+   "fork",
+   "fprintf",
+   "fputs",
+   "fread",
+   "free",
+   "fscanf",
+   "fseek",
+   "ftell",
+   "fwrite",
+   "getchar",
+   "getcwd",
+   "getenv",
+   "getline",
+   "getpid",
+   "gmtime",
+   "hypot",
+   "int16_t",
+   "int32_t",
+   "int64_t",
+   "int8_t",
+   "intptr_t",
+   "isalnum",
+   "isalpha",
+   "isatty",
+   "isdigit",
+   "isinf",
+   "islower",
+   "isnan",
+   "isprint",
+   "ispunct",
+   "isspace",
+   "isupper",
+   "isxdigit",
+   "labs",
+   "localtime",
+   "log",
+   "log10",
+   "log2",
+   "main",
+   "make_pair",
+   "make_shared",
+   "make_unique",
+   "malloc",
+   "map",
+   "memcmp",
+   "memcpy",
+   "memmove",
+   "memset",
+   "mktime",
+   "nanosleep",
+   "nullptr",
+   "pair",
+   "perror",
+   "pipe",
+   "pow",
+   "printf",
+   "push_back",
+   "putchar",
+   "puts",
+   "qsort",
+   "raise",
+   "rand",
+   "realloc",
+   "rewind",
+   "round",
+   "scanf",
+   "set",
+   "shared_ptr",
+   "signal",
+   "sin",
+   "size",
+   "size_t",
+   "sizeof",
+   "sleep",
+   "snprintf",
+   "sort",
+   "sprintf",
+   "sqrt",
+   "srand",
+   "sscanf",
+   "std",
+   "stderr",
+   "stdin",
+   "stdout",
+   "stoi",
+   "strcat",
+   "strchr",
+   "strcmp",
+   "strcpy",
+   "strcspn",
+   "strdup",
+   "strerror",
+   "strftime",
+   "string",
+   "strlen",
+   "strncat",
+   "strncmp",
+   "strncpy",
+   "strndup",
+   "strrchr",
+   "strspn",
+   "strstr",
+   "strtod",
+   "strtok",
+   "strtol",
+   "strtoul",
+   "system",
+   "tan",
+   "time",
+   "to_string",
+   "tolower",
+   "toupper",
+   "true",
+   "trunc",
+   "uint16_t",
+   "uint32_t",
+   "uint64_t",
+   "uint8_t",
+   "uintptr_t",
+   "unique_ptr",
+   "unordered_map",
+   "usleep",
+   "vector"
+  ],
+  "keywords": [
+   "auto",
+   "bool",
+   "break",
+   "case",
+   "catch",
+   "char",
+   "class",
+   "const",
+   "constexpr",
+   "continue",
+   "default",
+   "delete",
+   "do",
+   "double",
+   "else",
+   "enum",
+   "explicit",
+   "extern",
+   "false",
+   "float",
+   "for",
+   "friend",
+   "goto",
+   "if",
+   "inline",
+   "int",
+   "long",
+   "namespace",
+   "new",
+   "noexcept",
+   "operator",
+   "override",
+   "private",
+   "protected",
+   "public",
+   "register",
+   "restrict",
+   "return",
+   "short",
+   "signed",
+   "sizeof",
+   "static",
+   "struct",
+   "switch",
+   "template",
+   "this",
+   "throw",
+   "true",
+   "try",
+   "typedef",
+   "typename",
+   "union",
+   "unsigned",
+   "using",
+   "virtual",
+   "void",
+   "volatile",
+   "while"
+  ],
+  "methods": [
+   "at",
+   "back",
+   "begin",
+   "c_str",
+   "clear",
+   "count",
+   "emplace_back",
+   "empty",
+   "end",
+   "erase",
+   "find",
+   "first",
+   "front",
+   "insert",
+   "length",
+   "pop_back",
+   "push_back",
+   "reserve",
+   "resize",
+   "second",
+   "size",
+   "substr"
+  ]
+ },
+ "java": {
+  "rules": [
+   {
+    "id": "java.System case",
+    "match": "(?<![\\w.])(?:system|SYSTEM)\\.(in|out|err)\\b",
+    "with": "System.$1",
+    "why": "It's System with a capital S",
+    "auto": true
+   },
+   {
+    "id": "java.System.Out",
+    "match": "\\bSystem\\.(?:Out|OUT)\\.",
+    "with": "System.out.",
+    "why": "It's System.out",
+    "auto": true
+   },
+   {
+    "id": "java.println alias",
+    "match": "\\bSystem\\.out\\.(?:printLn|PrintLn|Println|printline|print_line|prinln|printn|pritnln|println_|writeLine|WriteLine|log|write|printLine|prinltn|pirntln)(?=\\s*\\()",
+    "with": "System.out.println",
+    "why": "It's System.out.println()",
+    "auto": true
+   },
+   {
+    "id": "java.console.log",
+    "match": "(?<![\\w.])(console)\\.log(?=\\s*\\()",
+    "with": "System.out.println",
+    "why": "Java prints with System.out.println()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "java.print bare",
+    "match": "(?<![\\w.])(print|println)(?=\\s*\\()",
+    "with": "System.out.println",
+    "why": "Java prints with System.out.println()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "java.printf bare",
+    "match": "(?<![\\w.])(printf)(?=\\s*\\()",
+    "with": "System.out.printf",
+    "why": "Java's printf is System.out.printf()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "java.string type",
+    "match": "(?<![\\w.])string(?=[ \\t]+\\w|[ \\t]*\\[|[ \\t]*>|[ \\t]*\\.\\.\\.)",
+    "with": "String",
+    "why": "Java's text type is String (capital S)",
+    "auto": true,
+    "unless": "\\bclass\\s+string\\b"
+   },
+   {
+    "id": "java.bool type",
+    "match": "(?<![\\w.])bool(?=[ \\t]+\\w)",
+    "with": "boolean",
+    "why": "Java's true/false type is boolean",
+    "auto": true,
+    "unless": "\\bclass\\s+bool\\b"
+   },
+   {
+    "id": "java.Int type",
+    "match": "(?<![\\w.])(?:Int|integer)(?=[ \\t]+[a-z]\\w*[ \\t]*[=;,)])",
+    "with": "int",
+    "why": "Java's whole-number type is int",
+    "auto": true,
+    "unless": "\\bclass\\s+(?:Int|integer)\\b"
+   },
+   {
+    "id": "java.Integer.parse",
+    "match": "\\bInteger\\.(?:parse|parseInteger|fromString|toInt|parseint|ParseInt)(?=\\s*\\()",
+    "with": "Integer.parseInt",
+    "why": "It's Integer.parseInt(text)",
+    "auto": true
+   },
+   {
+    "id": "java.Double.parse",
+    "match": "\\bDouble\\.(?:parse|parsedouble|ParseDouble|toDouble)(?=\\s*\\()",
+    "with": "Double.parseDouble",
+    "why": "It's Double.parseDouble(text)",
+    "auto": true
+   },
+   {
+    "id": "java.Thread.wait",
+    "match": "\\bThread\\.(?:wait|delay|pause)(?=\\s*\\()",
+    "with": "Thread.sleep",
+    "why": "It's Thread.sleep(milliseconds)",
+    "auto": true
+   },
+   {
+    "id": "java.string ==",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*(?:\\(\\))?)[ \\t]*==[ \\t]*(\\\"(?:[^\\\"\\\\\\n]|\\\\.)*\\\")",
+    "with": "$1.equals($2)",
+    "why": "== compares objects, not text; use .equals()"
+   },
+   {
+    "id": "java.string !=",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*(?:\\(\\))?)[ \\t]*!=[ \\t]*(\\\"(?:[^\\\"\\\\\\n]|\\\\.)*\\\")",
+    "with": "!$1.equals($2)",
+    "why": "!= compares objects, not text; use !….equals()"
+   },
+   {
+    "id": "java.True",
+    "match": "(?<![\\w.'\\\"])(True|TRUE)(?![\\w'\\\"])",
+    "with": "true",
+    "why": "Java writes true in lowercase",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "java.False",
+    "match": "(?<![\\w.'\\\"])(False|FALSE)(?![\\w'\\\"])",
+    "with": "false",
+    "why": "Java writes false in lowercase",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "java.null",
+    "match": "(?<![\\w.'\\\"])(None|nil|NULL|Null|nullptr|undefined)(?![\\w'\\\"])",
+    "with": "null",
+    "why": "Java's “nothing” is null",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "java.elif",
+    "match": "(?m)^([ \\t]*\\}?[ \\t]*)(?:elif|elsif|elseif|elseIf)\\b",
+    "with": "$1else if",
+    "why": "Java writes it else if",
+    "auto": true
+   },
+   {
+    "id": "java.and",
+    "match": "(?<=[\\w)\\]'\\\"])[ \\t]+and[ \\t]+(?=[\\w(!'\\\"])",
+    "with": " && ",
+    "why": "Java writes and as &&",
+    "auto": true
+   },
+   {
+    "id": "java.or",
+    "match": "(?<=[\\w)\\]'\\\"])[ \\t]+or[ \\t]+(?=[\\w(!'\\\"])",
+    "with": " || ",
+    "why": "Java writes or as ||",
+    "auto": true
+   },
+   {
+    "id": "java.not",
+    "match": "(?<![\\w.])not[ \\t]+(?=[\\w(])",
+    "with": "!",
+    "why": "Java writes not as !",
+    "auto": true
+   },
+   {
+    "id": "java.mian",
+    "match": "\\bstatic[ \\t]+void[ \\t]+mian(?=[ \\t]*\\()",
+    "with": "static void main",
+    "why": "Did you mean main?",
+    "auto": true
+   },
+   {
+    "id": "java.^ power",
+    "match": "([\\w)\\]]+)[ \\t]*\\^[ \\t]*(\\d+)\\b",
+    "with": "Math.pow($1, $2)",
+    "why": "^ is XOR in Java; powers are Math.pow(x, y)"
+   }
+  ],
+  "imports": {
+   "Scanner": "import java.util.Scanner;",
+   "ArrayList": "import java.util.ArrayList;",
+   "List": "import java.util.List;",
+   "HashMap": "import java.util.HashMap;",
+   "Map": "import java.util.Map;",
+   "HashSet": "import java.util.HashSet;",
+   "Set": "import java.util.Set;",
+   "Random": "import java.util.Random;",
+   "Arrays": "import java.util.Arrays;",
+   "Collections": "import java.util.Collections;",
+   "LinkedList": "import java.util.LinkedList;",
+   "Queue": "import java.util.Queue;",
+   "Deque": "import java.util.Deque;",
+   "ArrayDeque": "import java.util.ArrayDeque;",
+   "Iterator": "import java.util.Iterator;",
+   "Optional": "import java.util.Optional;",
+   "Stack": "import java.util.Stack;",
+   "TreeMap": "import java.util.TreeMap;",
+   "TreeSet": "import java.util.TreeSet;",
+   "PriorityQueue": "import java.util.PriorityQueue;",
+   "Objects": "import java.util.Objects;",
+   "File": "import java.io.File;",
+   "FileReader": "import java.io.FileReader;",
+   "BufferedReader": "import java.io.BufferedReader;",
+   "InputStreamReader": "import java.io.InputStreamReader;",
+   "IOException": "import java.io.IOException;",
+   "FileWriter": "import java.io.FileWriter;",
+   "PrintWriter": "import java.io.PrintWriter;",
+   "LocalDate": "import java.time.LocalDate;",
+   "LocalDateTime": "import java.time.LocalDateTime;",
+   "Duration": "import java.time.Duration;",
+   "Collectors": "import java.util.stream.Collectors;"
+  },
+  "members": {
+   "Math": [
+    "abs",
+    "max",
+    "min",
+    "pow",
+    "sqrt",
+    "cbrt",
+    "round",
+    "floor",
+    "ceil",
+    "random",
+    "sin",
+    "cos",
+    "tan",
+    "asin",
+    "acos",
+    "atan",
+    "atan2",
+    "log",
+    "log10",
+    "exp",
+    "hypot",
+    "signum",
+    "toRadians",
+    "toDegrees",
+    "floorDiv",
+    "floorMod",
+    "PI",
+    "E",
+    "rint",
+    "log1p",
+    "expm1",
+    "sinh",
+    "cosh",
+    "tanh",
+    "ulp",
+    "addExact",
+    "multiplyExact"
+   ],
+   "System": [
+    "out",
+    "err",
+    "in",
+    "currentTimeMillis",
+    "nanoTime",
+    "exit",
+    "arraycopy",
+    "getProperty",
+    "getenv",
+    "lineSeparator",
+    "identityHashCode",
+    "gc"
+   ],
+   "Integer": [
+    "parseInt",
+    "valueOf",
+    "MAX_VALUE",
+    "MIN_VALUE",
+    "toString",
+    "toBinaryString",
+    "toHexString",
+    "toOctalString",
+    "compare",
+    "sum",
+    "max",
+    "min",
+    "bitCount",
+    "reverse",
+    "signum"
+   ],
+   "Double": [
+    "parseDouble",
+    "valueOf",
+    "MAX_VALUE",
+    "MIN_VALUE",
+    "isNaN",
+    "isInfinite",
+    "compare",
+    "toString",
+    "POSITIVE_INFINITY",
+    "NEGATIVE_INFINITY",
+    "NaN",
+    "sum",
+    "max",
+    "min"
+   ],
+   "String": [
+    "valueOf",
+    "format",
+    "join",
+    "copyValueOf"
+   ],
+   "Arrays": [
+    "sort",
+    "toString",
+    "asList",
+    "fill",
+    "copyOf",
+    "copyOfRange",
+    "stream",
+    "equals",
+    "binarySearch",
+    "deepToString",
+    "hashCode",
+    "setAll",
+    "parallelSort"
+   ],
+   "Collections": [
+    "sort",
+    "reverse",
+    "shuffle",
+    "max",
+    "min",
+    "unmodifiableList",
+    "unmodifiableMap",
+    "emptyList",
+    "emptyMap",
+    "singletonList",
+    "frequency",
+    "swap",
+    "addAll",
+    "nCopies",
+    "reverseOrder"
+   ],
+   "Thread": [
+    "sleep",
+    "currentThread",
+    "onSpinWait",
+    "yield"
+   ],
+   "Character": [
+    "isDigit",
+    "isLetter",
+    "isLetterOrDigit",
+    "isUpperCase",
+    "isLowerCase",
+    "toUpperCase",
+    "toLowerCase",
+    "isWhitespace",
+    "getNumericValue",
+    "isAlphabetic"
+   ],
+   "Boolean": [
+    "parseBoolean",
+    "valueOf",
+    "TRUE",
+    "FALSE",
+    "toString"
+   ],
+   "Long": [
+    "parseLong",
+    "valueOf",
+    "MAX_VALUE",
+    "MIN_VALUE",
+    "toString"
+   ],
+   "Objects": [
+    "equals",
+    "hash",
+    "requireNonNull",
+    "isNull",
+    "nonNull",
+    "toString",
+    "hashCode"
+   ]
+  },
+  "builtins": [
+   "ArrayList",
+   "Arrays",
+   "Boolean",
+   "Character",
+   "Collections",
+   "Double",
+   "Exception",
+   "HashMap",
+   "HashSet",
+   "Integer",
+   "List",
+   "Long",
+   "Map",
+   "Math",
+   "Object",
+   "Optional",
+   "Override",
+   "RuntimeException",
+   "Scanner",
+   "Set",
+   "String",
+   "StringBuilder",
+   "System",
+   "Thread",
+   "args",
+   "false",
+   "main",
+   "null",
+   "super",
+   "this",
+   "true"
+  ],
+  "keywords": [
+   "abstract",
+   "assert",
+   "boolean",
+   "break",
+   "byte",
+   "case",
+   "catch",
+   "char",
+   "class",
+   "continue",
+   "default",
+   "do",
+   "double",
+   "else",
+   "enum",
+   "extends",
+   "final",
+   "finally",
+   "float",
+   "for",
+   "if",
+   "implements",
+   "import",
+   "instanceof",
+   "int",
+   "interface",
+   "long",
+   "new",
+   "package",
+   "private",
+   "protected",
+   "public",
+   "record",
+   "return",
+   "short",
+   "static",
+   "super",
+   "switch",
+   "synchronized",
+   "this",
+   "throw",
+   "throws",
+   "try",
+   "var",
+   "void",
+   "volatile",
+   "while"
+  ],
+  "methods": [
+   "add",
+   "charAt",
+   "close",
+   "collect",
+   "compareTo",
+   "contains",
+   "containsKey",
+   "endsWith",
+   "entrySet",
+   "equals",
+   "equalsIgnoreCase",
+   "filter",
+   "forEach",
+   "get",
+   "getKey",
+   "getOrDefault",
+   "getValue",
+   "hasNext",
+   "hasNextInt",
+   "hasNextLine",
+   "hashCode",
+   "indexOf",
+   "isEmpty",
+   "keySet",
+   "lastIndexOf",
+   "length",
+   "map",
+   "next",
+   "nextDouble",
+   "nextInt",
+   "nextLine",
+   "print",
+   "printf",
+   "println",
+   "put",
+   "remove",
+   "replace",
+   "set",
+   "size",
+   "sort",
+   "split",
+   "startsWith",
+   "stream",
+   "substring",
+   "toLowerCase",
+   "toString",
+   "toUpperCase",
+   "trim",
+   "values"
+  ]
+ },
+ "swift": {
+  "rules": [
+   {
+    "id": "swift.println",
+    "match": "(?<![\\w.])(println)(?=\\s*\\()",
+    "with": "print",
+    "why": "Swift prints with print()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "swift.console.log",
+    "match": "(?<![\\w.])(console)\\.log(?=\\s*\\()",
+    "with": "print",
+    "why": "Swift prints with print()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "swift.System.out",
+    "match": "(?<![\\w.])(System)\\.out\\.print(?:ln)?(?=\\s*\\()",
+    "with": "print",
+    "why": "Swift prints with print()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "swift..count()",
+    "match": "\\.count\\(\\)",
+    "with": ".count",
+    "why": ".count is a property — no ()",
+    "auto": true
+   },
+   {
+    "id": "swift..length",
+    "match": "\\.(?:length|size|len)\\b(?:\\(\\))?",
+    "with": ".count",
+    "why": "Swift collections and strings use .count",
+    "auto": true,
+    "unless": "\\b(?:var|let)\\s+(?:length|size|len)\\b|\\bfunc\\s+(?:length|size|len)\\b"
+   },
+   {
+    "id": "swift..push",
+    "match": "\\.(?:push|push_back|pushBack)\\(",
+    "with": ".append(",
+    "why": "Swift arrays use .append()",
+    "auto": true,
+    "unless": "\\bfunc\\s+(?:push|push_back|pushBack)\\b"
+   },
+   {
+    "id": "swift..add",
+    "match": "\\.add\\(",
+    "with": ".append(",
+    "why": "Arrays use .append() (Sets use .insert())",
+    "unless": "\\bfunc\\s+add\\b"
+   },
+   {
+    "id": "swift..toUpperCase",
+    "match": "\\.(?:toUpperCase|upper|toUpper|uppercase)\\(\\)",
+    "with": ".uppercased()",
+    "why": "Swift strings use .uppercased()",
+    "auto": true
+   },
+   {
+    "id": "swift..toLowerCase",
+    "match": "\\.(?:toLowerCase|lower|toLower|lowercase)\\(\\)",
+    "with": ".lowercased()",
+    "why": "Swift strings use .lowercased()",
+    "auto": true
+   },
+   {
+    "id": "swift..trim",
+    "match": "\\.(?:trim|strip)\\(\\)",
+    "with": ".trimmingCharacters(in: .whitespacesAndNewlines)",
+    "why": "Swift trims with .trimmingCharacters(in:)",
+    "auto": true
+   },
+   {
+    "id": "swift..includes",
+    "match": "\\.includes\\(",
+    "with": ".contains(",
+    "why": "Swift uses .contains()",
+    "auto": true
+   },
+   {
+    "id": "swift..indexOf",
+    "match": "\\.indexOf\\(",
+    "with": ".firstIndex(of: ",
+    "why": "Swift finds positions with .firstIndex(of:)",
+    "auto": true
+   },
+   {
+    "id": "swift..startsWith",
+    "match": "\\.(?:startsWith|startswith)\\(",
+    "with": ".hasPrefix(",
+    "why": "Swift strings use .hasPrefix()",
+    "auto": true
+   },
+   {
+    "id": "swift..endsWith",
+    "match": "\\.(?:endsWith|endswith)\\(",
+    "with": ".hasSuffix(",
+    "why": "Swift strings use .hasSuffix()",
+    "auto": true
+   },
+   {
+    "id": "swift.True",
+    "match": "(?<![\\w.'\\\"])(True|TRUE)(?![\\w'\\\"])",
+    "with": "true",
+    "why": "Swift writes true in lowercase",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "swift.False",
+    "match": "(?<![\\w.'\\\"])(False|FALSE)(?![\\w'\\\"])",
+    "with": "false",
+    "why": "Swift writes false in lowercase",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "swift.nil",
+    "match": "(?<![\\w.'\\\"])(None|null|NULL|Null|nullptr|undefined)(?![\\w'\\\"])",
+    "with": "nil",
+    "why": "Swift's “nothing” is nil",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "swift.elif",
+    "match": "(?m)^([ \\t]*\\}?[ \\t]*)(?:elif|elsif|elseif|elseIf)\\b",
+    "with": "$1else if",
+    "why": "Swift writes it else if",
+    "auto": true
+   },
+   {
+    "id": "swift.def",
+    "match": "(?m)^([ \\t]*)(?:def|function|fun|fn)[ \\t]+(\\w+)[ \\t]*\\(",
+    "with": "$1func $2(",
+    "why": "Swift defines functions with func",
+    "auto": true
+   },
+   {
+    "id": "swift.const",
+    "match": "(?m)^([ \\t]*)const[ \\t]+",
+    "with": "$1let ",
+    "why": "Swift constants use let",
+    "auto": true
+   },
+   {
+    "id": "swift.and",
+    "match": "(?<=[\\w)\\]'\\\"])[ \\t]+and[ \\t]+(?=[\\w(!'\\\"])",
+    "with": " && ",
+    "why": "Swift writes and as &&",
+    "auto": true
+   },
+   {
+    "id": "swift.or",
+    "match": "(?<=[\\w)\\]'\\\"])[ \\t]+or[ \\t]+(?=[\\w(!'\\\"])",
+    "with": " || ",
+    "why": "Swift writes or as ||",
+    "auto": true
+   },
+   {
+    "id": "swift.not",
+    "match": "(?<![\\w.])not[ \\t]+(?=[\\w(])",
+    "with": "!",
+    "why": "Swift writes not as !",
+    "auto": true
+   },
+   {
+    "id": "swift.Int(readLine())",
+    "match": "\\b(Int|Double)\\(\\s*readLine\\(\\)\\s*\\)",
+    "with": "$1(readLine() ?? \"\")",
+    "why": "readLine() can return nil; give it a fallback",
+    "auto": true
+   },
+   {
+    "id": "swift.sleep fraction",
+    "match": "(?<![\\w.])sleep\\(\\s*(\\d+\\.\\d+)\\s*\\)",
+    "with": "Thread.sleep(forTimeInterval: $1)",
+    "why": "sleep() takes whole seconds; Thread.sleep(forTimeInterval:) takes fractions",
+    "auto": true
+   }
+  ],
+  "keywords": [
+   "actor",
+   "any",
+   "as",
+   "associatedtype",
+   "async",
+   "await",
+   "break",
+   "case",
+   "catch",
+   "class",
+   "continue",
+   "default",
+   "defer",
+   "deinit",
+   "do",
+   "else",
+   "enum",
+   "extension",
+   "fallthrough",
+   "fileprivate",
+   "for",
+   "func",
+   "guard",
+   "if",
+   "import",
+   "in",
+   "init",
+   "inout",
+   "internal",
+   "is",
+   "let",
+   "open",
+   "operator",
+   "private",
+   "protocol",
+   "public",
+   "repeat",
+   "rethrows",
+   "return",
+   "some",
+   "static",
+   "struct",
+   "subscript",
+   "super",
+   "switch",
+   "throw",
+   "throws",
+   "try",
+   "typealias",
+   "var",
+   "where",
+   "while"
+  ],
+  "builtins": [
+   "Array",
+   "Bool",
+   "Character",
+   "Dictionary",
+   "Double",
+   "Error",
+   "Float",
+   "Int",
+   "Optional",
+   "Result",
+   "Self",
+   "Set",
+   "String",
+   "abs",
+   "false",
+   "max",
+   "min",
+   "nil",
+   "print",
+   "readLine",
+   "self",
+   "stride",
+   "true",
+   "zip"
+  ],
+  "methods": [
+   "append",
+   "compactMap",
+   "contains",
+   "count",
+   "description",
+   "dropFirst",
+   "dropLast",
+   "enumerated",
+   "filter",
+   "first",
+   "firstIndex",
+   "flatMap",
+   "forEach",
+   "hasPrefix",
+   "hasSuffix",
+   "insert",
+   "isEmpty",
+   "joined",
+   "keys",
+   "last",
+   "lastIndex",
+   "lowercased",
+   "map",
+   "prefix",
+   "reduce",
+   "remove",
+   "removeAll",
+   "removeFirst",
+   "removeLast",
+   "replacingOccurrences",
+   "reversed",
+   "sort",
+   "sorted",
+   "split",
+   "suffix",
+   "trimmingCharacters",
+   "uppercased",
+   "values"
+  ]
+ },
+ "go": {
+  "rules": [
+   {
+    "id": "go.time.wait",
+    "match": "(?<![\\w.])time\\.(?:wait|delay|pause|sleep)(?=\\s*\\()",
+    "with": "time.Sleep",
+    "why": "Go pauses with time.Sleep(duration)",
+    "auto": true
+   },
+   {
+    "id": "go.time.Sleep n",
+    "match": "(?<![\\w.])time\\.Sleep\\(\\s*(\\d+)\\s*\\)",
+    "with": "time.Sleep($1 * time.Second)",
+    "why": "time.Sleep takes a Duration; a bare number is nanoseconds"
+   },
+   {
+    "id": "go.nil",
+    "match": "(?<![\\w.'\\\"])(None|null|NULL|Null|nullptr|undefined)(?![\\w'\\\"])",
+    "with": "nil",
+    "why": "Go's “nothing” is nil",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "go.True",
+    "match": "(?<![\\w.'\\\"])(True|TRUE)(?![\\w'\\\"])",
+    "with": "true",
+    "why": "Go writes true in lowercase",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "go.False",
+    "match": "(?<![\\w.'\\\"])(False|FALSE)(?![\\w'\\\"])",
+    "with": "false",
+    "why": "Go writes false in lowercase",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "go.elif",
+    "match": "(?m)^([ \\t]*\\}?[ \\t]*)(?:elif|elsif|elseif|elseIf)\\b",
+    "with": "$1else if",
+    "why": "Go writes it else if",
+    "auto": true
+   },
+   {
+    "id": "go.def",
+    "match": "(?m)^([ \\t]*)(?:def|function|fun|fn)[ \\t]+(\\w+)[ \\t]*\\(",
+    "with": "$1func $2(",
+    "why": "Go defines functions with func",
+    "auto": true
+   },
+   {
+    "id": "go.while",
+    "match": "(?m)^([ \\t]*)while\\b[ \\t]*",
+    "with": "$1for ",
+    "why": "Go has no while; for does it all",
+    "auto": true
+   },
+   {
+    "id": "go.and",
+    "match": "(?<=[\\w)\\]'\\\"])[ \\t]+and[ \\t]+(?=[\\w(!'\\\"])",
+    "with": " && ",
+    "why": "Go writes and as &&",
+    "auto": true
+   },
+   {
+    "id": "go.or",
+    "match": "(?<=[\\w)\\]'\\\"])[ \\t]+or[ \\t]+(?=[\\w(!'\\\"])",
+    "with": " || ",
+    "why": "Go writes or as ||",
+    "auto": true
+   },
+   {
+    "id": "go.not",
+    "match": "(?<![\\w.])not[ \\t]+(?=[\\w(])",
+    "with": "!",
+    "why": "Go writes not as !",
+    "auto": true
+   },
+   {
+    "id": "go.console.log",
+    "match": "(?<![\\w.])(console)\\.log(?=\\s*\\()",
+    "with": "fmt.Println",
+    "why": "Go prints with fmt.Println()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "go.print",
+    "match": "(?<![\\w.])print(?:ln)?(?=\\s*\\()",
+    "with": "fmt.Println",
+    "why": "print() writes to stderr without formatting; fmt.Println() is the usual way"
+   },
+   {
+    "id": "go..length",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.(?:length|len|size|count|Len)\\b(?:\\(\\))?",
+    "with": "len($1)",
+    "why": "Go gets a length with len(x)",
+    "auto": true,
+    "unless": "\\bfunc\\s*\\([^)]*\\)\\s*(?:length|len|size|count|Len)\\b"
+   },
+   {
+    "id": "go..append",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.(?:append|push)\\(([^()\\n]*)\\)",
+    "with": "$1 = append($1, $2)",
+    "why": "Go appends with x = append(x, item)",
+    "auto": true,
+    "unless": "\\bfunc\\s*\\([^)]*\\)\\s*(?:append|push)\\b"
+   }
+  ],
+  "members": {
+   "fmt": [
+    "Println",
+    "Printf",
+    "Print",
+    "Sprintf",
+    "Sprint",
+    "Sprintln",
+    "Errorf",
+    "Scan",
+    "Scanln",
+    "Scanf",
+    "Fprintf",
+    "Fprintln",
+    "Fprint",
+    "Sscanf",
+    "Sscan",
+    "Stringer"
+   ],
+   "strings": [
+    "Split",
+    "Join",
+    "Contains",
+    "ToUpper",
+    "ToLower",
+    "TrimSpace",
+    "Trim",
+    "TrimLeft",
+    "TrimRight",
+    "TrimPrefix",
+    "TrimSuffix",
+    "Replace",
+    "ReplaceAll",
+    "HasPrefix",
+    "HasSuffix",
+    "Index",
+    "LastIndex",
+    "Fields",
+    "Repeat",
+    "Count",
+    "EqualFold",
+    "Title",
+    "Builder",
+    "NewReader",
+    "NewReplacer",
+    "SplitN",
+    "Map"
+   ],
+   "strconv": [
+    "Itoa",
+    "Atoi",
+    "ParseInt",
+    "ParseFloat",
+    "ParseBool",
+    "FormatInt",
+    "FormatFloat",
+    "Quote",
+    "Unquote"
+   ],
+   "os": [
+    "Exit",
+    "Args",
+    "Open",
+    "Create",
+    "ReadFile",
+    "WriteFile",
+    "Getenv",
+    "Setenv",
+    "Remove",
+    "RemoveAll",
+    "Mkdir",
+    "MkdirAll",
+    "Stdin",
+    "Stdout",
+    "Stderr",
+    "Getwd",
+    "Chdir",
+    "Stat",
+    "IsNotExist",
+    "Environ",
+    "Hostname"
+   ],
+   "time": [
+    "Sleep",
+    "Now",
+    "Since",
+    "Until",
+    "Duration",
+    "Second",
+    "Millisecond",
+    "Microsecond",
+    "Nanosecond",
+    "Minute",
+    "Hour",
+    "Tick",
+    "NewTicker",
+    "NewTimer",
+    "After",
+    "AfterFunc",
+    "Parse",
+    "Date",
+    "Unix",
+    "UnixMilli",
+    "Time",
+    "Month",
+    "Weekday",
+    "RFC3339",
+    "Kitchen"
+   ],
+   "math": [
+    "Sqrt",
+    "Pow",
+    "Abs",
+    "Max",
+    "Min",
+    "Floor",
+    "Ceil",
+    "Round",
+    "Trunc",
+    "Pi",
+    "E",
+    "Inf",
+    "NaN",
+    "IsNaN",
+    "IsInf",
+    "Log",
+    "Log2",
+    "Log10",
+    "Exp",
+    "Sin",
+    "Cos",
+    "Tan",
+    "Hypot",
+    "Mod",
+    "MaxInt",
+    "MinInt",
+    "MaxInt64",
+    "MaxFloat64",
+    "Cbrt"
+   ],
+   "sort": [
+    "Ints",
+    "Strings",
+    "Float64s",
+    "Slice",
+    "SliceStable",
+    "Sort",
+    "Search",
+    "SearchInts"
+   ],
+   "errors": [
+    "New",
+    "Is",
+    "As",
+    "Unwrap",
+    "Join"
+   ],
+   "sync": [
+    "WaitGroup",
+    "Mutex",
+    "RWMutex",
+    "Once",
+    "Map",
+    "Pool",
+    "Cond"
+   ],
+   "bufio": [
+    "NewReader",
+    "NewWriter",
+    "NewScanner",
+    "ScanLines",
+    "ScanWords",
+    "Scanner",
+    "Reader",
+    "Writer"
+   ],
+   "rand": [
+    "Intn",
+    "Int",
+    "Float64",
+    "Seed",
+    "Shuffle",
+    "Perm",
+    "New",
+    "NewSource",
+    "Int63"
+   ],
+   "json": [
+    "Marshal",
+    "Unmarshal",
+    "MarshalIndent",
+    "NewEncoder",
+    "NewDecoder"
+   ],
+   "http": [
+    "Get",
+    "Post",
+    "HandleFunc",
+    "ListenAndServe",
+    "NewRequest",
+    "Client",
+    "Request",
+    "Response",
+    "ResponseWriter",
+    "StatusOK",
+    "StatusNotFound",
+    "Handle",
+    "FileServer",
+    "Dir"
+   ],
+   "filepath": [
+    "Join",
+    "Base",
+    "Dir",
+    "Ext",
+    "Abs",
+    "Walk",
+    "WalkDir",
+    "Glob",
+    "Rel",
+    "Split",
+    "Clean"
+   ]
+  },
+  "keywords": [
+   "break",
+   "case",
+   "chan",
+   "const",
+   "continue",
+   "default",
+   "defer",
+   "else",
+   "fallthrough",
+   "for",
+   "func",
+   "go",
+   "goto",
+   "if",
+   "import",
+   "interface",
+   "map",
+   "package",
+   "range",
+   "return",
+   "select",
+   "struct",
+   "switch",
+   "type",
+   "var"
+  ],
+  "builtins": [
+   "any",
+   "append",
+   "bool",
+   "byte",
+   "cap",
+   "close",
+   "complex",
+   "copy",
+   "delete",
+   "error",
+   "false",
+   "float64",
+   "imag",
+   "int",
+   "int64",
+   "iota",
+   "len",
+   "make",
+   "new",
+   "nil",
+   "panic",
+   "print",
+   "println",
+   "real",
+   "recover",
+   "rune",
+   "string",
+   "true"
+  ]
+ },
+ "rust": {
+  "rules": [
+   {
+    "id": "rust.macro !",
+    "match": "(?<![\\w.!])(println|print|eprintln|eprint|format|vec|panic|assert|assert_eq|assert_ne|write|writeln|todo|unimplemented|dbg)(?=\\s*\\()",
+    "with": "$1!",
+    "why": "$1 is a macro: $1!(…)",
+    "auto": true,
+    "unless": "\\bfn\\s+(?:println|print|eprintln|format|vec|panic|assert|write|writeln|dbg)\\b"
+   },
+   {
+    "id": "rust.console.log",
+    "match": "(?<![\\w.])(console)\\.log(?=\\s*\\()",
+    "with": "println!",
+    "why": "Rust prints with println!()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "rust.printf",
+    "match": "(?<![\\w.])(printf)(?=\\s*\\()",
+    "with": "println!",
+    "why": "Rust prints with println!()",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "rust.True",
+    "match": "(?<![\\w.'\\\"])(True|TRUE)(?![\\w'\\\"])",
+    "with": "true",
+    "why": "Rust writes true in lowercase",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "rust.False",
+    "match": "(?<![\\w.'\\\"])(False|FALSE)(?![\\w'\\\"])",
+    "with": "false",
+    "why": "Rust writes false in lowercase",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "rust.None",
+    "match": "(?<![\\w.'\\\"])(null|nil|NULL|Null|nullptr|undefined)(?![\\w'\\\"])",
+    "with": "None",
+    "why": "Rust has no null; an empty Option is None",
+    "auto": true,
+    "undefined": 1
+   },
+   {
+    "id": "rust.elif",
+    "match": "(?m)^([ \\t]*\\}?[ \\t]*)(?:elif|elsif|elseif|elseIf)\\b",
+    "with": "$1else if",
+    "why": "Rust writes it else if",
+    "auto": true
+   },
+   {
+    "id": "rust.def",
+    "match": "(?m)^([ \\t]*)(?:def|function|func|fun)[ \\t]+(\\w+)[ \\t]*\\(",
+    "with": "$1fn $2(",
+    "why": "Rust defines functions with fn",
+    "auto": true
+   },
+   {
+    "id": "rust.and",
+    "match": "(?<=[\\w)\\]'\\\"])[ \\t]+and[ \\t]+(?=[\\w(!'\\\"])",
+    "with": " && ",
+    "why": "Rust writes and as &&",
+    "auto": true
+   },
+   {
+    "id": "rust.or",
+    "match": "(?<=[\\w)\\]'\\\"])[ \\t]+or[ \\t]+(?=[\\w(!'\\\"])",
+    "with": " || ",
+    "why": "Rust writes or as ||",
+    "auto": true
+   },
+   {
+    "id": "rust.not",
+    "match": "(?<![\\w.])not[ \\t]+(?=[\\w(])",
+    "with": "!",
+    "why": "Rust writes not as !",
+    "auto": true
+   },
+   {
+    "id": "rust..length",
+    "match": "\\.(?:length|size)\\b(?:\\(\\))?",
+    "with": ".len()",
+    "why": "Rust uses .len()",
+    "auto": true,
+    "unless": "\\bfn\\s+(?:length|size)\\b"
+   },
+   {
+    "id": "rust..add",
+    "match": "\\.(?:add|push_back|pushBack)\\(",
+    "with": ".push(",
+    "why": "Vec adds with .push()",
+    "auto": true,
+    "unless": "\\bfn\\s+(?:add|push_back|pushBack)\\b|\\bimpl\\s+Add\\b|HashSet|BTreeSet"
+   },
+   {
+    "id": "rust.String::new(\"",
+    "match": "\\bString::new\\(\\s*\\\"",
+    "with": "String::from(\"",
+    "why": "String::new() makes an empty string; String::from(\"…\") makes one with text",
+    "auto": true
+   },
+   {
+    "id": "rust..toUpperCase",
+    "match": "\\.(?:toUpperCase|upper|toUpper)\\(\\)",
+    "with": ".to_uppercase()",
+    "why": "Rust uses .to_uppercase()",
+    "auto": true
+   },
+   {
+    "id": "rust..toLowerCase",
+    "match": "\\.(?:toLowerCase|lower|toLower)\\(\\)",
+    "with": ".to_lowercase()",
+    "why": "Rust uses .to_lowercase()",
+    "auto": true
+   },
+   {
+    "id": "rust..strip",
+    "match": "\\.strip\\(\\)",
+    "with": ".trim()",
+    "why": "Rust uses .trim()",
+    "auto": true
+   },
+   {
+    "id": "rust..includes",
+    "match": "\\.includes\\(",
+    "with": ".contains(",
+    "why": "Rust uses .contains()",
+    "auto": true
+   },
+   {
+    "id": "rust..toString",
+    "match": "\\.(?:toString|ToString|tostring)\\(\\)",
+    "with": ".to_string()",
+    "why": "Rust uses .to_string()",
+    "auto": true
+   }
+  ],
+  "keywords": [
+   "as",
+   "async",
+   "await",
+   "break",
+   "const",
+   "continue",
+   "crate",
+   "dyn",
+   "else",
+   "enum",
+   "extern",
+   "fn",
+   "for",
+   "if",
+   "impl",
+   "in",
+   "let",
+   "loop",
+   "match",
+   "mod",
+   "move",
+   "mut",
+   "pub",
+   "ref",
+   "return",
+   "static",
+   "struct",
+   "super",
+   "trait",
+   "type",
+   "unsafe",
+   "use",
+   "where",
+   "while"
+  ],
+  "builtins": [
+   "BTreeMap",
+   "Box",
+   "Err",
+   "HashMap",
+   "HashSet",
+   "None",
+   "Ok",
+   "Option",
+   "Result",
+   "Self",
+   "Some",
+   "String",
+   "Vec",
+   "assert",
+   "assert_eq",
+   "eprintln",
+   "false",
+   "format",
+   "panic",
+   "print",
+   "println",
+   "self",
+   "true",
+   "vec"
+  ],
+  "methods": [
+   "all",
+   "any",
+   "as_str",
+   "bytes",
+   "chars",
+   "clone",
+   "collect",
+   "contains",
+   "count",
+   "ends_with",
+   "enumerate",
+   "expect",
+   "filter",
+   "find",
+   "fold",
+   "get",
+   "insert",
+   "into_iter",
+   "is_empty",
+   "iter",
+   "iter_mut",
+   "join",
+   "len",
+   "lines",
+   "map",
+   "max",
+   "min",
+   "parse",
+   "pop",
+   "push",
+   "remove",
+   "replace",
+   "rev",
+   "sort",
+   "sort_by",
+   "split",
+   "starts_with",
+   "sum",
+   "to_lowercase",
+   "to_string",
+   "to_uppercase",
+   "trim",
+   "unwrap",
+   "zip"
+  ]
+ }
+}
