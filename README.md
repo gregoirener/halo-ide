@@ -27,6 +27,7 @@ Halo is designed to help developers stay in flow:
 - Streamlined developer workflow
 - Built for macOS
 - Simple, focused environment for experimentation and product development
+- Fast gh deployment and much more 
 
 ## Getting started
 
@@ -38,7 +39,3 @@ Halo is designed to help developers stay in flow:
 ## Contributing
 
 Contributions are welcome. If you'd like to help improve Halo, open an issue or submit a pull request.
-
-## License
-
-This project does not currently declare a license. Add one before publishing or distributing it publicly.
