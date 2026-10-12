@@ -1,2 +1,11 @@
 # halo-ide
-Interactive mac os Ide with mutliple misc features like powerful autofill its basically made to dominate xcode
+    __         ____                             __    __
+   / /_  ___  / / /___     _      ______  _____/ /___/ /
+  / __ \/ _ \/ / / __ \   | | /| / / __ \/ ___/ / __  / 
+ / / / /  __/ / / /_/ /   | |/ |/ / /_/ / /  / / /_/ /  
+/_/ /_/\___/_/_/\____/    |__/|__/\____/_/  /_/\__,_/   
+
+Welcome to Halo
+the interactive development environment 
+for Mac OS 
+
