@@ -24,6 +24,10 @@ final class Preferences {
     var lineSpacing: CGFloat { didSet { defaults.set(Double(lineSpacing), forKey: "lineSpacing"); notify() } }
     var wordWrap: Bool { didSet { defaults.set(wordWrap, forKey: "wordWrap"); notify() } }
     var fillEnabled: Bool { didSet { defaults.set(fillEnabled, forKey: "fillEnabled") } }
+    /// Swap obvious mistakes the moment they're typed (time.wait → time.sleep).
+    var autoFix: Bool { didSet { defaults.set(autoFix, forKey: "autoFix") } }
+    /// Underline mistakes in the rest of the code and propose the fix.
+    var suggestFixes: Bool { didSet { defaults.set(suggestFixes, forKey: "suggestFixes"); notify() } }
     var hasCompletedSetup: Bool { didSet { defaults.set(hasCompletedSetup, forKey: "hasCompletedSetup") } }
     private(set) var recentFolders: [URL]
 
@@ -36,6 +40,8 @@ final class Preferences {
         wordWrap = defaults.object(forKey: "wordWrap") as? Bool ?? true
         hasCompletedSetup = defaults.bool(forKey: "hasCompletedSetup")
         fillEnabled = defaults.object(forKey: "fillEnabled") as? Bool ?? true
+        autoFix = defaults.object(forKey: "autoFix") as? Bool ?? true
+        suggestFixes = defaults.object(forKey: "suggestFixes") as? Bool ?? true
         recentFolders = (defaults.stringArray(forKey: "recentFolders") ?? [])
             .map { URL(fileURLWithPath: $0) }
             .filter { FileManager.default.fileExists(atPath: $0.path) }

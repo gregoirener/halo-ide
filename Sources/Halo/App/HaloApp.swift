@@ -137,6 +137,10 @@ struct HaloCommands: Commands {
                 .keyboardShortcut("[", modifiers: [.command, .option])
             Button("Move Line Down") { send(#selector(HaloTextView.moveLineDown(_:))) }
                 .keyboardShortcut("]", modifiers: [.command, .option])
+            Divider()
+            Button("Apply Suggested Fix   ⌥↩") { send(#selector(HaloTextView.applySuggestedFix(_:))) }
+            Button("Fix All Mistakes in File") { send(#selector(HaloTextView.applyAllSuggestedFixes(_:))) }
+                .keyboardShortcut(.return, modifiers: [.command, .option])
         }
 
         Group {
@@ -295,6 +299,22 @@ private struct CompletionSettings: View {
     var body: some View {
         Form {
             Toggle("Suggest code as you type (Tab to accept)", isOn: $prefs.fillEnabled)
+            Section("Mistakes") {
+                Toggle(isOn: $prefs.autoFix) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Fix obvious mistakes as you type")
+                        Text("time.wait( becomes time.sleep( the moment you type it. ⌘Z puts it back, and Halo leaves it alone after that.")
+                            .font(.system(size: 11.5)).foregroundStyle(Color.haloSecondary).fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                Toggle(isOn: $prefs.suggestFixes) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Suggest fixes in the rest of the code")
+                        Text("A dotted underline, with the fix after the line. Click it, or press ⌥↩ on that line; ⌥⌘↩ fixes them all.")
+                            .font(.system(size: 11.5)).foregroundStyle(Color.haloSecondary).fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
             Section("Smart Fill") {
                 Toggle("Use a local AI model", isOn: Binding(get: { SmartFill.shared.enabled }, set: { SmartFill.shared.enabled = $0 }))
                 SmartFillControls()
@@ -302,6 +322,6 @@ private struct CompletionSettings: View {
             }
         }
         .formStyle(.grouped)
-        .frame(height: 336)
+        .frame(height: 520)
     }
 }

@@ -282,13 +282,27 @@ enum MCPTools {
             entries = entries.filter { $0.key == url.path }
         }
         let list = entries.values.flatMap { $0 }.sorted { ($0.path, $0.line) < ($1.path, $1.line) }
+        // Mistakes Halo underlines in open files (time.wait → time.sleep…).
+        var suggestions: [String] = []
+        let only = try string(args, "path").map { try resolve($0, in: ws).path }
+        for doc in ws.documents {
+            guard let url = doc.url, only == nil || url.standardizedFileURL.path == only, let editor = doc.editor else { continue }
+            let ns = editor.text as NSString
+            for fix in editor.codeFixes {
+                let line = ns.substring(to: min(fix.anchor.location, ns.length)).filter { $0 == "\n" }.count + 1
+                suggestions.append("\(ws.relativePath(url)):\(line): suggestion: \(fix.original) → \(fix.label) (\(fix.why))")
+            }
+        }
+        if list.isEmpty, !suggestions.isEmpty {
+            return Outcome(text: suggestions.joined(separator: "\n"), summary: "Checked problems — \(suggestions.count) suggestions")
+        }
         guard !list.isEmpty else {
             return Outcome(text: "No problems. (Halo checks open files as they change, and compiled files when they’re run.)", summary: "Checked problems (none)")
         }
         let text = list.prefix(300).map { d in
             let severity = d.severity == .error ? "error" : d.severity == .warning ? "warning" : "note"
             return "\(ws.relativePath(URL(fileURLWithPath: d.path))):\(d.line)\(d.column.map { ":\($0)" } ?? ""): \(severity): \(d.message) [\(d.source)]"
-        }.joined(separator: "\n")
+        }.joined(separator: "\n") + (suggestions.isEmpty ? "" : "\n" + suggestions.joined(separator: "\n"))
         return Outcome(text: text, summary: "Checked problems — \(list.count)")
     }
 

@@ -1,13 +1,40 @@
-// Renders Halo's app icon into an .iconset: a flat ring and caret on an ink tile.
-// Usage: swift scripts/make-icon.swift <output.iconset>
+// Renders Halo's app icon into an .iconset from a photo of a halo: a square
+// crop centred on its light (the moon), set in the macOS icon tile.
+// Usage: swift scripts/make-icon.swift <photo> <output.iconset>
 import AppKit
 
-let out = URL(fileURLWithPath: CommandLine.arguments[1])
+let photo = URL(fileURLWithPath: CommandLine.arguments[1])
+let out = URL(fileURLWithPath: CommandLine.arguments[2])
 try? FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
-
-func color(_ hex: UInt32, _ a: CGFloat = 1) -> NSColor {
-    NSColor(srgbRed: CGFloat((hex >> 16) & 0xFF) / 255, green: CGFloat((hex >> 8) & 0xFF) / 255, blue: CGFloat(hex & 0xFF) / 255, alpha: a)
+guard let image = NSImage(contentsOf: photo)?.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+    fatalError("Can't read \(photo.path)")
 }
+
+/// The centroid of the brightest pixels, in image coordinates (origin top-left).
+func light(in image: CGImage) -> CGPoint {
+    let w = image.width, h = image.height
+    var pixels = [UInt8](repeating: 0, count: w * h * 4)
+    let ctx = CGContext(data: &pixels, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
+                        space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+    ctx.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
+    var brightest = 0
+    for i in stride(from: 0, to: pixels.count, by: 4) { brightest = max(brightest, Int(pixels[i]) + Int(pixels[i + 1]) + Int(pixels[i + 2])) }
+    var sx = 0.0, sy = 0.0, n = 0.0
+    for row in 0..<h {
+        for x in 0..<w {
+            let i = (row * w + x) * 4
+            if Int(pixels[i]) + Int(pixels[i + 1]) + Int(pixels[i + 2]) >= brightest - 8 { sx += Double(x); sy += Double(row); n += 1 }
+        }
+    }
+    return CGPoint(x: sx / n, y: sy / n)
+}
+
+let center = light(in: image)
+let side = min(image.width, image.height)
+let crop = CGRect(x: min(max(0, Int(center.x) - side / 2), image.width - side),
+                  y: min(max(0, Int(center.y) - side / 2), image.height - side), width: side, height: side)
+let square = image.cropping(to: crop)!
+print("light at \(Int(center.x)),\(Int(center.y)); crop \(crop)")
 
 func render(_ px: Int) -> NSBitmapImageRep {
     let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: px, pixelsHigh: px, bitsPerSample: 8, samplesPerPixel: 4,
@@ -15,36 +42,28 @@ func render(_ px: Int) -> NSBitmapImageRep {
     NSGraphicsContext.saveGraphicsState()
     NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
     let ctx = NSGraphicsContext.current!.cgContext
+    ctx.interpolationQuality = .high
     ctx.scaleBy(x: CGFloat(px) / 1024, y: CGFloat(px) / 1024)
 
-    // macOS icon grid: an 824pt rounded square centred in the 1024 canvas.
+    // macOS icon grid: an 824pt rounded square centred in the 1024 canvas, with a soft shadow.
     let tile = CGRect(x: 100, y: 100, width: 824, height: 824)
     let shape = NSBezierPath(roundedRect: tile, xRadius: 185, yRadius: 185)
     ctx.saveGState()
-    ctx.setShadow(offset: CGSize(width: 0, height: -8), blur: 20, color: color(0x000000, 0.25).cgColor)
-    color(0x1C2028).setFill()
+    ctx.setShadow(offset: CGSize(width: 0, height: -8), blur: 20, color: NSColor(white: 0, alpha: 0.28).cgColor)
+    NSColor(srgbRed: 0.09, green: 0.12, blue: 0.18, alpha: 1).setFill()
     shape.fill()
     ctx.restoreGState()
 
-    // A hairline of light on the top edge, the only "effect".
+    // The photo, filling the tile.
     ctx.saveGState()
     shape.addClip()
-    color(0xFFFFFF, 0.06).setStroke()
+    ctx.draw(square, in: tile)
+    // A hairline of light around the edge so it holds its shape on dark backgrounds.
+    NSColor(white: 1, alpha: 0.10).setStroke()
     let rim = NSBezierPath(roundedRect: tile.insetBy(dx: 2, dy: 2), xRadius: 183, yRadius: 183)
     rim.lineWidth = 4
     rim.stroke()
     ctx.restoreGState()
-
-    // The ring.
-    let ring = NSBezierPath(ovalIn: CGRect(x: 272, y: 566, width: 480, height: 156))
-    ring.lineWidth = 44
-    color(0xF1EEE7).setStroke()
-    ring.stroke()
-
-    // The caret.
-    let caret = NSBezierPath(roundedRect: CGRect(x: 488, y: 262, width: 48, height: 236), xRadius: 24, yRadius: 24)
-    color(0x4C8DF6).setFill()
-    caret.fill()
 
     NSGraphicsContext.restoreGraphicsState()
     return rep

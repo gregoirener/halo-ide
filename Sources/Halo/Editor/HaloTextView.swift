@@ -37,6 +37,7 @@ final class HaloTextView: NSTextView {
         breakUndoCoalescing()
         textStorage?.replaceCharacters(in: range, with: text)
         didChangeText()
+        breakUndoCoalescing()   // what's typed next is its own undo step
         if let select { setSelectedRange(select) }
         scrollRangeToVisible(selectedRange())
     }
@@ -60,6 +61,27 @@ final class HaloTextView: NSTextView {
         }
         super.setSelectedRanges(ranges, affinity: affinity, stillSelecting: stillSelecting)
         setNeedsDisplay(visibleRect, avoidAdditionalLayout: true)
+    }
+
+    // The ghost isn't in the undo history, so it must be gone before undo
+    // or redo replays edits — otherwise their ranges are off by its length.
+    private var watchedUndoManager: UndoManager?
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        let center = NotificationCenter.default
+        if let old = watchedUndoManager {
+            center.removeObserver(self, name: .NSUndoManagerWillUndoChange, object: old)
+            center.removeObserver(self, name: .NSUndoManagerWillRedoChange, object: old)
+        }
+        watchedUndoManager = undoManager
+        guard let manager = undoManager else { return }
+        center.addObserver(self, selector: #selector(undoWillChange), name: .NSUndoManagerWillUndoChange, object: manager)
+        center.addObserver(self, selector: #selector(undoWillChange), name: .NSUndoManagerWillRedoChange, object: manager)
+    }
+
+    @objc private func undoWillChange(_ note: Notification) {
+        removeGhost()
     }
 
     override func shouldChangeText(in affectedCharRange: NSRange, replacementString: String?) -> Bool {
@@ -189,15 +211,27 @@ final class HaloTextView: NSTextView {
         if ghostRange != nil, !typed.isEmpty, !hasMarkedText(), replacementRange.location == NSNotFound, ghostText.hasPrefix(typed) {
             let remaining = String(ghostText.dropFirst(typed.count))
             removeGhost()
+            let insertAt = selectedRange().location
             insertTextCore(insert, replacementRange: replacementRange)
             FillStats.shared.typed += typed.count
+            // The word before may be a mistake; fixing it makes the rest of the ghost stale.
+            if typed.utf16.count == 1, let unit = typed.utf16.first, FixEngine.isBoundary(unit),
+               controller?.fixJustTyped(boundary: insertAt, lineFinished: false) == true {
+                controller?.requestFill()
+                return
+            }
             if !remaining.isEmpty { showGhost(remaining) } else { controller?.requestFill() }
             return
         }
         removeGhost()
+        let insertAt = replacementRange.location == NSNotFound ? selectedRange().location : replacementRange.location
         insertTextCore(insert, replacementRange: replacementRange)
         if !hasMarkedText() {
             FillStats.shared.typed += typed.count
+            // A word just ended: fix it if it's a mistake Halo is sure about.
+            if typed.utf16.count == 1, let unit = typed.utf16.first, FixEngine.isBoundary(unit) {
+                controller?.fixJustTyped(boundary: insertAt, lineFinished: false)
+            }
             controller?.requestFill()
         }
     }
@@ -254,8 +288,36 @@ final class HaloTextView: NSTextView {
 
     override func insertNewline(_ sender: Any?) {
         removeGhost()
+        let at = selectedRange().location
+        // Enter finishes a line you were writing: its sure fixes all apply.
+        let lineStart = ns.lineRange(for: NSRange(location: at, length: 0)).location
+        let writingIt = controller?.lastEditLocation.map { $0 >= lineStart && $0 <= at } ?? false
         insertNewlineCore()
+        controller?.fixJustTyped(boundary: at, lineFinished: writingIt)
         controller?.requestFill()
+    }
+
+    /// ⌥↩ applies the suggested fix on this line (or inserts a plain newline).
+    override func insertNewlineIgnoringFieldEditor(_ sender: Any?) {
+        if controller?.applySuggestedFix() == true { return }
+        super.insertNewlineIgnoringFieldEditor(sender)
+    }
+
+    @objc func applySuggestedFix(_ sender: Any?) {
+        if controller?.applySuggestedFix() != true { NSSound.beep() }
+    }
+
+    @objc func applyAllSuggestedFixes(_ sender: Any?) {
+        controller?.applyAllFixes()
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        let point = convert(event.locationInWindow, from: nil)
+        if event.clickCount == 1, let fix = controller?.fixHint(at: point) {
+            controller?.apply(fix)
+            return
+        }
+        super.mouseDown(with: event)
     }
 
     override func cancelOperation(_ sender: Any?) {

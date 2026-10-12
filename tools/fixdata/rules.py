@@ -20,8 +20,9 @@ LANGS = {}
 def rules(lang):
     return LANGS.setdefault(lang, {"rules": []})["rules"]
 
-def R(lang, rid, match, to, why, auto=False, undefined=None, module=None, when=None, unless=None):
+def R(lang, rid, match, to, why, auto=False, undefined=None, module=None, when=None, unless=None, strings=False):
     rule = {"id": f"{lang}.{rid}", "match": match, "with": to, "why": why}
+    if strings: rule["strings"] = True
     if auto: rule["auto"] = True
     if undefined: rule["undefined"] = undefined
     if module: rule["module"] = module
@@ -58,7 +59,7 @@ R("python", "os.exit", r"(?<![\w.])os\.exit(?=\s*\()", "sys.exit", "os has no ex
 R("python", "os.sleep", r"(?<![\w.])os\.sleep(?=\s*\()", "time.sleep", "Sleeping is time.sleep(seconds)", module="os")
 R("python", "os.copy", r"(?<![\w.])os\.(?:copy|copyfile|cp)(?=\s*\()", "shutil.copy", "Copying files is shutil.copy", module="os")
 R("python", "os.move", r"(?<![\w.])os\.(?:move|mv)(?=\s*\()", "shutil.move", "Moving files is shutil.move (or os.rename)", module="os")
-R("python", "os.cls", r"(?<![\w.])os\.system\(\s*([\"'])cls\1\s*\)", "os.system($1clear$1)", "cls is Windows; macOS clears the terminal with clear", auto=True, module="os")
+R("python", "os.cls", r"(?<![\w.])os\.system\(\s*([\"'])cls\1\s*\)", "os.system($1clear$1)", "cls is Windows; macOS clears the terminal with clear", auto=True, module="os", strings=True)
 py_mod("os.path", "exist isExist file_exists fileExists exits".split(), "exists", "os.path.exists(path) checks a path")
 py_mod("os.path", "combine concat join_path joinPath".split(), "join", "os.path.join() builds a path")
 py_mod("os.path", "size filesize file_size".split(), "getsize", "os.path.getsize(path) is a file's size")
@@ -269,12 +270,12 @@ R("python", "float x =", r"(?m)^([ \t]*)(?:float|double)[ \t]+([A-Za-z_]\w*)[ \t
 R("python", "str x =", r"(?m)^([ \t]*)(?:String|string|char)[ \t]+([A-Za-z_]\w*)[ \t]*=(?!=)", "$1$2: str =", "Python writes types after the name: x: str = …", auto=True)
 R("python", "bool x =", r"(?m)^([ \t]*)(?:bool|boolean)[ \t]+([A-Za-z_]\w*)[ \t]*=(?!=)", "$1$2: bool =", "Python writes types after the name: x: bool = …", auto=True)
 R("python", "// comment", r"(?m)^([ \t]*)//[ \t]?", "$1# ", "Python comments start with #", auto=True)
-R("python", "print py2", r"(?m)^([ \t]*)print[ \t]+(?![\s(=,.\[])(.+?)[ \t]*$", "$1print($2)", "In Python 3, print is a function: print(…)", auto=True)
+R("python", "print py2", r"(?m)^([ \t]*)print[ \t]+(?![\s(=,.\[])(.+?)[ \t]*$", "$1print($2)", "In Python 3, print is a function: print(…)", auto=True, strings=True)
 R("python", "except py2", r"(?m)^([ \t]*)except[ \t]+([\w.]+)[ \t]*,[ \t]*([A-Za-z_]\w*)[ \t]*:", "$1except $2 as $3:", "Python 3 writes except Error as name:", auto=True)
-R("python", "has_key", r"(?<![\w.])([A-Za-z_][\w.]*)\.(?:has_key|containsKey|hasKey)\(\s*([^()\n]+?)\s*\)", "$2 in $1", "Python checks keys with: key in dict", auto=True)
-R("python", "iteritems", r"\.(?:iteritems|iterItems)\(\)", ".items()", "Python 3 renamed it .items()", auto=True)
-R("python", "itervalues", r"\.itervalues\(\)", ".values()", "Python 3 renamed it .values()", auto=True)
-R("python", "iterkeys", r"\.iterkeys\(\)", ".keys()", "Python 3 renamed it .keys()", auto=True)
+R("python", "has_key", r"(?<![\w.])([A-Za-z_][\w.]*)\.(?:has_key|containsKey|hasKey)\(\s*([^()\n]+?)\s*\)", "$2 in $1", "Python checks keys with: key in dict", auto=True, strings=True)
+R("python", "iteritems", r"\.(?:iteritems|iterItems)\(\)", ".items()", "Python 3 renamed it .items()", auto=True, unless=r"\bdef\s+iteritems\b")
+R("python", "itervalues", r"\.itervalues\(\)", ".values()", "Python 3 renamed it .values()", auto=True, unless=r"\bdef\s+itervalues\b")
+R("python", "iterkeys", r"\.iterkeys\(\)", ".keys()", "Python 3 renamed it .keys()", auto=True, unless=r"\bdef\s+iterkeys\b")
 R("python", "if =", r"(?m)^([ \t]*(?:if|elif|while)[ \t]+[^=!<>()\n:]*?[^=!<>:+\-*/%&|^\s])[ \t]*=[ \t]*(?!=)", "$1 == ",
   "A comparison needs == (a single = assigns)", auto=True)
 R("python", ".push", r"\.push\(", ".append(", "Python lists use .append()", auto=True, unless=r"\bdef\s+push\b")
@@ -292,30 +293,30 @@ R("python", ".endsWith", r"\.(?:endsWith|ends_with|endWith)\(", ".endswith(", "P
 for name in ["length", "len", "Length"]:
     R("python", f".{name}", rf"(?<![\w.])([A-Za-z_][\w.]*(?:\[[^\]\n]*\])?)\.{name}\b(?![\w(=]|\s*=[^=])", "len($1)", "Python gets a length with len(x)", auto=True,
       unless=rf"\.{name}\s*=[^=]|\bdef\s+{name}\b|\b{name}\s*=[^=]|@property")
-R("python", ".size()", r"(?<![\w.])([A-Za-z_][\w.]*(?:\[[^\]\n]*\])?)\.(?:size|length|len|count|getLength|get_length|getSize|Size|Count|Length)\(\)", "len($1)",
-  "Python gets a length with len(x)", auto=True, unless=r"\bdef\s+(?:size|length|len|count|getLength|get_length|getSize|Size|Count|Length)\b")
+R("python", ".size()", r"(?<![\w.])([A-Za-z_][\w.]*(?:\[[^\]\n]*\])?)\.(?:size|length|len|getLength|get_length|getSize|Size|Length)\(\)", "len($1)",
+  "Python gets a length with len(x)", auto=True, unless=r"\bdef\s+(?:size|length|len|getLength|get_length|getSize|Size|Length)\b")
 R("python", ".includes", r"(?<![\w.])([A-Za-z_][\w.]*(?:\[[^\]\n]*\])?)\.(?:includes|contains)\(\s*([^()\n]+?)\s*\)", "$2 in $1", "Python checks membership with: item in collection",
   auto=True, unless=r"\bdef\s+(?:includes|contains)\b")
 R("python", ".indexOf", r"\.indexOf\(", ".index(", "Python lists and strings use .index() (strings also have .find())", unless=r"\bdef\s+indexOf\b")
 R("python", ".lastIndexOf", r"\.lastIndexOf\(", ".rindex(", "Python strings use .rindex() or .rfind()", unless=r"\bdef\s+lastIndexOf\b")
 R("python", ".toString", r"(?<![\w.])([A-Za-z_][\w.]*(?:\[[^\]\n]*\])?)\.(?:toString|to_string|toStr|ToString|tostring)\(\)", "str($1)", "Python converts to text with str(x)", auto=True,
   unless=r"\bdef\s+(?:toString|to_string|toStr|ToString|tostring)\b")
-R("python", ".equals", r"(?<![\w.])([A-Za-z_][\w.]*)\.equals\(\s*([^()\n]+?)\s*\)", "$1 == $2", "Python compares with ==", auto=True, unless=r"\bdef\s+equals\b")
+R("python", ".equals", r"(?<![\w.])([A-Za-z_][\w.]*)\.equals\(\s*([^()\n]+?)\s*\)", "$1 == $2", "Python compares with ==", auto=True, unless=r"\bdef\s+equals\b", strings=True)
 R("python", ".isEmpty", r"(?<![\w.])([A-Za-z_][\w.]*)\.(?:isEmpty|is_empty)\(\)", "not $1", "Empty collections are falsy: not x", auto=True, unless=r"\bdef\s+(?:isEmpty|is_empty)\b")
-R("python", ".charAt", r"(?<![\w.])([A-Za-z_][\w.]*)\.charAt\(\s*([^()\n]+?)\s*\)", "$1[$2]", "Python indexes strings with s[i]", auto=True, unless=r"\bdef\s+charAt\b")
+R("python", ".charAt", r"(?<![\w.])([A-Za-z_][\w.]*)\.charAt\(\s*([^()\n]+?)\s*\)", "$1[$2]", "Python indexes strings with s[i]", auto=True, unless=r"\bdef\s+charAt\b", strings=True)
 R("python", ".substring2", r"(?<![\w.])([A-Za-z_][\w.]*)\.(?:substring|substr|slice)\(\s*([^(),\n]+?)\s*,\s*([^()\n]+?)\s*\)", "$1[$2:$3]", "Python slices with s[start:end]", auto=True,
   unless=r"\bdef\s+(?:substring|substr|slice)\b")
 R("python", ".substring1", r"(?<![\w.])([A-Za-z_][\w.]*)\.(?:substring|substr)\(\s*([^(),\n]+?)\s*\)", "$1[$2:]", "Python slices with s[start:]", auto=True,
   unless=r"\bdef\s+(?:substring|substr)\b")
 R("python", ".replaceAll", r"\.replaceAll\(", ".replace(", "Python's .replace() already replaces every occurrence", auto=True, unless=r"\bdef\s+replaceAll\b")
-R("python", ".join", r"(?<![\w.])([A-Za-z_][\w.]*)\.join\(\s*(\"[^\"\n]*\"|'[^'\n]*')\s*\)", "$2.join($1)", "In Python the separator comes first: \", \".join(items)", auto=True)
-R("python", ".put", r"(?<![\w.])([A-Za-z_][\w.]*)\.put\(\s*([^,()\n]+?)\s*,\s*([^()\n]+?)\s*\)", "$1[$2] = $3", "Python dicts set values with d[key] = value", unless=r"\bdef\s+put\b|\bqueue\b|\bQueue\b")
+R("python", ".join", r"(?<![\w.])([A-Za-z_][\w.]*)\.join\(\s*(\"[^\"\n]*\"|'[^'\n]*')\s*\)", "$2.join($1)", "In Python the separator comes first: \", \".join(items)", auto=True, strings=True)
+R("python", ".put", r"(?<![\w.])([A-Za-z_][\w.]*)\.put\(\s*([^,()\n]+?)\s*,\s*([^()\n]+?)\s*\)", "$1[$2] = $3", "Python dicts set values with d[key] = value", unless=r"\bdef\s+put\b|\bqueue\b|\bQueue\b", strings=True)
 R("python", "= .sort()", r"(?<![\w.])([A-Za-z_]\w*)[ \t]*=[ \t]*([A-Za-z_][\w.]*)\.sort\(\s*\)", "$1 = sorted($2)",
   "list.sort() sorts in place and returns None; sorted() returns a new list")
 R("python", "= .reverse()", r"(?<![\w.])([A-Za-z_]\w*)[ \t]*=[ \t]*([A-Za-z_][\w.]*)\.reverse\(\s*\)", "$1 = list(reversed($2))",
   "list.reverse() works in place and returns None")
 R("python", "x = x.append", r"(?<![\w.])([A-Za-z_]\w*)[ \t]*=[ \t]*\1\.append\(", "$1.append(", "append() changes the list and returns None — don't assign it", auto=True)
-R("python", "^ power", r"([\w)\]]+)[ \t]*\^[ \t]*(\d+)\b", "$1 ** $2", "^ is XOR in Python; powers are **")
+R("python", "^ power", r"([\w)\]]+)[ \t]*\^[ \t]*([23])\b(?![\w.])", "$1 ** $2", "^ is XOR in Python; powers are **", unless=r"<<|>>|\b0x[0-9a-fA-F]|\^=|&\s*0x|~")
 
 LANGS["python"]["imports"] = {
     **{n: "from time import " + n for n in ["sleep", "perf_counter", "monotonic"]},
@@ -373,9 +374,9 @@ js_member("document", "getElementByTagName getElementsByTag".split(), "getElemen
 js_member("document", "querySelectAll selectAll querySelectorALL".split(), "querySelectorAll", "It's document.querySelectorAll")
 js_member("document", "querySelect".split(), "querySelector", "It's document.querySelector")
 js_member("document", "createElem newElement makeElement".split(), "createElement", "It's document.createElement")
-R("javascript", "getElementById #", r"getElementById\(\s*([\"'`])#([\w-]+)\1", "getElementById($1$2$1", "getElementById takes the id without #", auto=True)
-R("javascript", "getElementsByClassName .", r"getElementsByClassName\(\s*([\"'`])\.([\w-]+)\1", "getElementsByClassName($1$2$1", "getElementsByClassName takes the class without the dot", auto=True)
-R("javascript", "addEventListener on", r"addEventListener\(\s*([\"'`])on([a-z]+)\1", "addEventListener($1$2$1", "Event names have no “on”: \"click\", not \"onclick\"", auto=True)
+R("javascript", "getElementById #", r"getElementById\(\s*([\"'`])#([\w-]+)\1", "getElementById($1$2$1", "getElementById takes the id without #", auto=True, strings=True)
+R("javascript", "getElementsByClassName .", r"getElementsByClassName\(\s*([\"'`])\.([\w-]+)\1", "getElementsByClassName($1$2$1", "getElementsByClassName takes the class without the dot", auto=True, strings=True)
+R("javascript", "addEventListener on", r"addEventListener\(\s*([\"'`])on([a-z]+)\1", "addEventListener($1$2$1", "Event names have no “on”: \"click\", not \"onclick\"", auto=True, strings=True)
 R("javascript", "addEventListener call", r"addEventListener\(\s*([\"'`]\w+[\"'`])\s*,\s*([A-Za-z_$][\w$.]*)\(\)\s*\)", "addEventListener($1, $2)",
   "Pass the function itself; $2() runs it right away")
 R("javascript", "setTimeout call", r"\b(setTimeout|setInterval)\(\s*([A-Za-z_$][\w$.]*)\(\)\s*,", "$1($2,", "Pass the function itself; $2() runs it right away")
@@ -393,7 +394,6 @@ R("javascript", ".length()", r"\.length\(\)", ".length", ".length is a property 
 R("javascript", ".len", r"\.len\b(?:\(\))?", ".length", "It's .length", auto=True, unless=r"\blen\s*[:=(]")
 R("javascript", ".size()", r"\.(?:size|count)\(\)", ".length", "Arrays and strings use .length (Maps and Sets use .size)", unless=r"\b(?:size|count)\s*\(\s*\)\s*\{")
 R("javascript", ".push_back", r"\.(?:push_back|pushBack)\(", ".push(", "JavaScript arrays use .push()", auto=True)
-R("javascript", ".append", r"\.append\(", ".push(", "Arrays use .push() (DOM elements do have .append())")
 R("javascript", ".upper", r"\.(?:upper|toUpper|uppercase|to_upper)\(\)", ".toUpperCase()", "JavaScript strings use .toUpperCase()", auto=True)
 R("javascript", ".lower", r"\.(?:lower|toLower|lowercase|to_lower)\(\)", ".toLowerCase()", "JavaScript strings use .toLowerCase()", auto=True)
 R("javascript", ".strip", r"\.strip\(\)", ".trim()", "JavaScript strings use .trim()", auto=True)
@@ -420,20 +420,21 @@ R("javascript", "not", r"(?<![\w$.])not[ \t]+(?=[\w$(\[])", "!", "JavaScript wri
 R("javascript", "self.", r"(?<![\w$.])(self)\.", "this.", "Methods use this, not self", undefined=1, unless=r"postMessage|importScripts|onmessage")
 R("javascript", "module.export", r"(?<![\w$.])module\.export\b(?!s)", "module.exports", "It's module.exports (with an s)", auto=True)
 R("javascript", "->", r"\)[ \t]*->[ \t]*(?=[{(\w])", ") => ", "Arrow functions use =>", auto=True)
-R("javascript", "if =", r"\bif[ \t]*\([ \t]*([\w$.]+)[ \t]*=[ \t]*(?![=>])", "if ($1 === ", "A comparison needs === (a single = assigns)")
-R("javascript", "len()", r"(?<![\w$.])(len)\(\s*([^()]+?)\s*\)", "$2.length", "JavaScript gets a length with x.length", auto=True, undefined=1)
+R("javascript", "if =", r"\bif[ \t]*\([ \t]*([\w$.]+)[ \t]*=[ \t]*(?![=>])([\w$.'\"-]+)[ \t]*\)", "if ($1 === $2)", "A comparison needs === (a single = assigns)", strings=True)
+R("javascript", "len()", r"(?<![\w$.])(len)\(\s*([^()]+?)\s*\)", "$2.length", "JavaScript gets a length with x.length", auto=True, undefined=1, strings=True)
 R("javascript", "str()", r"(?<![\w$.])(str)\(", "String(", "JavaScript converts to text with String(x)", auto=True, undefined=1)
 R("javascript", "int()", r"(?<![\w$.])(int)\(", "parseInt(", "JavaScript converts to a whole number with parseInt(x)", auto=True, undefined=1)
 R("javascript", "float()", r"(?<![\w$.])(float)\(", "parseFloat(", "JavaScript converts to a number with parseFloat(x)", auto=True, undefined=1)
-R("javascript", "type()", r"(?<![\w$.])(type)\(\s*([^()]+?)\s*\)", "typeof $2", "JavaScript checks types with typeof x", undefined=1)
+R("javascript", "type()", r"(?<![\w$.])(type)\(\s*([^()]+?)\s*\)", "typeof $2", "JavaScript checks types with typeof x", undefined=1, strings=True)
 R("javascript", "input()", r"(?<![\w$.])(input)\(", "prompt(", "Browsers ask with prompt()", undefined=1)
-R("javascript", "for in", r"\bfor[ \t]*\([ \t]*(const|let|var)[ \t]+(\w+)[ \t]+in[ \t]+", "for ($1 $2 of ", "for…in gives keys/indexes; for…of gives the values")
-R("javascript", "typeof array", r"\btypeof[ \t]+([\w$.]+)[ \t]*===?[ \t]*([\"'`])array\2", "Array.isArray($1)", "typeof never says \"array\"; use Array.isArray(x)", auto=True)
-R("javascript", "typeof null", r"\btypeof[ \t]+([\w$.]+)[ \t]*===?[ \t]*([\"'`])null\2", "$1 === null", "typeof null is \"object\"; compare with === null", auto=True)
+R("javascript", "for in", r"\bfor[ \t]*\([ \t]*(const|let|var)[ \t]+(\w+)[ \t]+in[ \t]+(?=\[|[\w$.]+\.(?:split|map|filter|slice|concat)\(|Array\.from\()", "for ($1 $2 of ",
+  "for…in gives the indexes; for…of gives the values")
+R("javascript", "typeof array", r"\btypeof[ \t]+([\w$.]+)[ \t]*===?[ \t]*([\"'`])array\2", "Array.isArray($1)", "typeof never says \"array\"; use Array.isArray(x)", auto=True, strings=True)
+R("javascript", "typeof null", r"\btypeof[ \t]+([\w$.]+)[ \t]*===?[ \t]*([\"'`])null\2", "$1 === null", "typeof null is \"object\"; compare with === null", auto=True, strings=True)
 R("javascript", "== NaN", r"([\w$.]+)[ \t]*===?[ \t]*NaN\b", "Number.isNaN($1)", "Nothing equals NaN, not even NaN; use Number.isNaN(x)", auto=True)
-R("javascript", "fetch.json", r"\bfetch\(([^()]*)\)\.json\(\)", "(await fetch($1)).json()", "fetch() returns a promise; await it before .json()")
+R("javascript", "fetch.json", r"\bfetch\(([^()]*)\)\.json\(\)", "(await fetch($1)).json()", "fetch() returns a promise; await it before .json()", strings=True)
 R("javascript", "throw str", r"(?m)^([ \t]*)raise[ \t]+", "$1throw ", "JavaScript throws errors with throw", auto=True, unless=r"\braise\s*\(")
-R("javascript", "^ power", r"([\w$)\]]+)[ \t]*\^[ \t]*(\d+)\b", "$1 ** $2", "^ is XOR in JavaScript; powers are **")
+R("javascript", "^ power", r"([\w$)\]]+)[ \t]*\^[ \t]*([23])\b(?![\w.])", "$1 ** $2", "^ is XOR in JavaScript; powers are **", unless=r"<<|>>|\b0x[0-9a-fA-F]|\^=|~")
 LANGS["javascript"]["builtins"] = ["require", "module", "exports", "process", "Buffer", "__dirname", "__filename", "global", "document", "window",
     "localStorage", "sessionStorage", "navigator", "location", "history", "console", "fetch", "alert", "confirm", "prompt", "setTimeout",
     "setInterval", "clearTimeout", "clearInterval", "requestAnimationFrame", "cancelAnimationFrame", "addEventListener", "event",
@@ -458,30 +459,30 @@ LANGS["javascript"]["keywords"] = """break case catch class const continue debug
 # ---------------------------------------------------------------- C and C++
 
 C_HEADERS = "stdio stdlib string math time ctype stdbool stdint limits assert errno signal stdarg stddef float locale setjmp unistd pthread fcntl dirent".split()
-R("c", "#include no .h", rf"(?m)^([ \t]*#[ \t]*include[ \t]*)<({alt(C_HEADERS)})>", "$1<$2.h>", "C headers end in .h: <$2.h>", auto=True)
+R("c", "#include no .h", rf"(?m)^([ \t]*#[ \t]*include[ \t]*)<({alt(C_HEADERS)})>", "$1<$2.h>", "C headers end in .h: <$2.h>", auto=True, strings=True)
 R("c", "#include typo", r"(?m)^([ \t]*)#[ \t]*(?:incldue|inlcude|inculde|includ|incude|inclde|Include|INCLUDE|imclude|icnlude|incluce|inclue)\b", "$1#include", "It's #include", auto=True)
 R("c", "#define typo", r"(?m)^([ \t]*)#[ \t]*(?:defien|defnie|definr|defin|Define|DEFINE|deifne)\b", "$1#define", "It's #define", auto=True)
 R("c", "#define =", r"(?m)^([ \t]*#[ \t]*define[ \t]+\w+)[ \t]*=[ \t]*", "$1 ", "#define takes no =: #define NAME value", auto=True)
 R("c", "#define ;", r"(?m)^([ \t]*#[ \t]*define[ \t]+\w+[ \t]+[^;\n]+?);[ \t]*$", "$1", "A ; in a #define ends up in every use")
-R("c", "malloc.h", r"(?m)^([ \t]*#[ \t]*include[ \t]*)<malloc\.h>", "$1<stdlib.h>", "macOS has malloc in <stdlib.h>", auto=True)
-R("c", "conio.h", r"(?m)^[ \t]*#[ \t]*include[ \t]*<conio\.h>[ \t]*\n?", "", "conio.h is Windows-only; macOS doesn't have it")
+R("c", "malloc.h", r"(?m)^([ \t]*#[ \t]*include[ \t]*)<malloc\.h>", "$1<stdlib.h>", "macOS has malloc in <stdlib.h>", auto=True, strings=True)
+R("c", "conio.h", r"(?m)^[ \t]*#[ \t]*include[ \t]*<conio\.h>[ \t]*\n?", "", "conio.h is Windows-only; macOS doesn't have it", strings=True)
 R("c", "print", r"(?<![\w.])(print|println|printLn|print_line|printline|Print|PRINT|prinf|writeln|echo)(?=\s*\()", "printf", "C prints with printf()", auto=True, undefined=1)
 R("c", "console.log", r"(?<![\w.])(console)\.log(?=\s*\()", "printf", "C prints with printf()", auto=True, undefined=1)
 R("c", "scanf &", r"\bscanf\(\s*(\"[^\"%]*%(?:d|i|u|f|lf|c|ld|lld|hd|x|o|e|g|zu)[^\"]*\")\s*,\s*([A-Za-z_]\w*)\s*\)", "scanf($1, &$2)",
   "scanf needs the variable's address: &$2")
-R("c", "gets", r"(?<![\w.])gets\(\s*(\w+)\s*\)", "fgets($1, sizeof $1, stdin)", "gets() can overflow the buffer and was removed from C; fgets() is safe")
+R("c", "gets", r"(?<![\w.])gets\(\s*(\w+)\s*\)", "fgets($1, sizeof $1, stdin)", "gets() can overflow the buffer and was removed from C; fgets() is safe", strings=True)
 R("c", "strlen alias", r"(?<![\w.])(strlength|string_length|len|length|strlenght|str_len|strLen|lenght)(?=\s*\()", "strlen", "C measures strings with strlen()", auto=True, undefined=1)
 R("c", "strcmp alias", r"(?<![\w.])(strcompare|string_compare|strequals|str_equals|strEquals|strcmpi)(?=\s*\()", "strcmp", "C compares strings with strcmp()", auto=True, undefined=1)
 R("c", "strcpy alias", r"(?<![\w.])(strcopy|string_copy|str_copy)(?=\s*\()", "strcpy", "C copies strings with strcpy()", auto=True, undefined=1)
 R("c", "strcat alias", r"(?<![\w.])(strconcat|strappend|str_concat|string_concat)(?=\s*\()", "strcat", "C joins strings with strcat()", auto=True, undefined=1)
 R("c", "Sleep", r"(?<![\w.])(Sleep)\(\s*(\d+)\s*\)", "usleep($2 * 1000)", "Sleep(ms) is Windows; usleep() takes microseconds (<unistd.h>)", undefined=1)
-R("c", "pause", r"\bsystem\(\s*\"pause\"\s*\)", "getchar()", "system(\"pause\") is Windows; getchar() waits for Enter")
-R("c", "cls", r"\bsystem\(\s*\"cls\"\s*\)", "system(\"clear\")", "cls is Windows; macOS clears with clear", auto=True)
+R("c", "pause", r"\bsystem\(\s*\"pause\"\s*\)", "getchar()", "system(\"pause\") is Windows; getchar() waits for Enter", strings=True)
+R("c", "cls", r"\bsystem\(\s*\"cls\"\s*\)", "system(\"clear\")", "cls is Windows; macOS clears with clear", auto=True, strings=True)
 R("c", "getch", r"(?<![\w.])(getch|getche)\(\s*\)", "getchar()", "getch() is from Windows' conio.h; getchar() reads a key", undefined=1)
 R("c", "void main", r"\bvoid[ \t]+main[ \t]*\(", "int main(", "main must return int", auto=True)
-R("c", "main()", r"(?m)^main[ \t]*\(", "int main(", "main must return int", auto=True)
+R("c", "main()", r"(?m)(?<!\b(?:int|void|char|long|short|unsigned|signed|static|extern|double|float)[ \t*]{0,8}\n)^main[ \t]*\(", "int main(", "main must return int", auto=True)
 R("c", "mian", r"(?<![\w.])mian(?=[ \t]*\()", "main", "Did you mean main?", auto=True, unless=r"\bmain\s*\(")
-R("c", "exit()", r"(?<![\w.])exit\(\s*\)", "exit(0)", "exit() needs a status: exit(0)", auto=True)
+R("c", "exit()", r"(?<![\w.])(?<!\bvoid[ \t])exit\(\s*\)(?=[ \t]*;)", "exit(0)", "exit() needs a status: exit(0)", auto=True, unless=r"\bvoid[ \t]+exit\b")
 R("c", "True", r"(?<![\w.'\"])(True|TRUE)(?![\w'\"])", "true", "C writes true in lowercase (<stdbool.h>)", auto=True, undefined=1)
 R("c", "False", r"(?<![\w.'\"])(False|FALSE)(?![\w'\"])", "false", "C writes false in lowercase (<stdbool.h>)", auto=True, undefined=1)
 R("c", "NULL", r"(?<![\w.'\"])(null|Null|nil|None|nullptr|NUll|Nul)(?![\w'\"])", "NULL", "C's null pointer is NULL", auto=True, undefined=1)
@@ -490,22 +491,22 @@ R("c", "and", r"(?<=[\w)\]'\"])[ \t]+and[ \t]+(?=[\w(!'\"])", " && ", "C writes 
 R("c", "or", r"(?<=[\w)\]'\"])[ \t]+or[ \t]+(?=[\w(!'\"])", " || ", "C writes or as ||", auto=True, unless=r"iso646")
 R("c", "not", r"(?<![\w.])not[ \t]+(?=[\w(])", "!", "C writes not as !", auto=True, unless=r"iso646")
 R("c", "string type", r"(?<![\w.])string[ \t]+(\w+)", "char *$1", "C has no string type; text is char * (or char name[size])", unless=r"\btypedef\b[^;]*\bstring\s*;")
-R("c", "char =\"", r"\bchar[ \t]+(\w+)[ \t]*=[ \t]*\"", "char $1[] = \"", "Text needs a char array: char $1[] = \"…\"", auto=True)
+R("c", "char =\"", r"\bchar[ \t]+(\w+)[ \t]*=[ \t]*\"", "char $1[] = \"", "Text needs a char array: char $1[] = \"…\"", auto=True, strings=True)
 R("c", "array []", r"(=[ \t]*)\[([^\]\n]*)\][ \t]*;", "$1{$2};", "C writes array values in braces: { … }", auto=True)
-R("c", "if =", r"\bif[ \t]*\([ \t]*([\w.\[\]>-]+)[ \t]*=[ \t]*(?!=)([^)=\n]+)\)", "if ($1 == $2)", "A comparison needs == (a single = assigns)")
-R("c", "loop ;", r"(?m)^([ \t]*(?:for|while)[ \t]*\(.*\))[ \t]*;[ \t]*$", "$1", "This ; ends the loop right here, so its body runs only once")
-R("c", "^ power", r"([\w)\]]+)[ \t]*\^[ \t]*2\b", "$1 * $1", "^ is XOR in C; to square, multiply (or pow(x, 2))")
+R("c", "if =", r"\bif[ \t]*\([ \t]*([\w.\[\]>-]+)[ \t]*=[ \t]*(?!=)([\w.'\"-]+)[ \t]*\)", "if ($1 == $2)", "A comparison needs == (a single = assigns)", strings=True)
+R("c", "loop ;", r"(?m)^([ \t]*)((?:for|while)[ \t]*\(.*\))[ \t]*;[ \t]*(?=\n\1[ \t]+\S)", "$1$2", "This ; ends the loop right here, so the indented line below runs only once")
+R("c", "^ power", r"([\w)\]]+)[ \t]*\^[ \t]*2\b(?![\w.])", "$1 * $1", "^ is XOR in C; to square, multiply (or pow(x, 2))")
 
 CPP_HEADERS = {"stdio": "cstdio", "stdlib": "cstdlib", "math": "cmath", "time": "ctime", "ctype": "cctype", "stdint": "cstdint", "limits": "climits",
                "assert": "cassert", "errno": "cerrno", "stddef": "cstddef", "float": "cfloat", "stdarg": "cstdarg"}
 for c, cpp in CPP_HEADERS.items():
-    R("cpp", f"#include <{c}>", rf"(?m)^([ \t]*#[ \t]*include[ \t]*)<{c}>", f"$1<{cpp}>", f"In C++ it's <{cpp}> (or <{c}.h>)", auto=True)
+    R("cpp", f"#include <{c}>", rf"(?m)^([ \t]*#[ \t]*include[ \t]*)<{c}>", f"$1<{cpp}>", f"In C++ it's <{cpp}> (or <{c}.h>)", auto=True, strings=True)
 R("cpp", "#include typo", r"(?m)^([ \t]*)#[ \t]*(?:incldue|inlcude|inculde|includ|incude|inclde|Include|INCLUDE|imclude|icnlude|incluce|inclue)\b", "$1#include", "It's #include", auto=True)
-R("cpp", "iostream.h", r"(?m)^([ \t]*#[ \t]*include[ \t]*)<iostream\.h>", "$1<iostream>", "Modern C++ headers have no .h: <iostream>", auto=True)
+R("cpp", "iostream.h", r"(?m)^([ \t]*#[ \t]*include[ \t]*)<iostream\.h>", "$1<iostream>", "Modern C++ headers have no .h: <iostream>", auto=True, strings=True)
 R("cpp", "bits/stdc++", r"(?m)^[ \t]*#[ \t]*include[ \t]*<bits/stdc\+\+\.h>",
   "#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\n#include <map>\n#include <set>\n#include <cmath>",
-  "macOS's compiler has no <bits/stdc++.h>; these are the headers it stands for", auto=True)
-R("cpp", "malloc.h", r"(?m)^([ \t]*#[ \t]*include[ \t]*)<malloc\.h>", "$1<cstdlib>", "macOS has malloc in <cstdlib>", auto=True)
+  "macOS's compiler has no <bits/stdc++.h>; these are the headers it stands for", auto=True, strings=True)
+R("cpp", "malloc.h", r"(?m)^([ \t]*#[ \t]*include[ \t]*)<malloc\.h>", "$1<cstdlib>", "macOS has malloc in <cstdlib>", auto=True, strings=True)
 R("cpp", "cout >>", r"\b((?:std::)?cout)[ \t]*>>", "$1 <<", "Output goes into cout with <<", auto=True)
 R("cpp", "cin <<", r"\b((?:std::)?cin)[ \t]*<<", "$1 >>", "Input comes out of cin with >>", auto=True)
 R("cpp", "std::", r"(?<![\w:.])(cout|cin|cerr|endl|getline)\b", "std::$1", "$1 lives in std:: (or add using namespace std;)", unless=r"using\s+namespace\s+std|using\s+std::")
@@ -516,12 +517,12 @@ R("cpp", "elif", r"(?m)^([ \t]*\}?[ \t]*)(?:elif|elsif|elseif|elseIf)\b", "$1els
 R("cpp", "void main", r"\bvoid[ \t]+main[ \t]*\(", "int main(", "main must return int", auto=True)
 R("cpp", "mian", r"(?<![\w.])mian(?=[ \t]*\()", "main", "Did you mean main?", auto=True, unless=r"\bmain\s*\(")
 R("cpp", ".push", r"\.push\(", ".push_back(", "Vectors add with .push_back() (stacks and queues use .push())", unless=r"\b(?:stack|queue|priority_queue)\s*<")
-R("cpp", ".length", r"\.length\b(?![\w(])", ".length()", "In C++ length() is a function", unless=r"\blength\s*[;=]")
+R("cpp", ".length", r"\.length\b(?![\w(])", ".length()", "In C++ length() is a function", unless=r"\blength\s*[;=]", strings=True)
 R("cpp", "print", r"(?<![\w.:])(print|println)(?=\s*\()", "printf", "C++ prints with std::cout << … or printf()", undefined=1)
 R("cpp", "array []", r"(=[ \t]*)\[([^\]\n]*)\][ \t]*;", "$1{$2};", "C++ writes values in braces: { … }", auto=True)
-R("cpp", "string.h", r"(?m)^([ \t]*#[ \t]*include[ \t]*)<string\.h>", "$1<string>", "std::string is in <string> (<string.h> is C's)", when=r"std::string|\bstring\s+\w")
-R("cpp", "if =", r"\bif[ \t]*\([ \t]*([\w.\[\]>-]+)[ \t]*=[ \t]*(?!=)([^)=\n]+)\)", "if ($1 == $2)", "A comparison needs == (a single = assigns)")
-R("cpp", "^ power", r"([\w)\]]+)[ \t]*\^[ \t]*2\b", "$1 * $1", "^ is XOR in C++; to square, multiply (or pow(x, 2))")
+R("cpp", "string.h", r"(?m)^([ \t]*#[ \t]*include[ \t]*)<string\.h>", "$1<string>", "std::string is in <string> (<string.h> is C's)", when=r"std::string|\bstring\s+\w", strings=True)
+R("cpp", "if =", r"\bif[ \t]*\([ \t]*([\w.\[\]>-]+)[ \t]*=[ \t]*(?!=)([\w.'\"-]+)[ \t]*\)", "if ($1 == $2)", "A comparison needs == (a single = assigns)", strings=True)
+R("cpp", "^ power", r"([\w)\]]+)[ \t]*\^[ \t]*2\b(?![\w.])", "$1 * $1", "^ is XOR in C++; to square, multiply (or pow(x, 2))")
 
 C_INCLUDES = {
     "stdio.h": "printf scanf fprintf fscanf sprintf snprintf sscanf puts fputs fgets putchar getchar fopen fclose fread fwrite fseek ftell rewind perror fflush getline FILE EOF stdin stdout stderr",
@@ -564,8 +565,8 @@ R("java", "Int type", r"(?<![\w.])(?:Int|integer)(?=[ \t]+[a-z]\w*[ \t]*[=;,)])"
 R("java", "Integer.parse", r"\bInteger\.(?:parse|parseInteger|fromString|toInt|parseint|ParseInt)(?=\s*\()", "Integer.parseInt", "It's Integer.parseInt(text)", auto=True)
 R("java", "Double.parse", r"\bDouble\.(?:parse|parsedouble|ParseDouble|toDouble)(?=\s*\()", "Double.parseDouble", "It's Double.parseDouble(text)", auto=True)
 R("java", "Thread.wait", r"\bThread\.(?:wait|delay|pause)(?=\s*\()", "Thread.sleep", "It's Thread.sleep(milliseconds)", auto=True)
-R("java", "string ==", r"(?<![\w.])([A-Za-z_][\w.]*(?:\(\))?)[ \t]*==[ \t]*(\"(?:[^\"\\\n]|\\.)*\")", "$1.equals($2)", "== compares objects, not text; use .equals()")
-R("java", "string !=", r"(?<![\w.])([A-Za-z_][\w.]*(?:\(\))?)[ \t]*!=[ \t]*(\"(?:[^\"\\\n]|\\.)*\")", "!$1.equals($2)", "!= compares objects, not text; use !….equals()")
+R("java", "string ==", r"(?<![\w.])([A-Za-z_][\w.]*(?:\(\))?)[ \t]*==[ \t]*(\"(?:[^\"\\\n]|\\.)*\")", "$1.equals($2)", "== compares objects, not text; use .equals()", strings=True)
+R("java", "string !=", r"(?<![\w.])([A-Za-z_][\w.]*(?:\(\))?)[ \t]*!=[ \t]*(\"(?:[^\"\\\n]|\\.)*\")", "!$1.equals($2)", "!= compares objects, not text; use !….equals()", strings=True)
 R("java", "True", r"(?<![\w.'\"])(True|TRUE)(?![\w'\"])", "true", "Java writes true in lowercase", auto=True, undefined=1)
 R("java", "False", r"(?<![\w.'\"])(False|FALSE)(?![\w'\"])", "false", "Java writes false in lowercase", auto=True, undefined=1)
 R("java", "null", r"(?<![\w.'\"])(None|nil|NULL|Null|nullptr|undefined)(?![\w'\"])", "null", "Java's “nothing” is null", auto=True, undefined=1)
@@ -574,7 +575,7 @@ R("java", "and", r"(?<=[\w)\]'\"])[ \t]+and[ \t]+(?=[\w(!'\"])", " && ", "Java w
 R("java", "or", r"(?<=[\w)\]'\"])[ \t]+or[ \t]+(?=[\w(!'\"])", " || ", "Java writes or as ||", auto=True)
 R("java", "not", r"(?<![\w.])not[ \t]+(?=[\w(])", "!", "Java writes not as !", auto=True)
 R("java", "mian", r"\bstatic[ \t]+void[ \t]+mian(?=[ \t]*\()", "static void main", "Did you mean main?", auto=True)
-R("java", "^ power", r"([\w)\]]+)[ \t]*\^[ \t]*(\d+)\b", "Math.pow($1, $2)", "^ is XOR in Java; powers are Math.pow(x, y)")
+R("java", "^ power", r"([\w)\]]+)[ \t]*\^[ \t]*([23])\b(?![\w.])", "Math.pow($1, $2)", "^ is XOR in Java; powers are Math.pow(x, y)", unless=r"<<|>>|\b0x[0-9a-fA-F]|\^=|~")
 LANGS["java"]["imports"] = {
     **{n: f"import java.util.{n};" for n in "Scanner ArrayList List HashMap Map HashSet Set Random Arrays Collections LinkedList Queue Deque ArrayDeque Iterator Optional Stack TreeMap TreeSet PriorityQueue Objects".split()},
     **{n: f"import java.io.{n};" for n in "File FileReader BufferedReader InputStreamReader IOException FileWriter PrintWriter".split()},
@@ -604,14 +605,13 @@ LANGS["java"]["methods"] = "println print printf equals equalsIgnoreCase length 
 R("swift", "println", r"(?<![\w.])(println)(?=\s*\()", "print", "Swift prints with print()", auto=True, undefined=1)
 R("swift", "console.log", r"(?<![\w.])(console)\.log(?=\s*\()", "print", "Swift prints with print()", auto=True, undefined=1)
 R("swift", "System.out", r"(?<![\w.])(System)\.out\.print(?:ln)?(?=\s*\()", "print", "Swift prints with print()", auto=True, undefined=1)
-R("swift", ".count()", r"\.count\(\)", ".count", ".count is a property — no ()", auto=True)
-R("swift", ".length", r"\.(?:length|size|len)\b(?:\(\))?", ".count", "Swift collections and strings use .count", auto=True, unless=r"\b(?:var|let)\s+(?:length|size|len)\b|\bfunc\s+(?:length|size|len)\b")
-R("swift", ".push", r"\.(?:push|push_back|pushBack)\(", ".append(", "Swift arrays use .append()", auto=True, unless=r"\bfunc\s+(?:push|push_back|pushBack)\b")
-R("swift", ".add", r"\.add\(", ".append(", "Arrays use .append() (Sets use .insert())", unless=r"\bfunc\s+add\b")
+R("swift", ".length()", r"\.(?:length|size|len|count)\(\)|\.len\b", ".count", "Swift collections and strings use .count", auto=True, unless=r"\bfunc\s+(?:length|size|len|count)\b|\b(?:var|let)\s+len\b")
+R("swift", ".length", r"\.length\b(?!\s*\()", ".count", "Swift collections and strings use .count", auto=True, unless=r"(?m)^\s*import\s+(?:Foundation|AppKit|UIKit|Cocoa|SwiftUI|CoreGraphics)\b|\b(?:var|let)\s+length\b")
+R("swift", ".push_back", r"\.(?:push_back|pushBack)\(", ".append(", "Swift arrays use .append()", auto=True)
 R("swift", ".toUpperCase", r"\.(?:toUpperCase|upper|toUpper|uppercase)\(\)", ".uppercased()", "Swift strings use .uppercased()", auto=True)
 R("swift", ".toLowerCase", r"\.(?:toLowerCase|lower|toLower|lowercase)\(\)", ".lowercased()", "Swift strings use .lowercased()", auto=True)
 R("swift", ".trim", r"\.(?:trim|strip)\(\)", ".trimmingCharacters(in: .whitespacesAndNewlines)", "Swift trims with .trimmingCharacters(in:)", auto=True)
-R("swift", ".includes", r"\.includes\(", ".contains(", "Swift uses .contains()", auto=True)
+R("swift", ".includes", r"\.includes\(", ".contains(", "Swift uses .contains()", auto=True, strings=True)
 R("swift", ".indexOf", r"\.indexOf\(", ".firstIndex(of: ", "Swift finds positions with .firstIndex(of:)", auto=True)
 R("swift", ".startsWith", r"\.(?:startsWith|startswith)\(", ".hasPrefix(", "Swift strings use .hasPrefix()", auto=True)
 R("swift", ".endsWith", r"\.(?:endsWith|endswith)\(", ".hasSuffix(", "Swift strings use .hasSuffix()", auto=True)
@@ -624,10 +624,10 @@ R("swift", "const", r"(?m)^([ \t]*)const[ \t]+", "$1let ", "Swift constants use 
 R("swift", "and", r"(?<=[\w)\]'\"])[ \t]+and[ \t]+(?=[\w(!'\"])", " && ", "Swift writes and as &&", auto=True)
 R("swift", "or", r"(?<=[\w)\]'\"])[ \t]+or[ \t]+(?=[\w(!'\"])", " || ", "Swift writes or as ||", auto=True)
 R("swift", "not", r"(?<![\w.])not[ \t]+(?=[\w(])", "!", "Swift writes not as !", auto=True)
-R("swift", "Int(readLine())", r"\b(Int|Double)\(\s*readLine\(\)\s*\)", "$1(readLine() ?? \"\")", "readLine() can return nil; give it a fallback", auto=True)
+R("swift", "Int(readLine())", r"\b(Int|Double)\(\s*readLine\(\)\s*\)", "$1(readLine() ?? \"\")", "readLine() can return nil; give it a fallback", auto=True, strings=True)
 R("swift", "sleep fraction", r"(?<![\w.])sleep\(\s*(\d+\.\d+)\s*\)", "Thread.sleep(forTimeInterval: $1)", "sleep() takes whole seconds; Thread.sleep(forTimeInterval:) takes fractions", auto=True)
 LANGS["swift"]["keywords"] = "associatedtype class deinit enum extension fileprivate func import init inout internal let open operator private protocol public rethrows static struct subscript typealias var break case continue default defer do else fallthrough for guard if in repeat return switch where while as catch is super throw throws try async await actor some any".split()
-LANGS["swift"]["builtins"] = "print Int String Double Float Bool Array Dictionary Set Character Optional Result Error true false nil self Self min max abs zip stride readLine".split()
+LANGS["swift"]["builtins"] = "error newValue oldValue print Int String Double Float Bool Array Dictionary Set Character Optional Result Error true false nil self Self min max abs zip stride readLine".split()
 LANGS["swift"]["methods"] = "append count isEmpty contains first last map filter reduce sorted sort insert remove removeAll removeFirst removeLast joined split uppercased lowercased hasPrefix hasSuffix replacingOccurrences trimmingCharacters description keys values enumerated reversed firstIndex lastIndex compactMap flatMap forEach prefix suffix dropFirst dropLast".split()
 
 # ---------------------------------------------------------------- Go
@@ -638,15 +638,15 @@ R("go", "nil", r"(?<![\w.'\"])(None|null|NULL|Null|nullptr|undefined)(?![\w'\"])
 R("go", "True", r"(?<![\w.'\"])(True|TRUE)(?![\w'\"])", "true", "Go writes true in lowercase", auto=True, undefined=1)
 R("go", "False", r"(?<![\w.'\"])(False|FALSE)(?![\w'\"])", "false", "Go writes false in lowercase", auto=True, undefined=1)
 R("go", "elif", r"(?m)^([ \t]*\}?[ \t]*)(?:elif|elsif|elseif|elseIf)\b", "$1else if", "Go writes it else if", auto=True)
-R("go", "def", r"(?m)^([ \t]*)(?:def|function|fun|fn)[ \t]+(\w+)[ \t]*\(", "$1func $2(", "Go defines functions with func", auto=True)
+R("go", "def", r"(?m)^([ \t]*)(?:def|function|fun|fn)[ \t]+(?!func\b|struct\b|interface\b|map\b|chan\b)(\w+)[ \t]*\(", "$1func $2(", "Go defines functions with func", auto=True)
 R("go", "while", r"(?m)^([ \t]*)while\b[ \t]*", "$1for ", "Go has no while; for does it all", auto=True)
 R("go", "and", r"(?<=[\w)\]'\"])[ \t]+and[ \t]+(?=[\w(!'\"])", " && ", "Go writes and as &&", auto=True)
 R("go", "or", r"(?<=[\w)\]'\"])[ \t]+or[ \t]+(?=[\w(!'\"])", " || ", "Go writes or as ||", auto=True)
 R("go", "not", r"(?<![\w.])not[ \t]+(?=[\w(])", "!", "Go writes not as !", auto=True)
 R("go", "console.log", r"(?<![\w.])(console)\.log(?=\s*\()", "fmt.Println", "Go prints with fmt.Println()", auto=True, undefined=1)
-R("go", "print", r"(?<![\w.])print(?:ln)?(?=\s*\()", "fmt.Println", "print() writes to stderr without formatting; fmt.Println() is the usual way")
-R("go", ".length", r"(?<![\w.])([A-Za-z_][\w.]*)\.(?:length|len|size|count|Len)\b(?:\(\))?", "len($1)", "Go gets a length with len(x)", auto=True, unless=r"\bfunc\s*\([^)]*\)\s*(?:length|len|size|count|Len)\b")
-R("go", ".append", r"(?<![\w.])([A-Za-z_][\w.]*)\.(?:append|push)\(([^()\n]*)\)", "$1 = append($1, $2)", "Go appends with x = append(x, item)", auto=True, unless=r"\bfunc\s*\([^)]*\)\s*(?:append|push)\b")
+R("go", "print", r"(?<![\w.])print(?:ln)?(?=\s*\()", "fmt.Println", "print() writes to stderr without formatting; fmt.Println() is the usual way", when=r"\"fmt\"")
+R("go", ".length", r"(?<![\w.])([A-Za-z_][\w.]*)\.(?:length\b(?:\(\))?|(?:size|len|count)\(\))", "len($1)", "Go gets a length with len(x)", auto=True, unless=r"\bfunc\s*\([^)]*\)\s*(?:length|size|len|count)\b|^\s*length\s+\w")
+R("go", ".append", r"(?<![\w.])([A-Za-z_][\w.]*)\.(?:append|push)\(([^()\n]*)\)", "$1 = append($1, $2)", "Go appends with x = append(x, item)", auto=True, unless=r"\bfunc\s*\([^)]*\)\s*(?:append|push)\b", strings=True)
 LANGS["go"]["members"] = {
     "fmt": "Println Printf Print Sprintf Sprint Sprintln Errorf Scan Scanln Scanf Fprintf Fprintln Fprint Sscanf Sscan Stringer".split(),
     "strings": "Split Join Contains ToUpper ToLower TrimSpace Trim TrimLeft TrimRight TrimPrefix TrimSuffix Replace ReplaceAll HasPrefix HasSuffix Index LastIndex Fields Repeat Count EqualFold Title Builder NewReader NewReplacer SplitN Map".split(),
@@ -680,17 +680,31 @@ R("rust", "def", r"(?m)^([ \t]*)(?:def|function|func|fun)[ \t]+(\w+)[ \t]*\(", "
 R("rust", "and", r"(?<=[\w)\]'\"])[ \t]+and[ \t]+(?=[\w(!'\"])", " && ", "Rust writes and as &&", auto=True)
 R("rust", "or", r"(?<=[\w)\]'\"])[ \t]+or[ \t]+(?=[\w(!'\"])", " || ", "Rust writes or as ||", auto=True)
 R("rust", "not", r"(?<![\w.])not[ \t]+(?=[\w(])", "!", "Rust writes not as !", auto=True)
-R("rust", ".length", r"\.(?:length|size)\b(?:\(\))?", ".len()", "Rust uses .len()", auto=True, unless=r"\bfn\s+(?:length|size)\b")
+R("rust", ".length", r"\.(?:length|size)\b(?:\(\))?", ".len()", "Rust uses .len()", auto=True, unless=r"\bfn\s+(?:length|size)\b", strings=True)
 R("rust", ".add", r"\.(?:add|push_back|pushBack)\(", ".push(", "Vec adds with .push()", auto=True, unless=r"\bfn\s+(?:add|push_back|pushBack)\b|\bimpl\s+Add\b|HashSet|BTreeSet")
 R("rust", "String::new(\"", r"\bString::new\(\s*\"", "String::from(\"", "String::new() makes an empty string; String::from(\"…\") makes one with text", auto=True)
 R("rust", ".toUpperCase", r"\.(?:toUpperCase|upper|toUpper)\(\)", ".to_uppercase()", "Rust uses .to_uppercase()", auto=True)
 R("rust", ".toLowerCase", r"\.(?:toLowerCase|lower|toLower)\(\)", ".to_lowercase()", "Rust uses .to_lowercase()", auto=True)
 R("rust", ".strip", r"\.strip\(\)", ".trim()", "Rust uses .trim()", auto=True)
-R("rust", ".includes", r"\.includes\(", ".contains(", "Rust uses .contains()", auto=True)
+R("rust", ".includes", r"\.includes\(", ".contains(", "Rust uses .contains()", auto=True, strings=True)
 R("rust", ".toString", r"\.(?:toString|ToString|tostring)\(\)", ".to_string()", "Rust uses .to_string()", auto=True)
 LANGS["rust"]["keywords"] = "as async await break const continue crate dyn else enum extern fn for if impl in let loop match mod move mut pub ref return static struct super trait type unsafe use where while".split()
 LANGS["rust"]["builtins"] = "println print eprintln format vec panic assert assert_eq String Vec Option Result Some None Ok Err Box HashMap HashSet BTreeMap self Self true false".split()
 LANGS["rust"]["methods"] = "len push pop iter iter_mut into_iter map collect unwrap expect clone to_string as_str is_empty contains insert remove get sort sort_by join split trim chars bytes enumerate filter rev sum count min max find any all fold zip lines parse to_uppercase to_lowercase starts_with ends_with replace".split()
+
+# Short keyword slips the typo engine can't judge on its own (too short to measure).
+R("python", "slef", r"(?<![\w.])(?:slef|sefl|slf)(?=\s*[,).:=])", "self", "Did you mean self?", auto=True, unless=r"\b(?:slef|sefl|slf)\s*=[^=]")
+R("python", "form", r"(?m)^([ \t]*)(?:form|fomr|frmo|fron|frm|fromm)[ \t]+([\w.]+)[ \t]+import\b", "$1from $2 import", "Did you mean from?", auto=True)
+R("python", "fro", r"(?m)^([ \t]*)(?:fro|ofr|foor)[ \t]+(?=[\w, ()]+[ \t]+in\b)", "$1for ", "Did you mean for?", auto=True)
+R("python", "esle", r"(?m)^([ \t]*)(?:esle|eles|els|elze|ese)[ \t]*:", "$1else:", "Did you mean else?", auto=True)
+R("python", "dfe", r"(?m)^([ \t]*)(?:dfe|edf|fed|deff|deg)[ \t]+(\w+)[ \t]*\(", "$1def $2(", "Did you mean def?", auto=True)
+R("python", "fi", r"(?m)^([ \t]*)(?:fi|ifi|iff)[ \t]+(?=[^=\n]*:[ \t]*(?:#.*)?$)", "$1if ", "Did you mean if?", auto=True)
+R("c", "itn", r"(?m)^([ \t]*)(?:itn|nit|unt|imt)[ \t]+(?=[A-Za-z_*])", "$1int ", "Did you mean int?", auto=True)
+R("cpp", "itn", r"(?m)^([ \t]*)(?:itn|nit|unt|imt)[ \t]+(?=[A-Za-z_*])", "$1int ", "Did you mean int?", auto=True)
+R("java", "Sytem", r"(?<![\w.])(?:Sytem|Sysem|Systen|Ssytem|Sytsem|Systme|Sistem|Syetem)\.", "System.", "Did you mean System?", auto=True)
+R("java", "Sting", r"(?<![\w.])(?:Sting|Strng|Srting|Stirng|Strig)(?=[ \t]+\w|[ \t]*\[|[ \t]*>)", "String", "Did you mean String?", auto=True)
+R("java", "itn", r"(?m)^([ \t]*)(?:itn|nit|imt)[ \t]+(?=[A-Za-z_])", "$1int ", "Did you mean int?", auto=True)
+R("javascript", "fn typo", r"(?m)^([ \t]*)(?:fucntion|funtion|functoin|fuction|funciton|fnction|fucnion|functon)\b", "$1function", "Did you mean function?", auto=True)
 
 PY_KEYWORDS_EXTRA = []
 LANGS["python"]["builtins"] = ["self", "cls"]

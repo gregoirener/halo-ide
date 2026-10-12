@@ -121,6 +121,7 @@
     "match": "(?<![\\w.])os\\.system\\(\\s*([\\\"'])cls\\1\\s*\\)",
     "with": "os.system($1clear$1)",
     "why": "cls is Windows; macOS clears the terminal with clear",
+    "strings": true,
     "auto": true,
     "module": "os"
    },
@@ -1611,6 +1612,7 @@
     "match": "(?m)^([ \\t]*)print[ \\t]+(?![\\s(=,.\\[])(.+?)[ \\t]*$",
     "with": "$1print($2)",
     "why": "In Python 3, print is a function: print(…)",
+    "strings": true,
     "auto": true
    },
    {
@@ -1625,6 +1627,7 @@
     "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.(?:has_key|containsKey|hasKey)\\(\\s*([^()\\n]+?)\\s*\\)",
     "with": "$2 in $1",
     "why": "Python checks keys with: key in dict",
+    "strings": true,
     "auto": true
    },
    {
@@ -1632,21 +1635,24 @@
     "match": "\\.(?:iteritems|iterItems)\\(\\)",
     "with": ".items()",
     "why": "Python 3 renamed it .items()",
-    "auto": true
+    "auto": true,
+    "unless": "\\bdef\\s+iteritems\\b"
    },
    {
     "id": "python.itervalues",
     "match": "\\.itervalues\\(\\)",
     "with": ".values()",
     "why": "Python 3 renamed it .values()",
-    "auto": true
+    "auto": true,
+    "unless": "\\bdef\\s+itervalues\\b"
    },
    {
     "id": "python.iterkeys",
     "match": "\\.iterkeys\\(\\)",
     "with": ".keys()",
     "why": "Python 3 renamed it .keys()",
-    "auto": true
+    "auto": true,
+    "unless": "\\bdef\\s+iterkeys\\b"
    },
    {
     "id": "python.if =",
@@ -1753,11 +1759,11 @@
    },
    {
     "id": "python..size()",
-    "match": "(?<![\\w.])([A-Za-z_][\\w.]*(?:\\[[^\\]\\n]*\\])?)\\.(?:size|length|len|count|getLength|get_length|getSize|Size|Count|Length)\\(\\)",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*(?:\\[[^\\]\\n]*\\])?)\\.(?:size|length|len|getLength|get_length|getSize|Size|Length)\\(\\)",
     "with": "len($1)",
     "why": "Python gets a length with len(x)",
     "auto": true,
-    "unless": "\\bdef\\s+(?:size|length|len|count|getLength|get_length|getSize|Size|Count|Length)\\b"
+    "unless": "\\bdef\\s+(?:size|length|len|getLength|get_length|getSize|Size|Length)\\b"
    },
    {
     "id": "python..includes",
@@ -1794,6 +1800,7 @@
     "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.equals\\(\\s*([^()\\n]+?)\\s*\\)",
     "with": "$1 == $2",
     "why": "Python compares with ==",
+    "strings": true,
     "auto": true,
     "unless": "\\bdef\\s+equals\\b"
    },
@@ -1810,6 +1817,7 @@
     "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.charAt\\(\\s*([^()\\n]+?)\\s*\\)",
     "with": "$1[$2]",
     "why": "Python indexes strings with s[i]",
+    "strings": true,
     "auto": true,
     "unless": "\\bdef\\s+charAt\\b"
    },
@@ -1842,6 +1850,7 @@
     "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.join\\(\\s*(\\\"[^\\\"\\n]*\\\"|'[^'\\n]*')\\s*\\)",
     "with": "$2.join($1)",
     "why": "In Python the separator comes first: \", \".join(items)",
+    "strings": true,
     "auto": true
    },
    {
@@ -1849,6 +1858,7 @@
     "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.put\\(\\s*([^,()\\n]+?)\\s*,\\s*([^()\\n]+?)\\s*\\)",
     "with": "$1[$2] = $3",
     "why": "Python dicts set values with d[key] = value",
+    "strings": true,
     "unless": "\\bdef\\s+put\\b|\\bqueue\\b|\\bQueue\\b"
    },
    {
@@ -1872,9 +1882,53 @@
    },
    {
     "id": "python.^ power",
-    "match": "([\\w)\\]]+)[ \\t]*\\^[ \\t]*(\\d+)\\b",
+    "match": "([\\w)\\]]+)[ \\t]*\\^[ \\t]*([23])\\b(?![\\w.])",
     "with": "$1 ** $2",
-    "why": "^ is XOR in Python; powers are **"
+    "why": "^ is XOR in Python; powers are **",
+    "unless": "<<|>>|\\b0x[0-9a-fA-F]|\\^=|&\\s*0x|~"
+   },
+   {
+    "id": "python.slef",
+    "match": "(?<![\\w.])(?:slef|sefl|slf)(?=\\s*[,).:=])",
+    "with": "self",
+    "why": "Did you mean self?",
+    "auto": true,
+    "unless": "\\b(?:slef|sefl|slf)\\s*=[^=]"
+   },
+   {
+    "id": "python.form",
+    "match": "(?m)^([ \\t]*)(?:form|fomr|frmo|fron|frm|fromm)[ \\t]+([\\w.]+)[ \\t]+import\\b",
+    "with": "$1from $2 import",
+    "why": "Did you mean from?",
+    "auto": true
+   },
+   {
+    "id": "python.fro",
+    "match": "(?m)^([ \\t]*)(?:fro|ofr|foor)[ \\t]+(?=[\\w, ()]+[ \\t]+in\\b)",
+    "with": "$1for ",
+    "why": "Did you mean for?",
+    "auto": true
+   },
+   {
+    "id": "python.esle",
+    "match": "(?m)^([ \\t]*)(?:esle|eles|els|elze|ese)[ \\t]*:",
+    "with": "$1else:",
+    "why": "Did you mean else?",
+    "auto": true
+   },
+   {
+    "id": "python.dfe",
+    "match": "(?m)^([ \\t]*)(?:dfe|edf|fed|deff|deg)[ \\t]+(\\w+)[ \\t]*\\(",
+    "with": "$1def $2(",
+    "why": "Did you mean def?",
+    "auto": true
+   },
+   {
+    "id": "python.fi",
+    "match": "(?m)^([ \\t]*)(?:fi|ifi|iff)[ \\t]+(?=[^=\\n]*:[ \\t]*(?:#.*)?$)",
+    "with": "$1if ",
+    "why": "Did you mean if?",
+    "auto": true
    }
   ],
   "imports": {
@@ -2163,6 +2217,7 @@
     "match": "getElementById\\(\\s*([\\\"'`])#([\\w-]+)\\1",
     "with": "getElementById($1$2$1",
     "why": "getElementById takes the id without #",
+    "strings": true,
     "auto": true
    },
    {
@@ -2170,6 +2225,7 @@
     "match": "getElementsByClassName\\(\\s*([\\\"'`])\\.([\\w-]+)\\1",
     "with": "getElementsByClassName($1$2$1",
     "why": "getElementsByClassName takes the class without the dot",
+    "strings": true,
     "auto": true
    },
    {
@@ -2177,6 +2233,7 @@
     "match": "addEventListener\\(\\s*([\\\"'`])on([a-z]+)\\1",
     "with": "addEventListener($1$2$1",
     "why": "Event names have no “on”: \"click\", not \"onclick\"",
+    "strings": true,
     "auto": true
    },
    {
@@ -2479,12 +2536,6 @@
     "auto": true
    },
    {
-    "id": "javascript..append",
-    "match": "\\.append\\(",
-    "with": ".push(",
-    "why": "Arrays use .push() (DOM elements do have .append())"
-   },
-   {
     "id": "javascript..upper",
     "match": "\\.(?:upper|toUpper|uppercase|to_upper)\\(\\)",
     "with": ".toUpperCase()",
@@ -2677,15 +2728,17 @@
    },
    {
     "id": "javascript.if =",
-    "match": "\\bif[ \\t]*\\([ \\t]*([\\w$.]+)[ \\t]*=[ \\t]*(?![=>])",
-    "with": "if ($1 === ",
-    "why": "A comparison needs === (a single = assigns)"
+    "match": "\\bif[ \\t]*\\([ \\t]*([\\w$.]+)[ \\t]*=[ \\t]*(?![=>])([\\w$.'\\\"-]+)[ \\t]*\\)",
+    "with": "if ($1 === $2)",
+    "why": "A comparison needs === (a single = assigns)",
+    "strings": true
    },
    {
     "id": "javascript.len()",
     "match": "(?<![\\w$.])(len)\\(\\s*([^()]+?)\\s*\\)",
     "with": "$2.length",
     "why": "JavaScript gets a length with x.length",
+    "strings": true,
     "auto": true,
     "undefined": 1
    },
@@ -2718,6 +2771,7 @@
     "match": "(?<![\\w$.])(type)\\(\\s*([^()]+?)\\s*\\)",
     "with": "typeof $2",
     "why": "JavaScript checks types with typeof x",
+    "strings": true,
     "undefined": 1
    },
    {
@@ -2729,15 +2783,16 @@
    },
    {
     "id": "javascript.for in",
-    "match": "\\bfor[ \\t]*\\([ \\t]*(const|let|var)[ \\t]+(\\w+)[ \\t]+in[ \\t]+",
+    "match": "\\bfor[ \\t]*\\([ \\t]*(const|let|var)[ \\t]+(\\w+)[ \\t]+in[ \\t]+(?=\\[|[\\w$.]+\\.(?:split|map|filter|slice|concat)\\(|Array\\.from\\()",
     "with": "for ($1 $2 of ",
-    "why": "for…in gives keys/indexes; for…of gives the values"
+    "why": "for…in gives the indexes; for…of gives the values"
    },
    {
     "id": "javascript.typeof array",
     "match": "\\btypeof[ \\t]+([\\w$.]+)[ \\t]*===?[ \\t]*([\\\"'`])array\\2",
     "with": "Array.isArray($1)",
     "why": "typeof never says \"array\"; use Array.isArray(x)",
+    "strings": true,
     "auto": true
    },
    {
@@ -2745,6 +2800,7 @@
     "match": "\\btypeof[ \\t]+([\\w$.]+)[ \\t]*===?[ \\t]*([\\\"'`])null\\2",
     "with": "$1 === null",
     "why": "typeof null is \"object\"; compare with === null",
+    "strings": true,
     "auto": true
    },
    {
@@ -2758,7 +2814,8 @@
     "id": "javascript.fetch.json",
     "match": "\\bfetch\\(([^()]*)\\)\\.json\\(\\)",
     "with": "(await fetch($1)).json()",
-    "why": "fetch() returns a promise; await it before .json()"
+    "why": "fetch() returns a promise; await it before .json()",
+    "strings": true
    },
    {
     "id": "javascript.throw str",
@@ -2770,9 +2827,17 @@
    },
    {
     "id": "javascript.^ power",
-    "match": "([\\w$)\\]]+)[ \\t]*\\^[ \\t]*(\\d+)\\b",
+    "match": "([\\w$)\\]]+)[ \\t]*\\^[ \\t]*([23])\\b(?![\\w.])",
     "with": "$1 ** $2",
-    "why": "^ is XOR in JavaScript; powers are **"
+    "why": "^ is XOR in JavaScript; powers are **",
+    "unless": "<<|>>|\\b0x[0-9a-fA-F]|\\^=|~"
+   },
+   {
+    "id": "javascript.fn typo",
+    "match": "(?m)^([ \\t]*)(?:fucntion|funtion|functoin|fuction|funciton|fnction|fucnion|functon)\\b",
+    "with": "$1function",
+    "why": "Did you mean function?",
+    "auto": true
    }
   ],
   "builtins": [
@@ -3028,6 +3093,7 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<(pthread|stdbool|assert|dirent|limits|locale|setjmp|signal|stdarg|stddef|stdint|stdlib|string|unistd|ctype|errno|fcntl|float|stdio|math|time)>",
     "with": "$1<$2.h>",
     "why": "C headers end in .h: <$2.h>",
+    "strings": true,
     "auto": true
    },
    {
@@ -3062,13 +3128,15 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<malloc\\.h>",
     "with": "$1<stdlib.h>",
     "why": "macOS has malloc in <stdlib.h>",
+    "strings": true,
     "auto": true
    },
    {
     "id": "c.conio.h",
     "match": "(?m)^[ \\t]*#[ \\t]*include[ \\t]*<conio\\.h>[ \\t]*\\n?",
     "with": "",
-    "why": "conio.h is Windows-only; macOS doesn't have it"
+    "why": "conio.h is Windows-only; macOS doesn't have it",
+    "strings": true
    },
    {
     "id": "c.print",
@@ -3096,7 +3164,8 @@
     "id": "c.gets",
     "match": "(?<![\\w.])gets\\(\\s*(\\w+)\\s*\\)",
     "with": "fgets($1, sizeof $1, stdin)",
-    "why": "gets() can overflow the buffer and was removed from C; fgets() is safe"
+    "why": "gets() can overflow the buffer and was removed from C; fgets() is safe",
+    "strings": true
    },
    {
     "id": "c.strlen alias",
@@ -3141,13 +3210,15 @@
     "id": "c.pause",
     "match": "\\bsystem\\(\\s*\\\"pause\\\"\\s*\\)",
     "with": "getchar()",
-    "why": "system(\"pause\") is Windows; getchar() waits for Enter"
+    "why": "system(\"pause\") is Windows; getchar() waits for Enter",
+    "strings": true
    },
    {
     "id": "c.cls",
     "match": "\\bsystem\\(\\s*\\\"cls\\\"\\s*\\)",
     "with": "system(\"clear\")",
     "why": "cls is Windows; macOS clears with clear",
+    "strings": true,
     "auto": true
    },
    {
@@ -3166,7 +3237,7 @@
    },
    {
     "id": "c.main()",
-    "match": "(?m)^main[ \\t]*\\(",
+    "match": "(?m)(?<!\\b(?:int|void|char|long|short|unsigned|signed|static|extern|double|float)[ \\t*]{0,8}\\n)^main[ \\t]*\\(",
     "with": "int main(",
     "why": "main must return int",
     "auto": true
@@ -3181,10 +3252,11 @@
    },
    {
     "id": "c.exit()",
-    "match": "(?<![\\w.])exit\\(\\s*\\)",
+    "match": "(?<![\\w.])(?<!\\bvoid[ \\t])exit\\(\\s*\\)(?=[ \\t]*;)",
     "with": "exit(0)",
     "why": "exit() needs a status: exit(0)",
-    "auto": true
+    "auto": true,
+    "unless": "\\bvoid[ \\t]+exit\\b"
    },
    {
     "id": "c.True",
@@ -3253,6 +3325,7 @@
     "match": "\\bchar[ \\t]+(\\w+)[ \\t]*=[ \\t]*\\\"",
     "with": "char $1[] = \"",
     "why": "Text needs a char array: char $1[] = \"…\"",
+    "strings": true,
     "auto": true
    },
    {
@@ -3264,21 +3337,29 @@
    },
    {
     "id": "c.if =",
-    "match": "\\bif[ \\t]*\\([ \\t]*([\\w.\\[\\]>-]+)[ \\t]*=[ \\t]*(?!=)([^)=\\n]+)\\)",
+    "match": "\\bif[ \\t]*\\([ \\t]*([\\w.\\[\\]>-]+)[ \\t]*=[ \\t]*(?!=)([\\w.'\\\"-]+)[ \\t]*\\)",
     "with": "if ($1 == $2)",
-    "why": "A comparison needs == (a single = assigns)"
+    "why": "A comparison needs == (a single = assigns)",
+    "strings": true
    },
    {
     "id": "c.loop ;",
-    "match": "(?m)^([ \\t]*(?:for|while)[ \\t]*\\(.*\\))[ \\t]*;[ \\t]*$",
-    "with": "$1",
-    "why": "This ; ends the loop right here, so its body runs only once"
+    "match": "(?m)^([ \\t]*)((?:for|while)[ \\t]*\\(.*\\))[ \\t]*;[ \\t]*(?=\\n\\1[ \\t]+\\S)",
+    "with": "$1$2",
+    "why": "This ; ends the loop right here, so the indented line below runs only once"
    },
    {
     "id": "c.^ power",
-    "match": "([\\w)\\]]+)[ \\t]*\\^[ \\t]*2\\b",
+    "match": "([\\w)\\]]+)[ \\t]*\\^[ \\t]*2\\b(?![\\w.])",
     "with": "$1 * $1",
     "why": "^ is XOR in C; to square, multiply (or pow(x, 2))"
+   },
+   {
+    "id": "c.itn",
+    "match": "(?m)^([ \\t]*)(?:itn|nit|unt|imt)[ \\t]+(?=[A-Za-z_*])",
+    "with": "$1int ",
+    "why": "Did you mean int?",
+    "auto": true
    }
   ],
   "imports": {
@@ -3645,6 +3726,7 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<stdio>",
     "with": "$1<cstdio>",
     "why": "In C++ it's <cstdio> (or <stdio.h>)",
+    "strings": true,
     "auto": true
    },
    {
@@ -3652,6 +3734,7 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<stdlib>",
     "with": "$1<cstdlib>",
     "why": "In C++ it's <cstdlib> (or <stdlib.h>)",
+    "strings": true,
     "auto": true
    },
    {
@@ -3659,6 +3742,7 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<math>",
     "with": "$1<cmath>",
     "why": "In C++ it's <cmath> (or <math.h>)",
+    "strings": true,
     "auto": true
    },
    {
@@ -3666,6 +3750,7 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<time>",
     "with": "$1<ctime>",
     "why": "In C++ it's <ctime> (or <time.h>)",
+    "strings": true,
     "auto": true
    },
    {
@@ -3673,6 +3758,7 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<ctype>",
     "with": "$1<cctype>",
     "why": "In C++ it's <cctype> (or <ctype.h>)",
+    "strings": true,
     "auto": true
    },
    {
@@ -3680,6 +3766,7 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<stdint>",
     "with": "$1<cstdint>",
     "why": "In C++ it's <cstdint> (or <stdint.h>)",
+    "strings": true,
     "auto": true
    },
    {
@@ -3687,6 +3774,7 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<limits>",
     "with": "$1<climits>",
     "why": "In C++ it's <climits> (or <limits.h>)",
+    "strings": true,
     "auto": true
    },
    {
@@ -3694,6 +3782,7 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<assert>",
     "with": "$1<cassert>",
     "why": "In C++ it's <cassert> (or <assert.h>)",
+    "strings": true,
     "auto": true
    },
    {
@@ -3701,6 +3790,7 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<errno>",
     "with": "$1<cerrno>",
     "why": "In C++ it's <cerrno> (or <errno.h>)",
+    "strings": true,
     "auto": true
    },
    {
@@ -3708,6 +3798,7 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<stddef>",
     "with": "$1<cstddef>",
     "why": "In C++ it's <cstddef> (or <stddef.h>)",
+    "strings": true,
     "auto": true
    },
    {
@@ -3715,6 +3806,7 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<float>",
     "with": "$1<cfloat>",
     "why": "In C++ it's <cfloat> (or <float.h>)",
+    "strings": true,
     "auto": true
    },
    {
@@ -3722,6 +3814,7 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<stdarg>",
     "with": "$1<cstdarg>",
     "why": "In C++ it's <cstdarg> (or <stdarg.h>)",
+    "strings": true,
     "auto": true
    },
    {
@@ -3736,6 +3829,7 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<iostream\\.h>",
     "with": "$1<iostream>",
     "why": "Modern C++ headers have no .h: <iostream>",
+    "strings": true,
     "auto": true
    },
    {
@@ -3743,6 +3837,7 @@
     "match": "(?m)^[ \\t]*#[ \\t]*include[ \\t]*<bits/stdc\\+\\+\\.h>",
     "with": "#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\n#include <map>\n#include <set>\n#include <cmath>",
     "why": "macOS's compiler has no <bits/stdc++.h>; these are the headers it stands for",
+    "strings": true,
     "auto": true
    },
    {
@@ -3750,6 +3845,7 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<malloc\\.h>",
     "with": "$1<cstdlib>",
     "why": "macOS has malloc in <cstdlib>",
+    "strings": true,
     "auto": true
    },
    {
@@ -3831,6 +3927,7 @@
     "match": "\\.length\\b(?![\\w(])",
     "with": ".length()",
     "why": "In C++ length() is a function",
+    "strings": true,
     "unless": "\\blength\\s*[;=]"
    },
    {
@@ -3852,19 +3949,28 @@
     "match": "(?m)^([ \\t]*#[ \\t]*include[ \\t]*)<string\\.h>",
     "with": "$1<string>",
     "why": "std::string is in <string> (<string.h> is C's)",
+    "strings": true,
     "when": "std::string|\\bstring\\s+\\w"
    },
    {
     "id": "cpp.if =",
-    "match": "\\bif[ \\t]*\\([ \\t]*([\\w.\\[\\]>-]+)[ \\t]*=[ \\t]*(?!=)([^)=\\n]+)\\)",
+    "match": "\\bif[ \\t]*\\([ \\t]*([\\w.\\[\\]>-]+)[ \\t]*=[ \\t]*(?!=)([\\w.'\\\"-]+)[ \\t]*\\)",
     "with": "if ($1 == $2)",
-    "why": "A comparison needs == (a single = assigns)"
+    "why": "A comparison needs == (a single = assigns)",
+    "strings": true
    },
    {
     "id": "cpp.^ power",
-    "match": "([\\w)\\]]+)[ \\t]*\\^[ \\t]*2\\b",
+    "match": "([\\w)\\]]+)[ \\t]*\\^[ \\t]*2\\b(?![\\w.])",
     "with": "$1 * $1",
     "why": "^ is XOR in C++; to square, multiply (or pow(x, 2))"
+   },
+   {
+    "id": "cpp.itn",
+    "match": "(?m)^([ \\t]*)(?:itn|nit|unt|imt)[ \\t]+(?=[A-Za-z_*])",
+    "with": "$1int ",
+    "why": "Did you mean int?",
+    "auto": true
    }
   ],
   "imports": {
@@ -4265,13 +4371,15 @@
     "id": "java.string ==",
     "match": "(?<![\\w.])([A-Za-z_][\\w.]*(?:\\(\\))?)[ \\t]*==[ \\t]*(\\\"(?:[^\\\"\\\\\\n]|\\\\.)*\\\")",
     "with": "$1.equals($2)",
-    "why": "== compares objects, not text; use .equals()"
+    "why": "== compares objects, not text; use .equals()",
+    "strings": true
    },
    {
     "id": "java.string !=",
     "match": "(?<![\\w.])([A-Za-z_][\\w.]*(?:\\(\\))?)[ \\t]*!=[ \\t]*(\\\"(?:[^\\\"\\\\\\n]|\\\\.)*\\\")",
     "with": "!$1.equals($2)",
-    "why": "!= compares objects, not text; use !….equals()"
+    "why": "!= compares objects, not text; use !….equals()",
+    "strings": true
    },
    {
     "id": "java.True",
@@ -4334,9 +4442,31 @@
    },
    {
     "id": "java.^ power",
-    "match": "([\\w)\\]]+)[ \\t]*\\^[ \\t]*(\\d+)\\b",
+    "match": "([\\w)\\]]+)[ \\t]*\\^[ \\t]*([23])\\b(?![\\w.])",
     "with": "Math.pow($1, $2)",
-    "why": "^ is XOR in Java; powers are Math.pow(x, y)"
+    "why": "^ is XOR in Java; powers are Math.pow(x, y)",
+    "unless": "<<|>>|\\b0x[0-9a-fA-F]|\\^=|~"
+   },
+   {
+    "id": "java.Sytem",
+    "match": "(?<![\\w.])(?:Sytem|Sysem|Systen|Ssytem|Sytsem|Systme|Sistem|Syetem)\\.",
+    "with": "System.",
+    "why": "Did you mean System?",
+    "auto": true
+   },
+   {
+    "id": "java.Sting",
+    "match": "(?<![\\w.])(?:Sting|Strng|Srting|Stirng|Strig)(?=[ \\t]+\\w|[ \\t]*\\[|[ \\t]*>)",
+    "with": "String",
+    "why": "Did you mean String?",
+    "auto": true
+   },
+   {
+    "id": "java.itn",
+    "match": "(?m)^([ \\t]*)(?:itn|nit|imt)[ \\t]+(?=[A-Za-z_])",
+    "with": "$1int ",
+    "why": "Did you mean int?",
+    "auto": true
    }
   ],
   "imports": {
@@ -4701,34 +4831,27 @@
     "undefined": 1
    },
    {
-    "id": "swift..count()",
-    "match": "\\.count\\(\\)",
-    "with": ".count",
-    "why": ".count is a property — no ()",
-    "auto": true
-   },
-   {
-    "id": "swift..length",
-    "match": "\\.(?:length|size|len)\\b(?:\\(\\))?",
+    "id": "swift..length()",
+    "match": "\\.(?:length|size|len|count)\\(\\)|\\.len\\b",
     "with": ".count",
     "why": "Swift collections and strings use .count",
     "auto": true,
-    "unless": "\\b(?:var|let)\\s+(?:length|size|len)\\b|\\bfunc\\s+(?:length|size|len)\\b"
+    "unless": "\\bfunc\\s+(?:length|size|len|count)\\b|\\b(?:var|let)\\s+len\\b"
    },
    {
-    "id": "swift..push",
-    "match": "\\.(?:push|push_back|pushBack)\\(",
+    "id": "swift..length",
+    "match": "\\.length\\b(?!\\s*\\()",
+    "with": ".count",
+    "why": "Swift collections and strings use .count",
+    "auto": true,
+    "unless": "(?m)^\\s*import\\s+(?:Foundation|AppKit|UIKit|Cocoa|SwiftUI|CoreGraphics)\\b|\\b(?:var|let)\\s+length\\b"
+   },
+   {
+    "id": "swift..push_back",
+    "match": "\\.(?:push_back|pushBack)\\(",
     "with": ".append(",
     "why": "Swift arrays use .append()",
-    "auto": true,
-    "unless": "\\bfunc\\s+(?:push|push_back|pushBack)\\b"
-   },
-   {
-    "id": "swift..add",
-    "match": "\\.add\\(",
-    "with": ".append(",
-    "why": "Arrays use .append() (Sets use .insert())",
-    "unless": "\\bfunc\\s+add\\b"
+    "auto": true
    },
    {
     "id": "swift..toUpperCase",
@@ -4756,6 +4879,7 @@
     "match": "\\.includes\\(",
     "with": ".contains(",
     "why": "Swift uses .contains()",
+    "strings": true,
     "auto": true
    },
    {
@@ -4850,6 +4974,7 @@
     "match": "\\b(Int|Double)\\(\\s*readLine\\(\\)\\s*\\)",
     "with": "$1(readLine() ?? \"\")",
     "why": "readLine() can return nil; give it a fallback",
+    "strings": true,
     "auto": true
    },
    {
@@ -4929,10 +5054,13 @@
    "Set",
    "String",
    "abs",
+   "error",
    "false",
    "max",
    "min",
+   "newValue",
    "nil",
+   "oldValue",
    "print",
    "readLine",
    "self",
@@ -5029,7 +5157,7 @@
    },
    {
     "id": "go.def",
-    "match": "(?m)^([ \\t]*)(?:def|function|fun|fn)[ \\t]+(\\w+)[ \\t]*\\(",
+    "match": "(?m)^([ \\t]*)(?:def|function|fun|fn)[ \\t]+(?!func\\b|struct\\b|interface\\b|map\\b|chan\\b)(\\w+)[ \\t]*\\(",
     "with": "$1func $2(",
     "why": "Go defines functions with func",
     "auto": true
@@ -5074,21 +5202,23 @@
     "id": "go.print",
     "match": "(?<![\\w.])print(?:ln)?(?=\\s*\\()",
     "with": "fmt.Println",
-    "why": "print() writes to stderr without formatting; fmt.Println() is the usual way"
+    "why": "print() writes to stderr without formatting; fmt.Println() is the usual way",
+    "when": "\\\"fmt\\\""
    },
    {
     "id": "go..length",
-    "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.(?:length|len|size|count|Len)\\b(?:\\(\\))?",
+    "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.(?:length\\b(?:\\(\\))?|(?:size|len|count)\\(\\))",
     "with": "len($1)",
     "why": "Go gets a length with len(x)",
     "auto": true,
-    "unless": "\\bfunc\\s*\\([^)]*\\)\\s*(?:length|len|size|count|Len)\\b"
+    "unless": "\\bfunc\\s*\\([^)]*\\)\\s*(?:length|size|len|count)\\b|^\\s*length\\s+\\w"
    },
    {
     "id": "go..append",
     "match": "(?<![\\w.])([A-Za-z_][\\w.]*)\\.(?:append|push)\\(([^()\\n]*)\\)",
     "with": "$1 = append($1, $2)",
     "why": "Go appends with x = append(x, item)",
+    "strings": true,
     "auto": true,
     "unless": "\\bfunc\\s*\\([^)]*\\)\\s*(?:append|push)\\b"
    }
@@ -5465,6 +5595,7 @@
     "match": "\\.(?:length|size)\\b(?:\\(\\))?",
     "with": ".len()",
     "why": "Rust uses .len()",
+    "strings": true,
     "auto": true,
     "unless": "\\bfn\\s+(?:length|size)\\b"
    },
@@ -5509,6 +5640,7 @@
     "match": "\\.includes\\(",
     "with": ".contains(",
     "why": "Rust uses .contains()",
+    "strings": true,
     "auto": true
    },
    {

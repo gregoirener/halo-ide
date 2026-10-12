@@ -29,6 +29,57 @@ for name in sys.argv[1:]:
         pass
 for name, obj in [("str", str), ("list", list), ("dict", dict), ("set", set), ("tuple", tuple), ("int", int), ("float", float), ("bytes", bytes)]:
     out["@" + name] = sorted(n for n in dir(obj) if not n.startswith("__"))
+# Attributes of the objects people actually hold: files, matches, dates, paths…
+attrs = set()
+import types as _t
+samples = []
+for spec in ["io.TextIOWrapper", "io.BufferedReader", "io.BufferedWriter", "io.BytesIO", "io.StringIO", "re.Match", "re.Pattern",
+             "datetime.datetime", "datetime.date", "datetime.timedelta", "datetime.time", "pathlib.Path", "socket.socket",
+             "threading.Thread", "threading.Event", "threading.Lock", "collections.Counter", "collections.deque", "collections.OrderedDict",
+             "collections.defaultdict", "subprocess.CompletedProcess", "subprocess.Popen", "logging.Logger", "logging.Handler",
+             "argparse.ArgumentParser", "argparse.Namespace", "sqlite3.Connection", "sqlite3.Cursor", "decimal.Decimal", "fractions.Fraction",
+             "zipfile.ZipFile", "tarfile.TarFile", "email.message.Message", "http.client.HTTPResponse", "urllib.request.Request",
+             "queue.Queue", "asyncio.Task", "asyncio.Future", "asyncio.Queue", "asyncio.Event", "asyncio.AbstractEventLoop",
+             "concurrent.futures.Future", "concurrent.futures.ThreadPoolExecutor", "enum.Enum", "unittest.TestCase", "csv.DictReader",
+             "csv.DictWriter", "string.Template", "random.Random", "array.array", "memoryview", "range", "slice", "property", "staticmethod",
+             "classmethod", "BaseException", "Exception", "OSError", "type", "object", "complex", "frozenset", "bytearray", "tkinter.Tk",
+             "tkinter.Canvas", "tkinter.Label", "tkinter.Button", "tkinter.Entry", "tkinter.Frame", "turtle.Turtle", "turtle.Screen"]:
+    module, _, name = spec.rpartition(".")
+    try:
+        obj = getattr(importlib.import_module(module), name) if module else getattr(__import__("builtins"), name)
+        attrs.update(dir(obj))
+    except Exception:
+        pass
+# Every class in the probed modules, so their attributes are known too.
+for name in sys.argv[1:]:
+    try:
+        m = importlib.import_module(name)
+    except Exception:
+        continue
+    for attr in dir(m):
+        try:
+            obj = getattr(m, attr)
+        except Exception:
+            continue
+        if isinstance(obj, type):
+            try: attrs.update(dir(obj))
+            except Exception: pass
+try:
+    raise ValueError
+except ValueError as error:
+    attrs.update(dir(error.__traceback__)); attrs.update(dir(error.__traceback__.tb_frame)); attrs.update(dir(error.__traceback__.tb_frame.f_code))
+# Linux- and Windows-only names that a Mac's Python doesn't have.
+attrs.update("""epoll EPOLLIN EPOLLOUT EPOLLERR EPOLLHUP EPOLLET EPOLLONESHOT EPOLLRDHUP EPOLLPRI EPOLLEXCLUSIVE devpoll
+    sched_setaffinity sched_getaffinity memfd_create pipe2 posix_fadvise getxattr setxattr listxattr removexattr startfile
+    O_BINARY O_TEXT O_DIRECT O_PATH SIGRTMIN SIGRTMAX SIGPWR SIGPOLL SIGCLD splice eventfd pidfd_open getrandom""".split())
+def _gen(): yield 1
+async def _coro(): pass
+async def _agen(): yield 1
+for sample in [_gen(), _coro(), _agen(), (lambda: 0), _t.SimpleNamespace(), _t.ModuleType("m")]:
+    attrs.update(dir(sample))
+    try: sample.close()
+    except Exception: pass
+out["@attrs"] = sorted(attrs)
 import builtins, keyword
 out["@builtins"] = sorted(n for n in dir(builtins) if not n.startswith("_"))
 out["@keywords"] = sorted(keyword.kwlist + getattr(keyword, "softkwlist", []))

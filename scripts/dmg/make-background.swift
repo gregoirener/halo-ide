@@ -1,8 +1,12 @@
 // Draws the DMG window background (660×420 pt) at 1x and 2x.
-// Usage: swift make-background.swift <out-dir>
+// Usage: swift make-background.swift <out-dir> [banner photo]
 import AppKit
 
 let outDir = URL(fileURLWithPath: CommandLine.arguments[1])
+// The banner photo; defaults to the one next to this script's repository.
+let photoURL = CommandLine.arguments.count > 2 ? URL(fileURLWithPath: CommandLine.arguments[2])
+    : URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        .appendingPathComponent("Resources/Brand/halo-moon.jpg")
 let size = NSSize(width: 660, height: 420)
 
 func color(_ hex: UInt32, _ a: CGFloat = 1) -> NSColor {
@@ -20,14 +24,32 @@ func draw(scale: CGFloat) -> Data {
     color(0xF5F4F1).setFill()
     NSRect(origin: .zero, size: size).fill()
 
+    // The banner: Halo's photograph across the top, darkened under the title.
+    let banner = NSRect(x: 0, y: size.height - 120, width: size.width, height: 120)
+    if let photo = NSImage(contentsOf: photoURL) {
+        NSGraphicsContext.saveGraphicsState()
+        NSBezierPath(rect: banner).addClip()
+        // Fill the banner's width, centred on the halo (a little above the photo's middle).
+        let scaled = NSSize(width: banner.width, height: banner.width * photo.size.height / photo.size.width)
+        let focus = 0.5    // fraction from the top of the photo to keep centred (the moon)
+        let y = banner.midY - scaled.height * (1 - focus)
+        photo.draw(in: NSRect(x: 0, y: y, width: scaled.width, height: scaled.height), from: .zero, operation: .copy, fraction: 1)
+        let shade = NSGradient(colors: [color(0x05070C, 0.62), color(0x05070C, 0.30)])!
+        shade.draw(in: banner, angle: 90)
+        NSGraphicsContext.restoreGraphicsState()
+    }
+
     let center = NSMutableParagraphStyle()
     center.alignment = .center
 
     // Title + instruction (y is from the bottom in AppKit).
+    let shadow = NSShadow()
+    shadow.shadowColor = color(0x000000, 0.5)
+    shadow.shadowBlurRadius = 6
     let title: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 20, weight: .semibold),
-                                                .foregroundColor: color(0x1C2028), .paragraphStyle: center]
+                                                .foregroundColor: color(0xFFFFFF), .paragraphStyle: center, .shadow: shadow]
     ("Install Halo" as NSString).draw(in: NSRect(x: 0, y: size.height - 62, width: size.width, height: 28), withAttributes: title)
-    let sub: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 13), .foregroundColor: color(0x5F656F), .paragraphStyle: center]
+    let sub: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 13), .foregroundColor: color(0xFFFFFF, 0.85), .paragraphStyle: center, .shadow: shadow]
     ("Drag Halo onto the Applications folder." as NSString).draw(in: NSRect(x: 0, y: size.height - 86, width: size.width, height: 20), withAttributes: sub)
 
     // Arrow between the two icons (icons sit at x 170 and 490, y 200 from the top).

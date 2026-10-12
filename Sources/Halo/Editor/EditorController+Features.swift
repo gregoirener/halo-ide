@@ -90,7 +90,7 @@ extension EditorController {
         return rect
     }
 
-    private func lineEndX(forLine line: Int) -> CGFloat {
+    func lineEndX(forLine line: Int) -> CGFloat {
         let index = storageLine(forReal: line - 1)
         guard index < lineStarts.count else { return 0 }
         let start = lineStarts[index]
@@ -108,6 +108,8 @@ extension EditorController {
             Palette.executionLine.setFill()
             rect.fill()
         }
+        // Fix hints come first on their line; a problem's message follows them.
+        let hintWidths = drawFixHints(in: dirty)
         guard !diagnostics.isEmpty else { return }
         let font = NSFont.systemFont(ofSize: max(10.5, fontSize - 2), weight: .regular)
         var seen = Set<Int>()
@@ -117,7 +119,7 @@ extension EditorController {
             d.color.withAlphaComponent(0.06).setFill()
             rect.fill()
             // The message, quietly, after the end of the line.
-            let x = lineEndX(forLine: d.line) + 28
+            let x = lineEndX(forLine: d.line) + 28 + (hintWidths[d.line].map { $0 + 16 } ?? 0)
             let available = textView.bounds.width - x - 16
             guard available > 60 else { continue }
             let message = d.message.replacingOccurrences(of: "\n", with: " ")
@@ -137,11 +139,24 @@ extension EditorController {
 
     func setDiagnostics(_ list: [Diagnostic]) {
         diagnostics = list
+        applyUnderlines()
+    }
+
+    /// Problems get a thick dotted underline in their color; fixable mistakes a fine one in the accent.
+    func applyUnderlines() {
         let full = NSRange(location: 0, length: storage.length)
         layoutManager.removeTemporaryAttribute(.underlineStyle, forCharacterRange: full)
         layoutManager.removeTemporaryAttribute(.underlineColor, forCharacterRange: full)
         let ns = storage.string as NSString
-        for d in list where d.severity != .note {
+        for fix in codeFixes {
+            let range = storageRange(forText: fix.anchor)
+            guard range.length > 0, NSMaxRange(range) <= storage.length else { continue }
+            layoutManager.addTemporaryAttributes([
+                .underlineStyle: NSUnderlineStyle.single.rawValue | NSUnderlineStyle.patternDot.rawValue,
+                .underlineColor: Palette.sky,
+            ], forCharacterRange: range)
+        }
+        for d in diagnostics where d.severity != .note {
             let index = storageLine(forReal: d.line - 1)
             guard index < lineStarts.count else { continue }
             let start = lineStarts[index]

@@ -33,6 +33,8 @@ cp "$UNIVERSAL" "$APP/Contents/MacOS/Halo"
 cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 cp -R Resources/Icons "$APP/Contents/Resources/Icons"
 cp -R Resources/FillCorpus "$APP/Contents/Resources/FillCorpus"
+cp -R Resources/Fixes "$APP/Contents/Resources/Fixes"
+cp -R Resources/Brand "$APP/Contents/Resources/Brand"
 # Smart Fill runtime (llama.cpp, MIT): the local model server and its libraries.
 if [[ -d Vendor/llama ]]; then
   mkdir -p "$APP/Contents/Helpers"

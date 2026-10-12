@@ -35,7 +35,7 @@ final class EditorController: NSObject, NSTextStorageDelegate, NSLayoutManagerDe
     private var pendingFullPass = false
 
     // Feature state drawn by the text view and gutter.
-    var fileURL: URL?
+    var fileURL: URL? { didSet { if fileURL != oldValue { scheduleFixScan(after: 0.2) } } }
     var diagnostics: [Diagnostic] = []
     var breakpoints: Set<Int> = [] { didSet { if breakpoints != oldValue { ruler?.needsDisplay = true } } }
     var executionLine: Int? { didSet { if executionLine != oldValue { textView.needsDisplay = true; ruler?.needsDisplay = true } } }
@@ -45,6 +45,17 @@ final class EditorController: NSObject, NSTextStorageDelegate, NSLayoutManagerDe
     var fillGeneration = 0
     /// Identifies the current streamed suggestion; any new request retires the old one.
     var smartToken = 0
+
+    // Mistake fixes: suggestions for existing code, and what was fixed while typing.
+    var codeFixes: [CodeFix] = []
+    var fixScanWork: DispatchWorkItem?
+    var fixScanGeneration = 0
+    var lastAutoFixes: [CodeFix] = []
+    var autoFixNotice: (range: NSRange, text: String, until: Date)?
+    /// Where the last edit happened (to know whether Enter finishes a line you were writing).
+    var lastEditLocation: Int?
+    /// Edits since the suggestions were found: (range after the edit, change in length).
+    var fixEdits: [(NSRange, Int)] = []
 
     /// When set (Ascend mode), text is centered in a column of this width.
     var centeredWidth: CGFloat? { didSet { layoutInsets() } }
@@ -186,6 +197,7 @@ final class EditorController: NSObject, NSTextStorageDelegate, NSLayoutManagerDe
             applyFont()
         }
         if wrapsLines != s.wordWrap { wrapsLines = s.wordWrap }
+        scheduleFixScan(after: 0.05)
     }
 
     @objc private func boundsChanged() { ruler.needsDisplay = true }
@@ -265,6 +277,7 @@ final class EditorController: NSObject, NSTextStorageDelegate, NSLayoutManagerDe
         MainActor.assumeIsolated {
             guard !textView.isManipulatingGhost else { return }
             pendingEdit = pendingEdit.map { NSUnionRange($0, editedRange) } ?? editedRange
+            fixEdits.append((editedRange, delta))
         }
     }
 
@@ -274,7 +287,9 @@ final class EditorController: NSObject, NSTextStorageDelegate, NSLayoutManagerDe
         if let edit = pendingEdit {
             pendingEdit = nil
             highlighter.highlightLines(around: edit, in: storage)
+            lastEditLocation = NSMaxRange(edit)
         }
+        noteEditForFixes()
         let oldCount = lineStarts.count
         recomputeLineStarts()
         if String(oldCount).count != String(lineStarts.count).count { ruler.updateThickness() }

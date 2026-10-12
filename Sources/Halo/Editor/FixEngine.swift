@@ -48,11 +48,12 @@ final class FixEngine: @unchecked Sendable {
     func ignore(_ original: String) { lock.withLock { _ = ignored.insert(original) } }
 
     /// Every fix in the file (or only those inside `limit`), mistakes first-come.
-    func fixes(in text: String, family: String, limit: NSRange? = nil) -> [CodeFix] {
+    func fixes(in text: String, family: String, limit: NSRange? = nil, typingAt: Int? = nil) -> [CodeFix] {
         guard let knowledge = knowledge.families[family] else { return [] }
         let ignored = lock.withLock { self.ignored }
-        let context = FileContext(text: text, family: family, knowledge: knowledge)
+        let context = FileContext(text: text, family: family, knowledge: knowledge, wholeFile: limit == nil)
         let scope = limit ?? NSRange(location: 0, length: context.ns.length)
+        if let typingAt, !context.mask.isCode(typingAt) { return [] }   // still inside a string or comment
         var found: [CodeFix] = []
         found += context.ruleFixes(in: scope)
         found += context.memberFixes(in: scope)
@@ -69,20 +70,37 @@ final class FixEngine: @unchecked Sendable {
         return kept.sorted { $0.anchor.location < $1.anchor.location }
     }
 
-    /// The fix for what was just typed: `boundary` is where the character that
-    /// ended a word (space, bracket, newline…) went in.
-    func justTyped(in text: String, family: String, boundary: Int) -> CodeFix? {
+    /// Characters that finish what you were typing: only then is a fix safe
+    /// (`=` might become `==`, a quote opens a string that isn't done yet).
+    static func isBoundary(_ c: unichar) -> Bool {
+        switch c {
+        case 32, 9, 10, 13, 40, 41, 91, 93, 123, 125, 44, 59, 58: return true   // space tab newline ( ) [ ] { } , ; :
+        default: return false
+        }
+    }
+
+    /// The fixes for what was just typed: `boundary` is where the character that
+    /// finished it (space, bracket, newline…) went in. When `lineFinished` (Enter
+    /// at the end of a line being written), every sure fix on that line applies.
+    func justTyped(in text: String, family: String, boundary: Int, lineFinished: Bool = false) -> [CodeFix] {
         let ns = text as NSString
-        guard boundary <= ns.length else { return nil }
+        guard boundary < ns.length, Self.isBoundary(ns.character(at: boundary)) else { return [] }
+        let typedNewline = ns.character(at: boundary) == 10
         let line = ns.lineRange(for: NSRange(location: max(0, boundary - 1), length: 0))
-        // The word that the boundary ended (with its dots: time.wait, self.x).
-        var wordStart = boundary
-        while wordStart > line.location, let c = UnicodeScalar(ns.character(at: wordStart - 1)),
-              CharacterSet.alphanumerics.contains(c) || c == "_" || c == "." || c == "$" { wordStart -= 1 }
-        return fixes(in: text, family: family, limit: line)
-            .filter { $0.auto && !$0.insertsLine && $0.range.location <= boundary
-                && NSMaxRange($0.range) >= wordStart - 1 && NSMaxRange($0.range) <= boundary + 2 }
-            .last
+        var lineEnd = NSMaxRange(line)
+        while lineEnd > line.location, [10, 13].contains(ns.character(at: lineEnd - 1)) { lineEnd -= 1 }
+        // What was typed since the previous boundary: the fix has to touch it.
+        var chunkStart = boundary
+        while chunkStart > line.location, !Self.isBoundary(ns.character(at: chunkStart - 1)) { chunkStart -= 1 }
+        let found = fixes(in: text, family: family, limit: line, typingAt: boundary)
+        return found.filter { fix in
+            guard fix.auto, !fix.insertsLine, fix.range.location <= boundary else { return false }
+            let end = NSMaxRange(fix.range)
+            if lineFinished && typedNewline { return end <= boundary + 1 }
+            guard end >= chunkStart - 1, end <= boundary + 2 else { return false }
+            // Whole-line fixes wait for the line to be finished.
+            return typedNewline || end < lineEnd || (end == lineEnd && boundary < lineEnd && fix.range.location > line.location)
+        }
     }
 }
 
@@ -99,6 +117,8 @@ final class FixKnowledge: @unchecked Sendable {
         let module: String?
         let when: NSRegularExpression?
         let unless: NSRegularExpression?
+        /// May reach into string literals (getElementById("#id")).
+        let strings: Bool
     }
 
     struct Family {
@@ -111,6 +131,8 @@ final class FixKnowledge: @unchecked Sendable {
         var members: [String: Set<String>] = [:]
         /// Methods and properties of the built-in types.
         var methods: Set<String> = []
+        /// Every attribute name known to exist (never a typo).
+        var attributes: Set<String> = []
         /// Name → the line that brings it in.
         var imports: [String: String] = [:]
     }
@@ -159,7 +181,7 @@ final class FixKnowledge: @unchecked Sendable {
                 family.rules.append(Rule(id: id, regex: match, template: raw["with"] as? String ?? "", why: raw["why"] as? String ?? "",
                                          auto: raw["auto"] as? Bool ?? false, undefinedGroup: raw["undefined"] as? Int,
                                          module: raw["module"] as? String, when: regex(raw["when"] as? String, id: id + ".when"),
-                                         unless: regex(raw["unless"] as? String, id: id + ".unless")))
+                                         unless: regex(raw["unless"] as? String, id: id + ".unless"), strings: raw["strings"] as? Bool ?? false))
             }
             family.keywords = Set(spec["keywords"] as? [String] ?? [])
             family.builtins = Set(spec["builtins"] as? [String] ?? [])
@@ -173,11 +195,14 @@ final class FixKnowledge: @unchecked Sendable {
                 case "@builtins", "@globals": family.builtins.formUnion(list)
                 case "@keywords": family.keywords.formUnion(list)
                 case "@known": family.known.formUnion(list)
+                case "@attrs": family.attributes.formUnion(list)
                 case let k where k.hasPrefix("@"): family.methods.formUnion(list.filter { !$0.hasPrefix("_") })
                 default: family.members[key] = Set(list)
                 }
             }
             if name == "cpp", let c = members["c"]?["@known"] { family.known.formUnion(c) }
+            family.attributes.formUnion(family.methods)
+            family.members.values.forEach { family.attributes.formUnion($0) }
             families[name] = family
         }
         return FixKnowledge(families: families, problems: problems)
@@ -188,6 +213,16 @@ final class FixKnowledge: @unchecked Sendable {
 
 struct CodeMask {
     private var skipped: [NSRange] = []
+
+    func overlapsSkipped(_ range: NSRange) -> Bool {
+        var lo = 0, hi = skipped.count - 1
+        while lo <= hi {
+            let mid = (lo + hi) / 2
+            let r = skipped[mid]
+            if NSMaxRange(range) <= r.location { hi = mid - 1 } else if range.location >= NSMaxRange(r) { lo = mid + 1 } else { return true }
+        }
+        return false
+    }
 
     func isCode(_ location: Int) -> Bool {
         var lo = 0, hi = skipped.count - 1
@@ -225,6 +260,21 @@ struct CodeMask {
                 i = min(n, i + 2)
                 skipped.append(NSRange(location: start, length: i - start))
                 continue
+            }
+            // #include <path> and "path": not code.
+            if (family == "c" || family == "cpp"), c == hash {
+                var k = i + 1
+                while k < n, at(k) == 32 || at(k) == 9 { k += 1 }
+                let word = k + 7 <= n ? s.substring(with: NSRange(location: k, length: 7)) : ""
+                if word == "include" || word.hasPrefix("import") {
+                    var open = k
+                    while open < n, at(open) != 60, at(open) != dq, at(open) != newline { open += 1 }
+                    var close = open
+                    while close < n, at(close) != newline { close += 1 }
+                    if open < close { skipped.append(NSRange(location: open, length: close - open)) }
+                    i = close
+                    continue
+                }
             }
             let isQuote = c == dq || c == sq || (c == bt && (family == "javascript" || family == "go"))
             if isQuote {
@@ -276,29 +326,63 @@ private final class FileContext {
     let knowledge: FixKnowledge.Family
     let mask: CodeMask
 
-    init(text: String, family: String, knowledge: FixKnowledge.Family) {
+    /// Scanning the whole file (counts come from one pass) or one line (counts on demand).
+    let wholeFile: Bool
+
+    init(text: String, family: String, knowledge: FixKnowledge.Family, wholeFile: Bool) {
         self.text = text
         ns = text as NSString
         self.family = family
         self.knowledge = knowledge
+        self.wholeFile = wholeFile
         mask = CodeMask(text as NSString, family: family)
+    }
+
+    func tokens(in scope: NSRange) -> [Token] {
+        if wholeFile { return tokens.filter { NSLocationInRange($0.range.location, scope) } }
+        return Self.scanTokens(text, ns, family: family, mask: mask, range: scope)
+    }
+
+    private var countCache: [String: Int] = [:]
+
+    /// Uses of a name (bare) or of .name (attribute) in code.
+    func count(_ name: String, attribute: Bool) -> Int {
+        if wholeFile { return (attribute ? attributeCounts : bareCounts)[name] ?? 0 }
+        let key = (attribute ? "." : "") + name
+        if let cached = countCache[key] { return cached }
+        var total = 0
+        var search = NSRange(location: 0, length: ns.length)
+        while true {
+            let r = ns.range(of: name, options: .literal, range: search)
+            guard r.location != NSNotFound else { break }
+            let before: unichar = r.location > 0 ? ns.character(at: r.location - 1) : 32
+            let after: unichar = NSMaxRange(r) < ns.length ? ns.character(at: NSMaxRange(r)) : 32
+            let isWord = { (c: unichar) -> Bool in (c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || c == 95 || c == 36 }
+            if !isWord(before), !isWord(after), (before == 46) == attribute, mask.isCode(r.location) { total += 1 }
+            search = NSRange(location: NSMaxRange(r), length: ns.length - NSMaxRange(r))
+        }
+        countCache[key] = total
+        return total
     }
 
     var whole: NSRange { NSRange(location: 0, length: ns.length) }
 
     // MARK: Tokens and what the file defines
 
-    lazy var tokens: [Token] = {
-        let pattern = family == "javascript" ? "[A-Za-z_$][A-Za-z0-9_$]*" : "[A-Za-z_][A-Za-z0-9_]*"
-        let re = try! NSRegularExpression(pattern: pattern)
+    lazy var tokens: [Token] = Self.scanTokens(text, ns, family: family, mask: mask, range: whole)
+
+    static let wordPattern = try! NSRegularExpression(pattern: "[A-Za-z_][A-Za-z0-9_]*")
+    static let jsWordPattern = try! NSRegularExpression(pattern: "[A-Za-z_$][A-Za-z0-9_$]*")
+
+    static func scanTokens(_ text: String, _ ns: NSString, family: String, mask: CodeMask, range: NSRange) -> [Token] {
         var out: [Token] = []
-        for m in re.matches(in: text, range: whole) where mask.isCode(m.range.location) {
+        for m in (family == "javascript" ? jsWordPattern : wordPattern).matches(in: text, range: range) where mask.isCode(m.range.location) {
             let before = m.range.location > 0 ? ns.character(at: m.range.location - 1) : 0
             if before >= 48 && before <= 57 { continue }   // 0x1F, 1e10
             out.append(Token(name: ns.substring(with: m.range), range: m.range, afterDot: before == 46))
         }
         return out
-    }()
+    }
 
     lazy var bareCounts: [String: Int] = tokens.filter { !$0.afterDot }.reduce(into: [:]) { $0[$1.name, default: 0] += 1 }
     lazy var attributeCounts: [String: Int] = tokens.filter(\.afterDot).reduce(into: [:]) { $0[$1.name, default: 0] += 1 }
@@ -370,7 +454,8 @@ private final class FileContext {
                         }
                         if let colon = partText.range(of: ":"), !partText.contains("::") {
                             part.length = partText.distance(from: partText.startIndex, to: colon.lowerBound)
-                            if let last = identifiers(in: part).last { add(last.0, at: last.1) }
+                            if family == "swift" { identifiers(in: part).forEach { add($0.0, at: $0.1) } }
+                            else if let last = identifiers(in: part).last { add(last.0, at: last.1) }
                         } else if typed, let last = identifiers(in: part).last {
                             add(last.0, at: last.1)
                         } else if let first = identifiers(in: part).first(where: { !skipWords.contains($0.0) }) {
@@ -397,7 +482,7 @@ private final class FileContext {
                     (#"\bfor[ \t]+([\w, ()\[\]]+?)[ \t]+in\b"#, .all), (#"\bas[ \t]+([A-Za-z_]\w*)"#, .single),
                     (#"^[ \t]*(?:global|nonlocal)[ \t]+([\w, ]+)"#, .all),
                     (#"^[ \t]*([A-Za-z_]\w*(?:[ \t]*,[ \t]*[A-Za-z_]\w*)+)[ \t]*="#, .all),
-                    (#"^[ \t]*([A-Za-z_]\w*)[ \t]*:[^=\n]+="#, .single), assign]
+                    (#"^[ \t]*([A-Za-z_]\w*)[ \t]*:[^=\n]+="#, .single), (#"^[ \t]*[\[(]([\w, *]+)[\])][ \t]*=(?!=)"#, .all), assign]
         case "javascript":
             return [(#"\b(?:function\*?|class|let|const|var)[ \t]+([A-Za-z_$][\w$]*)"#, .single), assign,
                     (#"(?<![\w$.])([A-Za-z_$][\w$]*)[ \t]*=>"#, .single),
@@ -431,11 +516,13 @@ private final class FileContext {
                     (#"\bfor[ \t]+(?:case[ \t]+let[ \t]+)?\(?([\w, ]+?)\)?[ \t]+in\b"#, .all),
                     (#"\{[ \t]*(?:\[[^\]]*\][ \t]*)?\(?([\w, ]+?)\)?[ \t]+in\b"#, .all),
                     (#"\bfunc[ \t]+\w+[ \t]*(?:<[^>]*>)?[ \t]*\(([^)]*)\)"#, .params(typed: false)),
-                    (#"\binit[ \t]*\??[ \t]*\(([^)]*)\)"#, .params(typed: false)), assign, (#"catch[ \t]+let[ \t]+(\w+)"#, .single)]
+                    (#"\binit[ \t]*\??[ \t]*\(([^)]*)\)"#, .params(typed: false)), assign, (#"catch[ \t]+let[ \t]+(\w+)"#, .single),
+                    (#"\bcase[ \t]+([A-Za-z_][\w, ]*?)[ \t]*(?:[=:({};]|$)"#, .all)]
         case "go":
             return [(#"\bfunc[ \t]+(?:\([^)]*\)[ \t]*)?([A-Za-z_]\w*)"#, .single),
                     (#"\bfunc[ \t]*(?:\([^)]*\)[ \t]*)?\w*[ \t]*\(([^)]*)\)"#, .params(typed: false)),
-                    (#"\bfunc[ \t]*\(([^)]*)\)"#, .params(typed: false)), (#"([A-Za-z_][\w, ]*?)[ \t]*:="#, .all),
+                    (#"\bfunc[ \t]*\(([^)]*)\)"#, .params(typed: false)), (#"\)[ \t]*\(([^)]*)\)[ \t]*\{"#, .params(typed: false)),
+                    (#"([A-Za-z_][\w, ]*?)[ \t]*:="#, .all),
                     (#"\b(?:var|const|type)[ \t]+([A-Za-z_]\w*)"#, .single), (#"\b(?:var|const)[ \t]*\(([^)]*)\)"#, .all),
                     (#"\bfor[ \t]+([\w, ]+?)[ \t]*:?=[ \t]*range"#, .all), assign,
                     (#"^[ \t]*import[ \t]+(?:\w+[ \t]+)?"(?:[^"]*/)?(\w+)""#, .single),
@@ -452,11 +539,77 @@ private final class FileContext {
         }
     }
 
-    func isDefined(_ name: String) -> Bool { definitions.names.contains(name) }
+    func isDefined(_ name: String) -> Bool {
+        wholeFile ? definitions.names.contains(name) : quickDefinition(name).other || quickDefinition(name).imported
+    }
+
+    private var quickCache: [String: (other: Bool, imported: Bool)] = [:]
+
+    /// Is one name defined, and how — without analysing the whole file (for keystrokes).
+    func quickDefinition(_ name: String) -> (other: Bool, imported: Bool) {
+        if let cached = quickCache[name] { return cached }
+        let n = NSRegularExpression.escapedPattern(for: name)
+        let other: String
+        var imported = "(?!)"
+        switch family {
+        case "python":
+            other = #"^[ \t]*(?:async[ \t]+)?def[ \t]+N\b|^[ \t]*class[ \t]+N\b|(?<![\w.])N[ \t]*(?:[-+*/%|&^]|<<|>>|\*\*|//)?=(?![=>])|\bfor[ \t]+[^\n:]*?(?<![\w.])N\b[^\n:]*?[ \t]+in\b|\bas[ \t]+N\b|^[ \t]*from[ \t]+[\w.]+[ \t]+import[^\n]*\bN\b|^[ \t]*(?:global|nonlocal)[ \t]+[^\n]*\bN\b|\blambda\b[^:\n]*\bN\b[^:\n]*:|^[ \t]*(?:async[ \t]+)?def[ \t]+\w+[ \t]*\([^)]*(?<![\w.])N\b|N[ \t]*:=|^[ \t]*[\[(]?[\w, *]*\bN\b[\w, *]*[\])]?[ \t]*=(?!=)"#
+            imported = #"^[ \t]*import[ \t]+[^\n#]*?(?<![\w.])N\b"#
+        case "javascript":
+            other = #"\b(?:function\*?|class|let|const|var|interface|type|enum)[ \t]+N\b|(?<![\w$.])N[ \t]*(?:[-+*/%|&^]|<<|>>|\*\*)?=(?![=>])|(?<![\w$.])N[ \t]*=>|\bimport\b[^;]*\bN\b|\bas[ \t]+N\b|catch[ \t]*\([ \t]*N\b|[(,{][ \t]*N[ \t]*[,)=:}]|^[ \t]*(?:async[ \t]+)?N[ \t]*\([^)\n]*\)[ \t]*\{"#
+        case "go":
+            other = #"\bfunc[ \t]+(?:\([^)]*\)[ \t]*)?N\b|\b(?:var|const|type)[ \t]+N\b|(?<![\w.])N[ \t]*(?:,[ \t]*\w+[ \t]*)*:?=(?!=)|(?<![\w.])\w+[ \t]*,[ \t]*N[ \t]*:?=|[(,][ \t]*N[ \t]+[\w*\[]|^[ \t]*import[ \t]+(?:\w+[ \t]+)?"(?:[^"\n]*/)?N"|^[ \t]*(?:\w+[ \t]+)?"(?:[^"\n]*/)?N"[ \t]*$"#
+        default:
+            other = #"\b(?:def|class|function|func|fn|let|const|var|val|struct|enum|interface|type|typedef|define|union|trait|mod|static)[ \t]+(?:mut[ \t]+)?N\b|(?<![\w.$])N[ \t]*:?=(?![=>])|[\w>\]*&][ \t*&]+N[ \t]*[=;,)(\[]|#[ \t]*define[ \t]+N\b|[(,|][ \t]*N[ \t]*[,):|]|\bimport\b[^\n]*\bN\b|\buse\b[^;]*\bN\b"#
+        }
+        // Only the lines that mention the name are worth a regex.
+        var lines: [NSRange] = []
+        var search = whole
+        while true {
+            let hit = ns.range(of: name, options: .literal, range: search)
+            guard hit.location != NSNotFound else { break }
+            let line = ns.lineRange(for: hit)
+            if lines.last != line { lines.append(line) }
+            search = NSRange(location: NSMaxRange(line), length: ns.length - NSMaxRange(line))
+            if search.length <= 0 { break }
+        }
+        func found(_ pattern: String) -> Bool {
+            guard pattern != "(?!)" else { return false }
+            guard let re = try? NSRegularExpression(pattern: pattern.replacingOccurrences(of: "N", with: n), options: .anchorsMatchLines) else { return true }
+            return lines.contains { line in re.matches(in: text, range: line).contains { mask.isCode($0.range.location) } }
+        }
+        let result = (other: found(other), imported: found(imported))
+        quickCache[name] = result
+        return result
+    }
+
+    /// import/use/#include statements, whose names aren't typos or missing imports.
+    lazy var importStatements: [NSRange] = {
+        let pattern: String
+        switch family {
+        case "python": pattern = #"^[ \t]*(?:from[ \t]+[\w.]+[ \t]+import[ \t]*\([^)]*\)|(?:from|import)[ \t]+(?:[^\n]*\\\n)*[^\n]*)"#
+        case "javascript": pattern = #"^[ \t]*(?:import\b[^;]*?(?:from[ \t]*["'][^"'\n]*["']|["'][^"'\n]*["'])|export\b[^\n]*\bfrom\b[^\n]*)"#
+        case "java": pattern = #"^[ \t]*(?:import|package)\b[^\n]*"#
+        case "go": pattern = #"^[ \t]*import[ \t]*\([^)]*\)|^[ \t]*import[^\n]*"#
+        case "rust": pattern = #"^[ \t]*(?:pub[ \t]+)?use\b[^;]*;"#
+        case "swift": pattern = #"^[ \t]*(?:@testable[ \t]+)?import\b[^\n]*"#
+        default: pattern = #"^[ \t]*#[^\n]*"#
+        }
+        let re = try! NSRegularExpression(pattern: pattern, options: .anchorsMatchLines)
+        return re.matches(in: text, range: whole).map(\.range)
+    }()
+
+    func inImportStatement(_ location: Int) -> Bool { importStatements.contains { NSLocationInRange(location, $0) } }
+
+    lazy var wildcardImport: Bool = {
+        let pattern = family == "python" ? #"from\s+\S+\s+import\s+\*"# : family == "java" ? #"import\s+static\s+[\w.]+\.\*"# : "(?!)"
+        return text.range(of: pattern, options: .regularExpression) != nil
+    }()
 
     /// A name refers to the standard module, not something the file made itself.
     func isModule(_ name: String) -> Bool {
-        !definitions.names.contains(name) || definitions.importedModules.contains(name)
+        if !wholeFile { return !quickDefinition(name).other }
+        return !definitions.names.contains(name) || definitions.importedModules.contains(name)
     }
 
     // MARK: Python imports → modules
@@ -492,10 +645,13 @@ private final class FileContext {
     func ruleFixes(in scope: NSRange) -> [CodeFix] {
         var out: [CodeFix] = []
         for rule in knowledge.rules {
+            let matches = rule.regex.matches(in: text, range: scope)
+            guard !matches.isEmpty else { continue }
             if let when = rule.when, when.firstMatch(in: text, range: whole) == nil { continue }
             if let unless = rule.unless, unless.firstMatch(in: text, range: whole) != nil { continue }
             if let module = rule.module, !isModule(module) { continue }
-            for m in rule.regex.matches(in: text, range: scope) where m.range.length > 0 && mask.isCode(m.range.location) {
+            for m in matches where m.range.length > 0 && mask.isCode(m.range.location) {
+                if !rule.strings, mask.overlapsSkipped(m.range) { continue }
                 if let group = rule.undefinedGroup, group < m.numberOfRanges, m.range(at: group).location != NSNotFound,
                    isDefined(ns.substring(with: m.range(at: group))) { continue }
                 let original = ns.substring(with: m.range)
@@ -542,7 +698,13 @@ private final class FileContext {
                 let after = NSMaxRange(partRange)
                 if after < ns.length, let next = ns.substring(from: after).first(where: { $0 != " " && $0 != "\t" }), next == "=",
                    !ns.substring(from: after).trimmingCharacters(in: .whitespaces).hasPrefix("==") { break }
-                if let (candidate, auto) = Self.closest(part, in: members, strict: false) {
+                let chainText = ns.substring(with: NSRange(location: m.range.location, length: NSMaxRange(partRange) - m.range.location))
+                if text.components(separatedBy: chainText).count > 2 { break }       // used twice: deliberate
+                if var (candidate, auto) = Self.closest(part, in: members, strict: false) {
+                    let caseOnly = part.lowercased() == candidate.lowercased()
+                    if !caseOnly, family != "python" && family != "javascript" { break }
+                    if Self.isEdgeEdit(part, candidate), !caseOnly { break }
+                    if part == part.uppercased() { auto = auto && caseOnly }
                     let called = after < ns.length && ns.substring(from: after).trimmingCharacters(in: .whitespaces).hasPrefix("(")
                     out.append(CodeFix(range: partRange, replacement: candidate,
                                        why: "\(module) has no \(part)\(called ? "()" : ""); it's \(module).\(candidate)",
@@ -557,19 +719,24 @@ private final class FileContext {
     // MARK: Typos (pritn, retrun, self.nmae)
 
     func typoFixes(in scope: NSRange) -> [CodeFix] {
-        if family == "python", text.range(of: #"from\s+\S+\s+import\s+\*"#, options: .regularExpression) != nil { return [] }
-        let defined = definitions.names
-        let sites = definitions.sites
+        if wildcardImport { return [] }
         let strongBare = knowledge.keywords.union(knowledge.builtins)
-        let frequentBare = Set(bareCounts.filter { $0.value >= 2 }.map(\.key)).union(defined)
-        let frequentAttributes = Set(attributeCounts.filter { $0.value >= 2 }.map(\.key))
         let capitalizedAreTypes = ["java", "swift", "go", "javascript", "cpp", "c", "rust"].contains(family)
         var out: [CodeFix] = []
 
-        for token in tokens where NSLocationInRange(token.range.location, scope) {
+        for token in tokens(in: scope) {
             let name = token.name
             let length = (name as NSString).length
-            guard length >= 4, !sites.contains(token.range.location) else { continue }
+            guard length >= 4, !name.hasPrefix("_") else { continue }
+            if token.afterDot {
+                guard !knowledge.attributes.contains(name), count(name, attribute: true) == 1 else { continue }
+            } else {
+                guard !strongBare.contains(name), !knowledge.known.contains(name), knowledge.members[name] == nil,
+                      knowledge.imports[name] == nil, count(name, attribute: false) == 1 else { continue }
+            }
+            // Suspicious: now look at the whole file.
+            let defined = definitions.names
+            guard !definitions.sites.contains(token.range.location), !inImportStatement(token.range.location) else { continue }
             if name == name.uppercased() { continue }                                  // CONSTANTS and MACROS
             if capitalizedAreTypes, name.first?.isUppercase == true { continue }       // types come from imports
             let next = nextCharacter(after: NSMaxRange(token.range))
@@ -577,30 +744,76 @@ private final class FileContext {
             if next == ":", family != "python", family != "c", family != "cpp" { continue } // object keys, labels
 
             if token.afterDot {
-                guard attributeCounts[name] == 1, !knowledge.methods.contains(name), !frequentAttributes.contains(name),
-                      !receiverHasMembers(token) else { continue }
+                let frequentAttributes = self.frequentAttributes
+                guard !frequentAttributes.contains(name), !defined.contains(name), !receiverHasMembers(token) else { continue }
                 let called = next == "("
                 let candidates = (called ? knowledge.methods : []).union(frequentAttributes)
                 guard let (candidate, close) = Self.closest(name, in: candidates, strict: true), !Self.distinctPair(name, candidate) else { continue }
                 let builtinMethod = knowledge.methods.contains(candidate)
+                let caseOnly = name.lowercased() == candidate.lowercased()
+                // Only Python knows every attribute that exists; elsewhere a one-off name is usually an API Halo hasn't heard of.
+                if family != "python", !(caseOnly && builtinMethod) { continue }
+                if Self.isEdgeEdit(name, candidate), !caseOnly { continue }
+                // Python knows every attribute that exists, so a one-letter slip on a call is safe to fix.
+                let auto = caseOnly ? builtinMethod : (family == "python" && close && builtinMethod && called && length >= 5 && !Self.isEdgeEdit(name, candidate))
                 out.append(CodeFix(range: token.range, replacement: candidate, why: builtinMethod ? "Did you mean .\(candidate)?" : "Did you mean .\(candidate)? (used elsewhere in this file)",
-                                   auto: close && builtinMethod && called, rule: "\(family).typo.member", original: name, anchor: token.range))
+                                   auto: auto, rule: "\(family).typo.member", original: name, anchor: token.range))
                 continue
             }
 
-            guard bareCounts[name] == 1, !strongBare.contains(name), !defined.contains(name), !knowledge.known.contains(name),
-                  knowledge.members[name] == nil, knowledge.imports[name] == nil else { continue }
-            // Keywords only fit where a statement starts.
-            let statementStart = startsStatement(token.range.location)
-            var candidates = knowledge.builtins.union(frequentBare)
-            if statementStart { candidates.formUnion(knowledge.keywords) }
-            guard let (candidate, close) = Self.closest(name, in: candidates, strict: true), !Self.distinctPair(name, candidate) else { continue }
+            guard !defined.contains(name) else { continue }
+            // Keywords only where they fit; languages whose names span many files only compare with keywords.
+            let fitting = keywords(at: token.range.location)
+            let multiFile = ["swift", "go", "java", "rust"].contains(family)
+            var candidates: Set<String> = (usesLibraries || multiFile) ? [] : knowledge.builtins.union(frequentBare)
+            candidates.formUnion(fitting)
+            guard !candidates.isEmpty else { continue }
+            if !fitting.isEmpty, restOfLineIsEmpty(after: NSMaxRange(token.range)), !lineIsFinished(at: token.range.location) { continue }
+            guard let (candidate, close) = Self.closest(name, in: candidates, strict: true), close || name.lowercased() == candidate.lowercased(),
+                  !Self.distinctPair(name, candidate), !Self.isEdgeEdit(name, candidate) else { continue }
             let strong = knowledge.keywords.contains(candidate) || knowledge.builtins.contains(candidate)
-            if !strong, name.lowercased() == candidate.lowercased() { continue }      // Value vs value: two names
+            // VerifyFlags vs verify_flags, Value vs value: two names, not a slip.
+            if !strong, name.lowercased().replacingOccurrences(of: "_", with: "") == candidate.lowercased().replacingOccurrences(of: "_", with: "") { continue }
             out.append(CodeFix(range: token.range, replacement: candidate, why: "Did you mean \(candidate)?",
-                               auto: close && (strong || (bareCounts[candidate] ?? 0) >= 2), rule: "\(family).typo", original: name, anchor: token.range))
+                               auto: close && candidate.count >= 4 && (multiFile ? knowledge.keywords.contains(candidate) : (strong || count(candidate, attribute: false) >= 2)),
+                               rule: "\(family).typo", original: name, anchor: token.range))
         }
         return out
+    }
+
+    /// C and C++ files that include non-standard headers get most names (and
+    /// standard headers) from places Halo can't see.
+    lazy var usesLibraries: Bool = {
+        guard family == "c" || family == "cpp" else { return false }
+        let include = try! NSRegularExpression(pattern: #"^[ \t]*#[ \t]*include[ \t]*([<"])([^>"\n]+)[>"]"#, options: .anchorsMatchLines)
+        let standard: Set<String> = ["stdio.h", "stdlib.h", "string.h", "math.h", "time.h", "ctype.h", "stdbool.h", "stdint.h", "limits.h", "assert.h",
+            "errno.h", "signal.h", "unistd.h", "stdarg.h", "stddef.h", "float.h", "locale.h", "setjmp.h", "iso646.h", "inttypes.h", "wchar.h",
+            "pthread.h", "fcntl.h", "dirent.h", "sys/types.h", "sys/stat.h", "sys/time.h", "termios.h", "complex.h", "stdatomic.h",
+            "iostream", "vector", "string", "map", "set", "unordered_map", "unordered_set", "algorithm", "cmath", "cstdio", "cstdlib",
+            "cstring", "memory", "utility", "functional", "numeric", "sstream", "fstream", "iomanip", "queue", "stack", "deque", "list",
+            "array", "tuple", "optional", "variant", "thread", "mutex", "chrono", "random", "limits", "climits", "cassert", "bitset", "iterator",
+            "ctime", "cctype", "cstdint"]
+        return include.matches(in: text, range: whole).contains { m in
+            ns.substring(with: m.range(at: 1)) == "\"" || !standard.contains(ns.substring(with: m.range(at: 2)))
+        }
+    }()
+
+    lazy var frequentBare: Set<String> = Set(bareCounts.filter { $0.value >= 2 }.map(\.key)).union(definitions.names)
+    lazy var frequentAttributes: Set<String> = Set(attributeCounts.filter { $0.value >= 2 }.map(\.key))
+
+    private func restOfLineIsEmpty(after location: Int) -> Bool {
+        var k = location
+        while k < ns.length {
+            let c = ns.character(at: k)
+            if c == 10 { return true }
+            if c != 32 && c != 9 { return false }
+            k += 1
+        }
+        return true
+    }
+
+    private func lineIsFinished(at location: Int) -> Bool {
+        ns.range(of: "\n", options: .literal, range: NSRange(location: location, length: ns.length - location)).location != NSNotFound
     }
 
     private func nextCharacter(after location: Int) -> Character? {
@@ -618,15 +831,21 @@ private final class FileContext {
         return rest.hasPrefix("==") || rest.hasPrefix("=>")
     }
 
-    private func startsStatement(_ location: Int) -> Bool {
+    /// Keywords that fit at this spot: statement keywords where a statement
+    /// starts, expression keywords (lambda, function, new…) after = ( , :
+    private func keywords(at location: Int) -> Set<String> {
         var k = location - 1
-        while k >= 0 {
-            let c = ns.character(at: k)
-            if c == 32 || c == 9 { k -= 1; continue }
-            return c == 10 || c == 59 || c == 123 || c == 125 || c == 61 || c == 40 || c == 44 || c == 58 || c == 41   // \n ; { } = ( , : )
+        while k >= 0, ns.character(at: k) == 32 || ns.character(at: k) == 9 { k -= 1 }
+        let c: unichar = k >= 0 ? ns.character(at: k) : 10
+        if c == 10 || c == 59 || c == 123 || c == 125 || (family == "python" && c == 58) { return knowledge.keywords }   // \n ; { } and python's :
+        if c == 61 || c == 40 || c == 44 || c == 58 || c == 91 {                                                     // = ( , : [
+            return knowledge.keywords.intersection(Self.expressionKeywords)
         }
-        return true
+        return []
     }
+
+    static let expressionKeywords: Set<String> = ["lambda", "not", "await", "yield", "None", "True", "False", "function", "typeof", "new", "async",
+                                                  "this", "null", "true", "false", "nil", "self", "func", "sizeof", "instanceof", "void", "delete"]
 
     /// x.attr where x is a module or global Halo knows (handled by memberFixes).
     private func receiverHasMembers(_ token: Token) -> Bool {
@@ -642,11 +861,10 @@ private final class FileContext {
     // MARK: Missing imports and includes
 
     func importFixes(in scope: NSRange) -> [CodeFix] {
-        guard family == "python" || family == "c" || family == "cpp" || family == "java" else { return [] }
+        guard family == "python" || family == "c" || family == "cpp" || family == "java", !wildcardImport else { return [] }
         var out: [CodeFix] = []
         var offered = Set<String>()
-        let insertion = importInsertionPoint()
-        for token in tokens where !token.afterDot && NSLocationInRange(token.range.location, scope) {
+        for token in tokens(in: scope) where !token.afterDot && !inImportStatement(token.range.location) {
             let name = token.name
             var line: String?
             switch family {
@@ -658,7 +876,7 @@ private final class FileContext {
                     line = wanted
                 }
             case "c", "cpp":
-                guard !isDefined(name), let wanted = knowledge.imports[name] else { continue }
+                guard !usesLibraries, !isDefined(name), let wanted = knowledge.imports[name] else { continue }
                 let header = wanted.replacingOccurrences(of: "#include ", with: "").trimmingCharacters(in: CharacterSet(charactersIn: "<>"))
                 let base = header.replacingOccurrences(of: ".h", with: "")
                 let pattern = #"#[ \t]*include[ \t]*[<"](?:"# + NSRegularExpression.escapedPattern(for: header) + "|c" + NSRegularExpression.escapedPattern(for: base)
@@ -676,7 +894,7 @@ private final class FileContext {
             }
             guard let line, !offered.contains(line), text.range(of: line) == nil else { continue }
             offered.insert(line)
-            out.append(CodeFix(range: NSRange(location: insertion, length: 0), replacement: line + "\n",
+            out.append(CodeFix(range: NSRange(location: importInsertionPoint, length: 0), replacement: line + "\n",
                                why: "\(name) needs \(line)", auto: false, rule: "\(family).import", original: name,
                                anchor: token.range, insertsLine: true))
         }
@@ -689,7 +907,7 @@ private final class FileContext {
                                                "symbol", "io", "abc", "gc", "locale", "sched", "array"]
 
     /// After the last import/include, else after the header comments.
-    private func importInsertionPoint() -> Int {
+    private lazy var importInsertionPoint: Int = {
         let pattern: String
         switch family {
         case "python": pattern = #"^(?:import[ \t]+[^\n]+|from[ \t]+[\w.]+[ \t]+import[ \t]+(?:\([^)]*\)|[^\n]+))\n?"#
@@ -713,7 +931,7 @@ private final class FileContext {
             location = NSMaxRange(line)
         }
         return location
-    }
+    }()
 
     // MARK: Knowledge that needs a little reasoning
 
@@ -743,7 +961,9 @@ private final class FileContext {
             for m in declaration.matches(in: text, range: scope) where mask.isCode(m.range.location) {
                 let name = NSRegularExpression.escapedPattern(for: ns.substring(with: m.range(at: 2)))
                 let after = NSRange(location: NSMaxRange(m.range), length: ns.length - NSMaxRange(m.range))
-                let reassigned = #"(?<![\w$.])"# + name + #"[ \t]*(?:[-+*/%]?=(?![=>])|\+\+|--)"#
+                let declarations = #"\b(?:const|let|var)[ \t]+"# + name + #"\b|[(,{][ \t]*"# + name + #"[ \t]*[,)=}]|\bfunction\b[^(\n]*\([^)]*\b"# + name + #"\b|\b"# + name + #"[ \t]*=>"#
+                if ((try? NSRegularExpression(pattern: declarations))?.numberOfMatches(in: text, range: whole) ?? 2) > 1 { continue }
+                let reassigned = #"(?m)^[ \t]*"# + name + #"[ \t]*(?:[-+*/%]?=(?![=>])|\+\+|--)"#
                 guard let hit = (try? NSRegularExpression(pattern: reassigned))?.firstMatch(in: text, range: after), mask.isCode(hit.range.location) else { continue }
                 let keyword = NSRange(location: m.range.location, length: 5)
                 out.append(CodeFix(range: keyword, replacement: "let", why: "\(ns.substring(with: m.range(at: 2))) changes later, so it can't be const",
@@ -775,6 +995,13 @@ private final class FileContext {
         guard let best else { return nil }
         if strict, best.1 == 2, w.count < 8 { return nil }
         return (best.0, best.1 == 1 && w.count >= 4)
+    }
+
+    /// A letter added or dropped at the very start (epoll/poll, athrow/throw) is
+    /// usually a different name, not a slip.
+    static func isEdgeEdit(_ a: String, _ b: String) -> Bool {
+        let x = a.lowercased(), y = b.lowercased()
+        return x.dropFirst() == Substring(y) || y.dropFirst() == Substring(x)
     }
 
     /// Pairs that are probably two real names, not a typo: x/y, 1/2, item/items.

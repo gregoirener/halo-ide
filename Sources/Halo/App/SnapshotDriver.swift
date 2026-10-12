@@ -6,7 +6,7 @@ import SwiftUI
 /// PNGs of the window into that directory. Inert in normal use.
 ///
 /// Steps: wait:<sec> · shot:<name> · type:<text> · tab · enter · end
-/// · eol:<text> · dump:<name> · ready · settings:<tab> · setup:<step> · panel-height:<pt> · run · debug
+/// · eol:<text> · altenter · fixall · undo · dump:<name> · ready · settings:<tab> · setup:<step> · panel-height:<pt> · run · debug
 /// · continue · step · panel:<terminal|problems|output|debugConsole>
 /// · mode:<files|search|git|debug> · bp:<line> · palette · close-palette
 /// · light · dark · quit
@@ -40,6 +40,15 @@ enum SnapshotDriver {
             }
             delay = 0.8
         case "tab": textView?.insertTab(nil)
+        case "altenter": textView?.insertNewlineIgnoringFieldEditor(nil)
+        case "fixall": textView?.applyAllSuggestedFixes(nil)
+        case "undo": textView?.undoManager?.undo()   // what ⌘Z does via the window
+        case "probe":
+            let um = textView?.undoManager
+            let info = "chars=\((textView?.string as NSString?)?.length ?? -1) canUndo=\(um?.canUndo ?? false) action=\(um?.undoActionName ?? "-") redo=\(um?.redoActionName ?? "-") level=\(um?.groupingLevel ?? -1) text=\((textView?.string ?? "").replacingOccurrences(of: "\n", with: "⏎")) levels=\(um?.levelsOfUndo ?? -1) groupsByEvent=\(um?.groupsByEvent ?? false) responds=\(textView?.responds(to: Selector(("undo:"))) ?? false) ghost=\(textView?.ghostRange.map { NSStringFromRange($0) } ?? "none")\n"
+            let url = dir.appendingPathComponent("probe.txt")
+            if let handle = try? FileHandle(forWritingTo: url) { handle.seekToEndOfFile(); handle.write(Data((arg + ": " + info).utf8)); try? handle.close() }
+            else { try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true); try? (arg + ": " + info).write(to: url, atomically: true, encoding: .utf8) }
         case "enter": textView?.insertNewline(nil)
         case "end": textView?.moveToEndOfDocument(nil)
         case "eol":

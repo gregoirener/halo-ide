@@ -138,17 +138,39 @@ private struct ClaudeStep: View {
     }
 }
 
+/// Halo's photographs (Resources/Brand).
+enum Brand {
+    static func image(_ name: String) -> NSImage? {
+        if let url = Bundle.main.url(forResource: name, withExtension: "jpg", subdirectory: "Brand") { return NSImage(contentsOf: url) }
+        let source = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("Resources/Brand/\(name).jpg")
+        return NSImage(contentsOf: source)
+    }
+
+    static let wanderer = image("halo-wanderer")
+}
+
 private struct WelcomeStep: View {
     var body: some View {
         VStack(spacing: 18) {
-            Image(nsImage: NSApp.applicationIconImage)
-                .resizable()
-                .frame(width: 128, height: 128)
-                .accessibilityHidden(true)
+            Group {
+                if let photo = Brand.wanderer {
+                    Image(nsImage: photo)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 186, height: 248)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.white.opacity(0.12)))
+                        .shadow(color: .black.opacity(0.25), radius: 14, y: 6)
+                } else {
+                    Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 128, height: 128)
+                }
+            }
+            .accessibilityHidden(true)
             StepHeader(title: "Welcome to Halo",
                        subtitle: "A quiet, fast editor made for the Mac. Let’s take a minute to make it feel like yours.")
         }
-        .padding(.top, 20)
+        .padding(.top, 8)
     }
 }
 
