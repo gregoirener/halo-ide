@@ -1,0 +1,108 @@
+Halo Source-Available License
+Version 1.0
+
+Copyright (c) 2026 Gregoire Denis Dumortier. All rights reserved.
+
+This license covers Halo, including its source code, documentation, build
+scripts, resources and the compiled application (the "Software"). It applies
+to every version of the Software published in this repository, including all
+past commits, and replaces any license file that appeared in earlier commits.
+
+The Software is source-available, not open source. You may read it and use
+it, but you may not change it or give it to others.
+
+
+1. What you may do
+
+   Subject to the terms below, you may:
+
+   (a) View, download and keep copies of the source code for your own
+       reading, study and reference.
+
+   (b) Install and run official, unmodified releases of Halo published by
+       the copyright holder (for example, the .dmg files on the GitHub
+       Releases page of the official repository), for personal or commercial
+       work. Code you write with Halo is yours; this license places no
+       restrictions on it.
+
+   (c) Build the unmodified source code to run on your own computers.
+
+   (d) Link others to the official repository or its Releases page.
+
+
+2. What you may not do
+
+   Except as expressly allowed in this license, you may not:
+
+   (a) Modify, adapt, translate or create derivative works of the Software
+       or any part of it, in source or compiled form.
+
+   (b) Distribute, publish, share, sell, rent, lease, sublicense or
+       otherwise make the Software available to anyone else, modified or
+       unmodified, in source or compiled form. This includes re-hosting
+       releases or mirroring the source code anywhere else.
+
+   (c) Remove or alter any copyright, license or attribution notice.
+
+
+3. GitHub forks
+
+   Because the source code is hosted publicly on GitHub, GitHub's Terms of
+   Service allow its users to view and fork this repository on GitHub. Forks
+   are permitted only to that extent. A fork grants no additional rights,
+   and section 2 still applies to it.
+
+
+4. Contributions
+
+   You may modify a copy of the source code solely to propose changes to the
+   copyright holder through an issue or pull request on the official
+   repository. By submitting a contribution, you grant the copyright holder a
+   perpetual, worldwide, irrevocable, royalty-free license to use, modify,
+   sublicense and distribute it as part of the Software under any terms, and
+   you confirm that you have the right to grant this license.
+
+
+5. Third-party components
+
+   The Software includes third-party components that remain under their own
+   licenses, which govern those components:
+
+   - Catppuccin icons (Resources/Icons): MIT License, see Resources/Icons/LICENSE
+   - llama.cpp / ggml binaries (Vendor/llama): MIT License, see
+     Vendor/llama/LICENSE-llama.cpp
+   - SwiftTerm and its dependencies: their own licenses
+
+   Nothing in this license limits your rights under those licenses.
+
+
+6. Trademarks
+
+   This license grants no rights to the Halo name, logo or icon.
+
+
+7. Termination
+
+   Your rights under this license end automatically if you breach any of its
+   terms. On termination you must stop using the Software and delete all
+   copies in your possession.
+
+
+8. No warranty
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+
+9. Limitation of liability
+
+   IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR
+   OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.
+
+
+10. Other permissions
+
+   For any use this license does not cover, ask the copyright holder through
+   the official repository: https://github.com/gregoirener/halo-ide
