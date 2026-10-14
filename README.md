@@ -23,6 +23,15 @@ Halo is designed to help developers stay in flow:
 
 ## Features
 
+<img width="1470" height="923" alt="image" src="https://github.com/user-attachments/assets/c44898ee-8a88-4f47-998b-d97d130d32f4" />
+
+<img width="1470" height="923" alt="image" src="https://github.com/user-attachments/assets/cf27e5c4-7d99-498e-8896-d5e0f37a1934" />
+
+
+
+<img width="556" height="605" alt="image" src="https://github.com/user-attachments/assets/a940520b-6f11-475e-ac5c-8da72229d204" />
+
+
 - Interactive coding experience
 - Streamlined developer workflow
 - Built for macOS
